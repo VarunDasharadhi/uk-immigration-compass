@@ -120,11 +120,15 @@ app.get('*', (_req, res) => {
 
 // ─── start ────────────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`API key configured: ${Boolean(process.env.OPENROUTER_API_KEY)}`);
-  // Load disk cache and kick off background warm-up + daily midnight refresh
-  aiService.initCache();
-});
+// Load disk cache and kick off background warm-up + daily midnight refresh.
+// Called at module load time so it runs in both Express server and Vercel serverless.
+aiService.initCache();
+
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`API key configured: ${Boolean(process.env.OPENROUTER_API_KEY)}`);
+  });
+}
 
 export default app;
