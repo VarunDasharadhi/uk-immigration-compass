@@ -16,3 +16,9 @@ logs/
 
 # Server-side feed cache (disk-persisted, not committed)
 .cache/
+
+# Verification artifacts (root-anchored so real assets in public/ are unaffected)
+.playwright-mcp/
+/*.png
+/*.jpeg
+/*.jpg
