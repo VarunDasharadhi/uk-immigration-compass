@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { refreshUpdates, refreshPetitions, refreshSponsorNews } from '../../services/aiService.js';
+import { refreshUpdates, refreshPetitions, refreshSponsorNews, refreshSponsorRegister, refreshAllHistoryBuckets } from '../../services/aiService.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const secret = process.env.CRON_SECRET;
@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    await Promise.all([refreshUpdates(), refreshPetitions(), refreshSponsorNews()]);
+    await Promise.all([refreshUpdates(), refreshPetitions(), refreshSponsorNews(), refreshSponsorRegister(), refreshAllHistoryBuckets()]);
     res.json({ ok: true, ts: new Date().toISOString() });
   } catch (err) {
     console.error('[Cron] Refresh failed:', err);

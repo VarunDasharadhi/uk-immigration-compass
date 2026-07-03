@@ -26,16 +26,15 @@ export const SponsorChecker: React.FC = () => {
     loadNews();
   }, []);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchTerm.trim()) return;
+  const runSearch = async (name: string) => {
+    if (!name.trim()) return;
 
     setLoading(true);
     setResult(null);
     setSearchError(null);
 
     try {
-      const data = await apiClient.checkSponsor(searchTerm) as SponsorCheckResult;
+      const data = await apiClient.checkSponsor(name) as SponsorCheckResult;
       setResult(data);
     } catch (err) {
       console.error(err);
@@ -43,6 +42,16 @@ export const SponsorChecker: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    runSearch(searchTerm);
+  };
+
+  const handleCandidateSelect = (candidateName: string) => {
+    setSearchTerm(candidateName);
+    runSearch(candidateName);
   };
 
   const getLinks = (name: string) => {
@@ -222,6 +231,43 @@ export const SponsorChecker: React.FC = () => {
                   <div className="mb-8 p-4 rounded-xl border border-amber-100 bg-amber-50 text-sm text-amber-800">
                     <span className="font-bold block mb-1">Additional information</span>
                     {result.notes}
+                  </div>
+                )}
+
+                {/* Possible matches — the search wasn't an exact/confirmed hit, so
+                    surface similarly-named entries (current or historically revoked)
+                    for the user to pick, rather than silently guessing which one they
+                    meant. Each is tagged with its status so a revoked suggestion never
+                    looks like a live one. */}
+                {result.candidates && result.candidates.length > 0 && (
+                  <div className="mb-8">
+                    <h4 className="text-sm font-bold text-slate-900 mb-1">
+                      {result.candidates.length === 1 ? 'Possible match' : 'Possible matches'}
+                    </h4>
+                    <p className="text-xs text-slate-500 mb-4">
+                      No exact entry was found for "{searchTerm}". These are similarly named — select the one you meant to check its confirmed status.
+                    </p>
+                    <div className="space-y-2">
+                      {result.candidates.map((candidate, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => handleCandidateSelect(candidate.name)}
+                          className="w-full text-left p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 transition-colors flex items-center justify-between gap-4"
+                        >
+                          <div>
+                            <span className="font-semibold text-slate-900 block">{candidate.name}</span>
+                            <span className="text-xs text-slate-500">{candidate.town} · {candidate.route}</span>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${candidate.status === 'Revoked' ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-700'}`}>
+                              {candidate.status}
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-slate-400" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 

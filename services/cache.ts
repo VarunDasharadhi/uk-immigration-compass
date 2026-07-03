@@ -98,6 +98,31 @@ export async function set(key: string, data: any): Promise<void> {
   }
 }
 
+// Bulk variant for writing many keys at once (e.g. priming hundreds of small
+// cache entries in a loop). set() persists to disk on every call — rewriting
+// the whole accumulated file each time is fine for a few calls a day, but
+// O(n^2) for hundreds of calls in a tight loop. This persists/pipelines once
+// for the whole batch instead.
+export async function setMany(entries: Record<string, any>): Promise<void> {
+  const now = Date.now();
+  for (const [key, data] of Object.entries(entries)) {
+    store.set(key, { data, savedAt: now });
+  }
+  if (redis) {
+    try {
+      const pipeline = redis.pipeline();
+      for (const [key, data] of Object.entries(entries)) {
+        pipeline.set(key, JSON.stringify({ data, savedAt: now }));
+      }
+      await pipeline.exec();
+    } catch (err) {
+      console.error('[Cache] Redis setMany failed:', err);
+    }
+  } else {
+    persist();
+  }
+}
+
 export function ageMs(key: string): number {
   const entry = store.get(key);
   if (!entry) return Infinity;
