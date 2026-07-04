@@ -4,7 +4,7 @@
  * Responses are disk-cached and refreshed once per day at local midnight.
  */
 
-import { AIResponse, SponsorCheckResult, SponsorNewsItem, SponsorCandidate } from '../types.js';
+import { AIResponse, SponsorCheckResult, SponsorNewsItem, SponsorCandidate, PetitionItem, PetitionsResult, PetitionSignatureSnapshot } from '../types.js';
 import * as cache from './cache.js';
 import { stripMarkdown } from '../utils/text.js';
 
@@ -456,7 +456,6 @@ function searchRegisterCandidates(name: string, limit: number = 5): SponsorCandi
 
 const MOCK: {
   updates: AIResponse;
-  petitions: AIResponse;
   sponsorNews: SponsorNewsItem[];
 } = {
   updates: {
@@ -514,33 +513,6 @@ SOURCE_URL: https://www.gov.uk/government/collections/health-and-care-worker-vis
 |END|`,
     sources: [],
   },
-  petitions: {
-    text: `|PETITION_START|
-TITLE: Extend Graduate Visa to 3 Years
-SUMMARY: Petition to increase the Graduate Route work visa duration to 3 years.
-SIGNATURES: 45230
-STATUS: Open
-|PETITION_END|
-|PETITION_START|
-TITLE: Review Spouse Visa Income Requirements
-SUMMARY: Campaign to lower the £29,000 annual income requirement for spouse visas.
-SIGNATURES: 32150
-STATUS: Open
-|PETITION_END|
-|PETITION_START|
-TITLE: Allow International Students to Bring Dependents
-SUMMARY: Urge the government to reverse the ban on international students bringing family dependents.
-SIGNATURES: 78400
-STATUS: Open
-|PETITION_END|
-|PETITION_START|
-TITLE: Reduce NHS Immigration Health Surcharge Fees
-SUMMARY: Call for a reduction in the annual NHS Immigration Health Surcharge for visa applicants.
-SIGNATURES: 28900
-STATUS: Open
-|PETITION_END|`,
-    sources: [],
-  },
   sponsorNews: [
     { title: 'CloudTech Solutions', date: '2024-04-20', summary: 'Recently added to Skilled Worker sponsor register', changeType: 'added' },
     { title: 'Global Staff Services', date: '2024-04-15', summary: 'License revoked due to compliance violations', changeType: 'revoked' },
@@ -573,21 +545,6 @@ NEXT_STEPS: [Specific future date or event, or "Awaiting government timeline"]
 SOURCE_URL: [Direct deep link to gov.uk or parliament.uk document. Leave EMPTY if no specific link found]
 SEARCH_KEYWORDS: [Exact search query to find this on Gov.uk]
 |END|`,
-
-  petitions: `Search for currently active and trending UK Parliament petitions (site:petition.parliament.uk) related to immigration, visas, international students, and foreign workers.
-
-Identify the top 4-6 most active petitions.
-
-For EACH use this EXACT format:
-
-|PETITION_START|
-TITLE: [Specific Petition Name]
-SUMMARY: [1 clear sentence explaining what it asks for]
-SIGNATURES: [Number of signatures, e.g. "45,200". If unknown put "Trending"]
-STATUS: [Open | Waiting for Response | Debated in Parliament | Closed]
-|PETITION_END|
-
-Return only the blocks. No intro or outro text.`,
 
   simplify: (text: string) => `You are an expert translator of legal jargon to plain English.
 Rewrite the following text so that a non-native English speaker or someone without a law degree can easily understand it.
@@ -627,15 +584,100 @@ export async function refreshUpdates(): Promise<AIResponse> {
   return result;
 }
 
-export async function refreshPetitions(): Promise<AIResponse> {
-  const { text, annotations } = await callOpenRouter(
-    [{ role: 'user', content: PROMPTS.petitions }],
-    getOnlineModel(),
-    4096
-  );
-  const result: AIResponse = { text: text || 'No petitions found.', sources: annotationsToSources(annotations) };
-  await cache.set('petitions', result);
-  console.log('[Cache] Refreshed: petitions');
+// ─── UK Parliament petitions (official API, no AI involved) ─────────────────
+
+// Search terms broad enough to surface the real highest-signature immigration
+// petitions (e.g. asylum/deportation petitions routinely outrank anything
+// matching just "immigration"), deduped by petition id across terms below.
+const PETITION_SEARCH_TERMS = ['immigration', 'visa', 'asylum', 'ILR', 'deportation'];
+
+// Applied to the petition's title only (not its background text) — titles
+// reliably state what the petition is actually about, while background text
+// can mention "immigration" in passing on totally unrelated petitions (e.g. a
+// petition about hate crime whose background blames "misinformation about
+// minorities and immigration").
+const PETITION_TITLE_RELEVANCE = /visa|immigrat|asylum|deport|migrant|\bILR\b|indefinite leave|settlement|refugee|sponsor|dependant|dependent|\bBNOs?\b|leave to remain|border control|foreign national/i;
+
+interface ParliamentPetitionAttributes {
+  action: string;
+  background: string;
+  signature_count: number;
+  state: string;
+  debate_outcome_at: string | null;
+  debate_scheduled_on: string | null;
+  government_response_at: string | null;
+  response_threshold_reached_at: string | null;
+}
+
+async function fetchPetitionsForTerm(term: string): Promise<{ id: number; attrs: ParliamentPetitionAttributes }[]> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15_000);
+  try {
+    const resp = await fetch(`https://petition.parliament.uk/petitions.json?state=open&q=${encodeURIComponent(term)}`, { signal: ctrl.signal });
+    if (!resp.ok) return [];
+    const json = await resp.json() as { data?: { id: number; attributes: ParliamentPetitionAttributes }[] };
+    return (json.data || []).map(p => ({ id: p.id, attrs: p.attributes }));
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function petitionStatus(attrs: ParliamentPetitionAttributes): string {
+  if (attrs.state !== 'open') return 'Closed';
+  if (attrs.debate_outcome_at) return 'Debated in Parliament';
+  if (attrs.debate_scheduled_on) return 'Debate Scheduled';
+  if (attrs.government_response_at) return 'Government Responded';
+  if (attrs.response_threshold_reached_at) return 'Awaiting Response';
+  return 'Open';
+}
+
+// Parliament's API only exposes a live signature count, not history, so a
+// real velocity graph has to be built from our own snapshots over time
+// (one per calendar day, taken whenever this refreshes) rather than a single
+// live call. Keeps the last 14 days.
+async function recordSignatureSnapshot(petitions: PetitionItem[]): Promise<PetitionSignatureSnapshot[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  const total = petitions.reduce((sum, p) => sum + (typeof p.signatures === 'number' ? p.signatures : 0), 0);
+  const history: PetitionSignatureSnapshot[] = (await cache.get('petition-signature-history')) || [];
+  const updated = [...history.filter(h => h.date !== today), { date: today, total }].slice(-14);
+  await cache.set('petition-signature-history', updated);
+  return updated;
+}
+
+export async function refreshPetitions(): Promise<PetitionsResult> {
+  const byId = new Map<number, ParliamentPetitionAttributes>();
+  for (const term of PETITION_SEARCH_TERMS) {
+    const results = await fetchPetitionsForTerm(term);
+    for (const { id, attrs } of results) {
+      if (!PETITION_TITLE_RELEVANCE.test(attrs.action)) continue;
+      if (!byId.has(id)) byId.set(id, attrs);
+    }
+  }
+
+  const top = [...byId.entries()]
+    .sort((a, b) => b[1].signature_count - a[1].signature_count)
+    .slice(0, 6);
+
+  const petitions: PetitionItem[] = top.map(([id, attrs]) => ({
+    id: `pet-${id}`,
+    title: attrs.action.trim(),
+    summary: (attrs.background || '').trim().slice(0, 240),
+    signatures: attrs.signature_count,
+    status: petitionStatus(attrs),
+    isActive: true,
+    url: `https://petition.parliament.uk/petitions/${id}`,
+  }));
+
+  const signatureHistory = await recordSignatureSnapshot(petitions);
+  const result: PetitionsResult = {
+    petitions,
+    sources: petitions.map(p => ({ web: { uri: p.url, title: p.title } })),
+    signatureHistory,
+  };
+  await cache.set('petitions:v2', result);
+  console.log(`[Cache] Refreshed: petitions (${petitions.length} found)`);
   return result;
 }
 
@@ -680,16 +722,12 @@ export async function getUpdates(): Promise<AIResponse> {
   }
 }
 
-export async function getPetitions(): Promise<AIResponse> {
-  const cached = await cache.get('petitions');
+// Parliament's petitions API is public and needs no API key, unlike the other
+// feeds — so this has no MOCK/no-key fallback, just cache-then-refresh.
+export async function getPetitions(): Promise<PetitionsResult> {
+  const cached = await cache.get('petitions:v2');
   if (cached) return cached;
-  if (!getApiKey()) return MOCK.petitions;
-  try {
-    return await refreshPetitions();
-  } catch (err) {
-    console.error('[aiService] refreshPetitions failed:', err);
-    return MOCK.petitions;
-  }
+  return refreshPetitions();
 }
 
 export async function getSponsorNews(): Promise<SponsorNewsItem[]> {

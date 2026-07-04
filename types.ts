@@ -44,6 +44,21 @@ export interface PetitionItem {
   isActive: boolean;
 }
 
+export interface PetitionSignatureSnapshot {
+  date: string;
+  total: number;
+}
+
+export interface PetitionsResult {
+  petitions: PetitionItem[];
+  sources: GroundingChunk[];
+  // Daily snapshots of the total signatures across the current top petitions,
+  // recorded by our own nightly refresh (Parliament's API only exposes a live
+  // count, not history) — so the velocity graph only has real data once a few
+  // days' worth of snapshots have accumulated.
+  signatureHistory: PetitionSignatureSnapshot[];
+}
+
 export interface SponsorHistoryEvent {
   date: string;
   status: string;

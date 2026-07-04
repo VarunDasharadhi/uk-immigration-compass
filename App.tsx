@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, FC } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import {
   Newspaper,
   ScrollText,
@@ -401,6 +402,7 @@ const App: FC = () => {
       className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900"
       role="application"
     >
+      <Analytics />
       {/* Navigation */}
       <Header
         activeTab={activeTab}

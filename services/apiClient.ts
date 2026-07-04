@@ -1,5 +1,5 @@
 // API Client Service - Calls backend endpoints from frontend
-import { AIResponse, SponsorCheckResult, SponsorNewsItem } from '../types';
+import { AIResponse, SponsorCheckResult, SponsorNewsItem, PetitionsResult } from '../types';
 
 // In the browser, use Vite's import.meta.env (not process.env which crashes at runtime).
 // In Node (server-side imports if ever needed), fall back to process.env.
@@ -32,7 +32,6 @@ class ApiClient {
   private getFromCache(key: string): any | null {
     const cached = cache.get(key);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      console.log(`[Cache HIT] ${key}`);
       return cached.data;
     }
     cache.delete(key);
@@ -79,10 +78,9 @@ class ApiClient {
       }
 
       const json = await response.json();
-      
+
       // Unwrap server response format { success, data, timestamp }
       const data = json.data || json;
-      console.log(`[API] ${endpoint} - raw response:`, json, 'unwrapped:', data);
 
       // Cache successful GET requests
       if (cacheKey && options?.method !== 'POST') {
@@ -110,8 +108,8 @@ class ApiClient {
   /**
    * Fetch petitions
    */
-  async fetchPetitions(): Promise<AIResponse> {
-    return this.fetch<AIResponse>('/api/petitions', { method: 'GET' }, 'petitions');
+  async fetchPetitions(): Promise<PetitionsResult> {
+    return this.fetch<PetitionsResult>('/api/petitions', { method: 'GET' }, 'petitions');
   }
 
   /**

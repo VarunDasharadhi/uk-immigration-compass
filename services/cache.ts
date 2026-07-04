@@ -25,6 +25,12 @@ const redis = isRedis
   ? new Redis({ url: process.env.KV_REST_API_URL!, token: process.env.KV_REST_API_TOKEN! })
   : null;
 
+// Shared with services/rateLimit.ts so rate limiting reuses this same Redis
+// connection instead of opening a second one.
+export function getRedisClient(): Redis | null {
+  return redis;
+}
+
 interface CacheEntry {
   data: any;
   savedAt: number;

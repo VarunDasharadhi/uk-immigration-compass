@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as aiService from '../services/aiService.js';
+import { checkRateLimit, clientKey } from '../services/rateLimit.js';
 
 export const config = { maxDuration: 60 };
 
@@ -7,6 +8,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const companyName = String(req.query.companyName || '').trim();
   if (!companyName) {
     return res.status(400).json({ error: 'companyName query param is required' });
+  }
+  const { allowed } = await checkRateLimit(`sponsor-status:${clientKey(req)}`);
+  if (!allowed) {
+    return res.status(429).json({ error: 'Too many requests. Please try again in a minute.' });
   }
   try {
     // Register/revoked-index are in-memory only and this function runs

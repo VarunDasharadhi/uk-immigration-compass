@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../services/apiClient';
 import { SponsorCheckResult, SponsorNewsItem } from '../types';
-import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, ExternalLink, RefreshCcw, AlertCircle, Clock, ChevronRight } from 'lucide-react';
+import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight } from 'lucide-react';
 
 export const SponsorChecker: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,29 +52,6 @@ export const SponsorChecker: React.FC = () => {
   const handleCandidateSelect = (candidateName: string) => {
     setSearchTerm(candidateName);
     runSearch(candidateName);
-  };
-
-  const getLinks = (name: string) => {
-    const cleanName = name || '';
-    return {
-      company: [
-        { label: 'Search company on Google.co.uk', url: `https://www.google.co.uk/search?q=${encodeURIComponent(cleanName)}` },
-        { label: 'Search company on Facebook.com', url: `https://www.facebook.com/search/top?q=${encodeURIComponent(cleanName)}` },
-        { label: 'Search company on LinkedIn.com', url: `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(cleanName)}` },
-        { label: 'Search company on Bing.com', url: `https://www.bing.com/search?q=${encodeURIComponent(cleanName)}` },
-        { label: 'Search company on GOV.uk', url: `https://www.gov.uk/search/all?keywords=${encodeURIComponent(cleanName)}` },
-      ],
-      roles: [
-        { label: 'Search open roles on Google.co.uk', url: `https://www.google.co.uk/search?q=${encodeURIComponent(cleanName + ' jobs')}` },
-        { label: 'Search open roles on Bing.com', url: `https://www.bing.com/search?q=${encodeURIComponent(cleanName + ' jobs')}` },
-        { label: 'Search open roles on Facebook.com', url: `https://www.facebook.com/search/top?q=${encodeURIComponent(cleanName + ' jobs')}` },
-        { label: 'Search open roles on GOV.uk', url: `https://findajob.dwp.gov.uk/search?q=${encodeURIComponent(cleanName)}` },
-        { label: 'Search open roles on LinkedIn.com', url: `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(cleanName)}` },
-        { label: 'Search open roles on Reed.co.uk', url: `https://www.reed.co.uk/jobs/${encodeURIComponent(cleanName.replace(/\s+/g, '-'))}-jobs` },
-        { label: 'Search open roles on Totaljobs.com', url: `https://www.totaljobs.com/jobs/${encodeURIComponent(cleanName.replace(/\s+/g, '-'))}` },
-        { label: 'Search open roles on Uk.indeed.com', url: `https://uk.indeed.com/jobs?q=${encodeURIComponent(cleanName)}` },
-      ]
-    };
   };
 
   return (
@@ -271,38 +248,6 @@ export const SponsorChecker: React.FC = () => {
                   </div>
                 )}
 
-                {/* Search Information Links */}
-                <div className="mb-8">
-                  <h4 className="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100">
-                    Search information about "{result.companyName}" company
-                  </h4>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Company Details Links */}
-                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-                      <h5 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">Search company details:</h5>
-                      <div className="space-y-3">
-                        {getLinks(result.companyName).company.map((link, i) => (
-                          <a key={i} href={link.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-blue-600 hover:underline hover:text-blue-800">
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            {link.label}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                    {/* Open Roles Links */}
-                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-                      <h5 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">Search open roles:</h5>
-                      <div className="space-y-3">
-                        {getLinks(result.companyName).roles.map((link, i) => (
-                          <a key={i} href={link.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-blue-600 hover:underline hover:text-blue-800">
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            {link.label}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           )}

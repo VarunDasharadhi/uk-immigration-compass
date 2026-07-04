@@ -60,16 +60,16 @@ export const NewsDashboard: React.FC = () => {
       const urlObj = new URL(urlToCheck);
       const hostname = urlObj.hostname.toLowerCase();
       
+      // Dotted suffixes only — a bare "gov.uk" would match "notgov.uk" via
+      // endsWith with no dot boundary, letting a lookalike domain pass as official.
       const officialDomains = [
-          '.gov.uk', 
-          'gov.uk', 
-          '.parliament.uk', 
-          'parliament.uk', 
+          '.gov.uk',
+          '.parliament.uk',
           'legislation.gov.uk',
           'nationalarchives.gov.uk'
       ];
 
-      const isOfficial = officialDomains.some(d => hostname.endsWith(d) || hostname === d);
+      const isOfficial = officialDomains.some(d => hostname === d || hostname.endsWith(d));
 
       // Filter out generic homepages to ensure we have a deep link
       const isGenericHomepage = urlObj.pathname === '/' || urlObj.pathname === '';
@@ -85,17 +85,14 @@ export const NewsDashboard: React.FC = () => {
     setError(null);
     try {
       const result = await apiClient.fetchUpdates() as AIResponse;
-      console.log('✅ fetchUpdates result:', result);
       setSources(result.sources || []);
-      
+
       const parsedItems: NewsItem[] = [];
       const blocks = result.text.split('|START|').slice(1);
-      console.log('📊 Parsed blocks:', blocks.length);
-      
+
       blocks.forEach((block: string, index: number) => {
         const cleanBlock = block.split('|END|')[0];
         const lines = cleanBlock.split('\n').map((l: string) => l.trim()).filter(Boolean);
-        console.log(`📄 Block ${index}:`, { lineCount: lines.length, lines: lines.slice(0, 5) });
         const item: any = {};
         let currentKey = '';
 
@@ -106,13 +103,10 @@ export const NewsDashboard: React.FC = () => {
                 const value = keyMatch[2];
                 item[key] = value;
                 currentKey = key;
-                console.log(`  ✅ Found key: ${key} = ${value.substring(0, 50)}`);
             } else if (currentKey) {
                 item[currentKey] += ' ' + line;
             }
         });
-        
-        console.log(`  📦 Parsed item:`, item);
 
         if (item['TITLE']) {
           const now = new Date().toISOString();
@@ -136,9 +130,7 @@ export const NewsDashboard: React.FC = () => {
       });
       
       setNewsItems(parsedItems);
-      
-      console.log('✅ setNewsItems called with:', parsedItems.length, 'items');
-      
+
       if (parsedItems.length === 0 && result.text.length > 0) {
         const now = new Date().toISOString();
         setNewsItems([{
