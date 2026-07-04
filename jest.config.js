@@ -5,6 +5,9 @@ export default {
   testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
+    // Strip the .js extension from ESM-style relative imports so ts-jest can
+    // resolve the .ts source (e.g. './cache.js' -> './cache').
+    '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@/(.*)$': '<rootDir>/$1',
     '^@components/(.*)$': '<rootDir>/components/$1',
     '^@services/(.*)$': '<rootDir>/services/$1',

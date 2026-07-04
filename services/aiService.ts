@@ -811,7 +811,11 @@ export async function refreshSponsorNews(): Promise<SponsorNewsItem[]> {
 
 export async function getUpdates(): Promise<UpdatesResponse> {
   const cached = await cache.get('updates');
-  if (cached) return cached;
+  // Only serve a cached value that matches the current {items: NewsItem[]}
+  // contract. A stale pre-refactor value (the old {text, sources} shape) has no
+  // `items` array — ignore it and refresh so we never hand the client a shape it
+  // can't render. See services/aiService.getUpdates.test.ts.
+  if (cached && Array.isArray(cached.items)) return cached;
   if (!getApiKey()) return MOCK.updates;
   try {
     return await refreshUpdates();
