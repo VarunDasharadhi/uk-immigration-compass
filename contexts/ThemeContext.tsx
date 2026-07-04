@@ -12,9 +12,19 @@ const THEME_STORAGE_KEY = 'theme';
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function getInitialTheme(): Theme {
-  const stored = localStorage.getItem(THEME_STORAGE_KEY);
+  let stored: string | null = null;
+  try {
+    stored = localStorage.getItem(THEME_STORAGE_KEY);
+  } catch {
+    stored = null;
+  }
   if (stored === 'light' || stored === 'dark') return stored;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
 }
 
 export const ThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -22,7 +32,11 @@ export const ThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {
+      // Persistence is best-effort; the toggle still works in-memory for the session.
+    }
   }, [theme]);
 
   const toggleTheme = useCallback(() => {

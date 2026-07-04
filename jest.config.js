@@ -15,6 +15,7 @@ export default {
   collectCoverageFrom: [
     '*.{ts,tsx}',
     'components/**/*.{ts,tsx}',
+    'contexts/**/*.{ts,tsx}',
     'services/**/*.{ts,tsx}',
     '!*.d.ts',
     '!main.tsx',
