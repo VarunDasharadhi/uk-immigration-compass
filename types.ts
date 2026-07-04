@@ -3,6 +3,8 @@ export enum Tab {
   PETITIONS = 'PETITIONS',
   SIMPLIFIER = 'SIMPLIFIER',
   SPONSORS = 'SPONSORS',
+  PRIVACY = 'PRIVACY',
+  TERMS = 'TERMS',
 }
 
 export interface GroundingChunk {
@@ -22,7 +24,11 @@ export interface NewsItem {
   title: string;
   status: string;
   date: string;
-  category: string;
+  // Best-effort timestamp parsed from `date` (ms since epoch), used to sort
+  // and to prune archive entries older than a year — falls back to the
+  // ingestion time when the AI's free-text date couldn't be parsed.
+  parsedDate: number;
+  category: 'Work' | 'Student' | 'Family' | 'Asylum' | 'General';
   summary: string;
   details: string;
   impact: string;
@@ -32,6 +38,11 @@ export interface NewsItem {
   sourceUrl: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UpdatesResponse {
+  items: NewsItem[];
+  sources: GroundingChunk[];
 }
 
 export interface PetitionItem {

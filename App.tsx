@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useCallback, FC } from 'react';
+import { createPortal } from 'react-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import {
   Newspaper,
@@ -10,6 +12,9 @@ import {
   ArrowRight,
   ChevronRight,
   Building2,
+  Mail,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Tab } from './types';
 import { NewsDashboard } from './components/NewsDashboard';
@@ -17,6 +22,9 @@ import { PetitionTracker } from './components/PetitionTracker';
 import { SimplifierTool } from './components/SimplifierTool';
 import { SponsorChecker } from './components/SponsorChecker';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { TermsOfService } from './components/TermsOfService';
+import { UpdatesArchivePage } from './components/UpdatesArchivePage';
 
 // ===================================================
 // CONSTANTS & CONFIGURATION
@@ -61,6 +69,8 @@ const CONTENT_MAP: Record<Tab, React.ComponentType> = {
   [Tab.PETITIONS]: PetitionTracker,
   [Tab.SIMPLIFIER]: SimplifierTool,
   [Tab.SPONSORS]: SponsorChecker,
+  [Tab.PRIVACY]: PrivacyPolicy,
+  [Tab.TERMS]: TermsOfService,
 };
 
 // ===================================================
@@ -299,8 +309,72 @@ const FooterLink: FC<FooterLinkProps> = ({ href, label }) => (
   </li>
 );
 
-const Footer: FC = () => {
+const CONTACT_EMAIL = 'developerworld.net@gmail.com';
+
+const ContactModal: FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(CONTACT_EMAIL);
+    } catch {
+      // Clipboard API unavailable or denied; the email is still visible to copy manually.
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-slate-900/70 backdrop-blur-md"
+        onClick={onClose}
+      ></div>
+
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative z-10 animate-in zoom-in-95 duration-200 p-8 text-center">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
+          aria-label="Close"
+        >
+          <X className="w-4 h-4 text-slate-600" />
+        </button>
+
+        <div className="inline-flex items-center justify-center p-3 bg-blue-50 rounded-2xl mb-5">
+          <Mail className="w-6 h-6 text-blue-600" />
+        </div>
+        <h3 className="text-lg font-bold text-slate-900 mb-2">Get in touch</h3>
+        <p className="text-sm text-slate-500 leading-relaxed mb-6">
+          Got a question, a concern, or found something not working right? Reach out anytime.
+        </p>
+
+        <button
+          onClick={handleCopy}
+          className="w-full flex items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 hover:border-blue-300 transition-colors group"
+        >
+          <span className="text-sm font-semibold text-slate-800">{CONTACT_EMAIL}</span>
+          {copied ? (
+            <Check className="w-4 h-4 text-green-600 shrink-0" />
+          ) : (
+            <Copy className="w-4 h-4 text-slate-400 group-hover:text-blue-600 shrink-0" />
+          )}
+        </button>
+        <p className="text-xs text-slate-400 mt-3">
+          {copied ? 'Copied to clipboard' : 'Tap to copy the email address'}
+        </p>
+      </div>
+    </div>,
+    document.body
+  );
+};
+
+interface FooterProps {
+  onNavigate: (tab: Tab) => void;
+}
+
+const Footer: FC<FooterProps> = ({ onNavigate }) => {
   const currentYear = new Date().getFullYear();
+  const [contactOpen, setContactOpen] = useState(false);
 
   return (
     <footer
@@ -356,15 +430,35 @@ const Footer: FC = () => {
               <ArrowRight className="w-3 h-3 text-slate-300" /> Data Refresh:
               Daily
             </li>
-            <li className="flex items-center gap-2">
-              <ArrowRight className="w-3 h-3 text-slate-300" /> Privacy Policy
+            <li>
+              <button
+                onClick={() => onNavigate(Tab.PRIVACY)}
+                className="hover:text-blue-600 transition flex items-center gap-2"
+              >
+                <ArrowRight className="w-3 h-3 text-slate-300" /> Privacy Policy
+              </button>
             </li>
-            <li className="flex items-center gap-2">
-              <ArrowRight className="w-3 h-3 text-slate-300" /> Terms of Service
+            <li>
+              <button
+                onClick={() => onNavigate(Tab.TERMS)}
+                className="hover:text-blue-600 transition flex items-center gap-2"
+              >
+                <ArrowRight className="w-3 h-3 text-slate-300" /> Terms of Service
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setContactOpen(true)}
+                className="hover:text-blue-600 transition flex items-center gap-2"
+              >
+                <ArrowRight className="w-3 h-3 text-slate-300" /> Contact / Report an Issue
+              </button>
             </li>
           </ul>
         </div>
       </div>
+
+      {contactOpen && <ContactModal onClose={() => setContactOpen(false)} />}
 
       {/* Bottom Bar */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -384,17 +478,22 @@ const Footer: FC = () => {
 // MAIN APP COMPONENT
 // ===================================================
 
-const App: FC = () => {
+const MainApp: FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.NEWS);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const ContentComponent = useMemo(() => {
     return CONTENT_MAP[activeTab] || NewsDashboard;
   }, [activeTab]);
 
   const handleExploreClick = useCallback(() => {
-    const feedElement = document.getElementById('feed-start');
-    feedElement?.scrollIntoView({ behavior: 'smooth' });
+    navigate('/updates/archive');
+  }, [navigate]);
+
+  const handleFooterNavigate = useCallback((tab: Tab) => {
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   return (
@@ -402,7 +501,6 @@ const App: FC = () => {
       className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900"
       role="application"
     >
-      <Analytics />
       {/* Navigation */}
       <Header
         activeTab={activeTab}
@@ -425,8 +523,20 @@ const App: FC = () => {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer onNavigate={handleFooterNavigate} />
     </div>
+  );
+};
+
+const App: FC = () => {
+  return (
+    <>
+      <Analytics />
+      <Routes>
+        <Route path="/updates/archive" element={<UpdatesArchivePage />} />
+        <Route path="*" element={<MainApp />} />
+      </Routes>
+    </>
   );
 };
 

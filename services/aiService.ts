@@ -4,9 +4,10 @@
  * Responses are disk-cached and refreshed once per day at local midnight.
  */
 
-import { AIResponse, SponsorCheckResult, SponsorNewsItem, SponsorCandidate, PetitionItem, PetitionsResult, PetitionSignatureSnapshot } from '../types.js';
+import { NewsItem, UpdatesResponse, SponsorCheckResult, SponsorNewsItem, SponsorCandidate, PetitionItem, PetitionsResult, PetitionSignatureSnapshot } from '../types.js';
 import * as cache from './cache.js';
 import { stripMarkdown } from '../utils/text.js';
+import { parseUpdatesText, newsDedupeKey, NEWS_CATEGORIES } from '../utils/newsParsing.js';
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const CALL_TIMEOUT_MS = 45_000;
@@ -454,12 +455,7 @@ function searchRegisterCandidates(name: string, limit: number = 5): SponsorCandi
 
 // ─── mock data (fallback when no API key and no disk cache) ──────────────────
 
-const MOCK: {
-  updates: AIResponse;
-  sponsorNews: SponsorNewsItem[];
-} = {
-  updates: {
-    text: `|START|
+const MOCK_UPDATES_TEXT = `|START|
 TITLE: Skilled Worker Salary Threshold Increase
 STATUS: Proposed
 DATE: April 2024
@@ -510,7 +506,14 @@ NEXT_STEPS: Employers must update recruitment policies and advise prospective hi
 TIMELINE: Effective 11 March 2024
 SEARCH_KEYWORDS: Health and Care visa, care workers, dependents, social care
 SOURCE_URL: https://www.gov.uk/government/collections/health-and-care-worker-visa-guidance
-|END|`,
+|END|`;
+
+const MOCK: {
+  updates: UpdatesResponse;
+  sponsorNews: SponsorNewsItem[];
+} = {
+  updates: {
+    items: parseUpdatesText(MOCK_UPDATES_TEXT),
     sources: [],
   },
   sponsorNews: [
@@ -521,18 +524,7 @@ SOURCE_URL: https://www.gov.uk/government/collections/health-and-care-worker-vis
 
 // ─── prompts ─────────────────────────────────────────────────────────────────
 
-const PROMPTS = {
-  latestUpdates: `Search for the most recent official changes, House of Commons debates, MP statements, and Home Office announcements regarding UK immigration from the last 30-60 days.
-
-STRICT SEARCH CONSTRAINT: Restrict results to OFFICIAL GOVERNMENT SOURCES (site:gov.uk or site:parliament.uk). Do not include information only found on news sites unless verified on a government site.
-
-SPECIFIC TOPICS: Check for: "Skilled Worker Indefinite Leave to Remain (ILR) extension", "5-year route changes", "Settlement updates", "Salary threshold changes".
-
-Find at least 8-10 distinct updates. Include at least 1-2 per category: Work, Student, Family, Asylum.
-
-For EACH update use this EXACT format:
-
-|START|
+const UPDATE_ITEM_FORMAT = `|START|
 TITLE: [Short punchy headline]
 STATUS: [Active | Passed | Proposed | Discussion]
 DATE: [Stage date, e.g. "Effective 4th April"]
@@ -544,7 +536,36 @@ IMPACT: [1 sentence on who is affected]
 NEXT_STEPS: [Specific future date or event, or "Awaiting government timeline"]
 SOURCE_URL: [Direct deep link to gov.uk or parliament.uk document. Leave EMPTY if no specific link found]
 SEARCH_KEYWORDS: [Exact search query to find this on Gov.uk]
-|END|`,
+|END|`;
+
+const PROMPTS = {
+  latestUpdates: `Search for the most recent official changes, House of Commons debates, MP statements, and Home Office announcements regarding UK immigration from the last 30-60 days.
+
+STRICT SEARCH CONSTRAINT: Restrict results to OFFICIAL GOVERNMENT SOURCES (site:gov.uk or site:parliament.uk). Do not include information only found on news sites unless verified on a government site.
+
+SPECIFIC TOPICS: Check for: "Skilled Worker Indefinite Leave to Remain (ILR) extension", "5-year route changes", "Settlement updates", "Salary threshold changes".
+
+Find up to 8-10 updates, but only as many as are genuinely distinct — never invent or split coverage just to fill a quota.
+
+DEDUPLICATION: If multiple changes trace back to the same underlying policy, speech, or announcement (e.g. the same new rule described in both a formal document and a plain-language statement), report it ONCE, in the category it fits best. Do not create separate entries that describe the same real-world change from different angles.
+
+For EACH update use this EXACT format:
+
+${UPDATE_ITEM_FORMAT}`,
+
+  // Used once to seed the archive for a category the daily search hasn't
+  // surfaced anything for yet (e.g. no Family news in the last 30-60 days) —
+  // looks back further so a quiet category still gets real past coverage
+  // instead of sitting empty.
+  categoryBackfill: (category: string) => `Search for official UK Home Office and Parliament changes specifically affecting the "${category}" immigration category (visas, rules, or announcements relevant to ${category.toLowerCase()} applicants) from the last 12 months.
+
+STRICT SEARCH CONSTRAINT: Restrict results to OFFICIAL GOVERNMENT SOURCES (site:gov.uk or site:parliament.uk).
+
+Find up to 4 genuinely distinct, real changes. If fewer than 4 real changes exist for this category in the last 12 months, report only the real ones — never invent or pad the list.
+
+For EACH update use this EXACT format:
+
+${UPDATE_ITEM_FORMAT}`,
 
   simplify: (text: string) => `You are an expert translator of legal jargon to plain English.
 Rewrite the following text so that a non-native English speaker or someone without a law degree can easily understand it.
@@ -572,16 +593,94 @@ Return 5-6 items. No intro text.`,
 
 // ─── refresh functions (always fetch live) ───────────────────────────────────
 
-export async function refreshUpdates(): Promise<AIResponse> {
+// A year of history plus a buffer, so nothing drops off the archive right at
+// the one-year mark due to clock/timezone slop.
+const ARCHIVE_MAX_AGE_MS = 370 * 24 * 60 * 60 * 1000;
+// How many of the most recent archived items to surface per category on the
+// homepage feed when today's fresh batch alone doesn't have that many.
+const CATEGORY_DISPLAY_COUNT = 4;
+
+// Rebuilds both the archive (merge + prune) and the homepage display cache
+// from a fresh set of parsed items. Shared by the main daily refresh and the
+// thin-category backfill below, which both need to do this same bookkeeping.
+async function mergeIntoArchiveAndRebuildDisplay(freshItems: NewsItem[], sources: any[]): Promise<UpdatesResponse> {
+  const archive: NewsItem[] = (await cache.get('updates-archive')) || [];
+  const existingKeys = new Set(archive.map(a => newsDedupeKey(a.title)));
+  for (const item of freshItems) {
+    const key = newsDedupeKey(item.title);
+    if (!existingKeys.has(key)) {
+      archive.push(item);
+      existingKeys.add(key);
+    }
+  }
+
+  const cutoff = Date.now() - ARCHIVE_MAX_AGE_MS;
+  const pruned = archive.filter(a => a.parsedDate >= cutoff);
+  pruned.sort((a, b) => b.parsedDate - a.parsedDate);
+  await cache.set('updates-archive', pruned);
+
+  // Build the homepage display set: the most recent items per category,
+  // backfilled from the archive so a quiet category (e.g. no fresh Family
+  // news today) still shows real past coverage instead of sitting empty —
+  // rather than pressuring the AI to invent coverage to fill a quota.
+  const display: NewsItem[] = [];
+  for (const category of NEWS_CATEGORIES) {
+    display.push(...pruned.filter(item => item.category === category).slice(0, CATEGORY_DISPLAY_COUNT));
+  }
+  display.sort((a, b) => b.parsedDate - a.parsedDate);
+
+  const result: UpdatesResponse = { items: display, sources };
+  await cache.set('updates', result);
+  console.log(`[Cache] Refreshed: updates (${freshItems.length} fresh, ${pruned.length} archived, ${display.length} displayed)`);
+  return result;
+}
+
+export async function refreshUpdates(): Promise<UpdatesResponse> {
   const { text, annotations } = await callOpenRouter(
     [{ role: 'user', content: PROMPTS.latestUpdates }],
     getOnlineModel(),
     12000
   );
-  const result: AIResponse = { text: text || 'No updates found.', sources: annotationsToSources(annotations) };
-  await cache.set('updates', result);
-  console.log('[Cache] Refreshed: updates');
-  return result;
+  return mergeIntoArchiveAndRebuildDisplay(parseUpdatesText(text || ''), annotationsToSources(annotations));
+}
+
+// Cron-only: seeds any category still thin after the daily refresh with a
+// one-off wider-window search per category, so it isn't stuck empty until
+// real news happens to mention it. NOT called from getUpdates()'s cold-cache
+// fallback — this can make up to 5 sequential AI calls, and a live request's
+// timeout budget on Vercel is much tighter than the cron job's.
+export async function backfillThinCategories(): Promise<void> {
+  const archive: NewsItem[] = (await cache.get('updates-archive')) || [];
+  const thinCategories = NEWS_CATEGORIES.filter(
+    category => archive.filter(a => a.category === category).length < CATEGORY_DISPLAY_COUNT
+  );
+  if (thinCategories.length === 0) return;
+
+  const existingKeys = new Set(archive.map(a => newsDedupeKey(a.title)));
+  const freshItems: NewsItem[] = [];
+  for (const category of thinCategories) {
+    try {
+      const { text } = await callOpenRouter(
+        [{ role: 'user', content: PROMPTS.categoryBackfill(category) }],
+        getOnlineModel(),
+        6000
+      );
+      for (const item of parseUpdatesText(text || '')) {
+        const key = newsDedupeKey(item.title);
+        if (!existingKeys.has(key)) {
+          freshItems.push(item);
+          existingKeys.add(key);
+        }
+      }
+    } catch (err) {
+      console.error(`[aiService] Category backfill failed for ${category}:`, err);
+    }
+  }
+
+  if (freshItems.length === 0) return;
+  const cachedUpdates = (await cache.get('updates')) as UpdatesResponse | undefined;
+  await mergeIntoArchiveAndRebuildDisplay(freshItems, cachedUpdates?.sources || []);
+  console.log(`[Cache] Backfilled thin categories: ${thinCategories.join(', ')}`);
 }
 
 // ─── UK Parliament petitions (official API, no AI involved) ─────────────────
@@ -710,7 +809,7 @@ export async function refreshSponsorNews(): Promise<SponsorNewsItem[]> {
 
 // ─── public getters (serve from cache; refresh once if cold) ─────────────────
 
-export async function getUpdates(): Promise<AIResponse> {
+export async function getUpdates(): Promise<UpdatesResponse> {
   const cached = await cache.get('updates');
   if (cached) return cached;
   if (!getApiKey()) return MOCK.updates;
@@ -720,6 +819,14 @@ export async function getUpdates(): Promise<AIResponse> {
     console.error('[aiService] refreshUpdates failed:', err);
     return MOCK.updates;
   }
+}
+
+// Full past-year archive for the "browse old updates" page — unlike
+// getUpdates() this has no per-category cap, so it's the complete history
+// rather than the balanced homepage sample.
+export async function getUpdatesArchive(): Promise<NewsItem[]> {
+  const archive: NewsItem[] = (await cache.get('updates-archive')) || [];
+  return archive.length > 0 ? archive : MOCK.updates.items;
 }
 
 // Parliament's petitions API is public and needs no API key, unlike the other
@@ -1177,8 +1284,9 @@ function msUntilNextMidnight(): number {
 
 async function runDailyRefresh(): Promise<void> {
   console.log('[Cache] Running daily midnight refresh...');
+  await refreshUpdates().catch(err => console.error('[Cache] refreshUpdates failed:', err));
   await Promise.allSettled([
-    refreshUpdates(),
+    backfillThinCategories(),
     refreshPetitions(),
     refreshSponsorNews(),
     refreshSponsorRegister(),

@@ -58,6 +58,16 @@ app.get('/api/updates', async (_req, res) => {
   }
 });
 
+app.get('/api/updates-archive', async (_req, res) => {
+  try {
+    const items = await aiService.getUpdatesArchive();
+    res.json({ items });
+  } catch (err) {
+    console.error('[/api/updates-archive]', err);
+    res.status(500).json({ error: 'Something went wrong fetching the update archive.' });
+  }
+});
+
 app.get('/api/petitions', async (_req, res) => {
   try {
     const data = await aiService.getPetitions();
