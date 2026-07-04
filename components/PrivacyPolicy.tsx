@@ -3,8 +3,8 @@ import { ShieldCheck } from 'lucide-react';
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <section className="mb-10">
-    <h2 className="text-xl font-bold text-slate-900 mb-3">{title}</h2>
-    <div className="text-slate-600 leading-relaxed space-y-3">{children}</div>
+    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-3">{title}</h2>
+    <div className="text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">{children}</div>
   </section>
 );
 
@@ -12,16 +12,16 @@ export const PrivacyPolicy: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto p-4 md:p-8">
       <div className="text-center mb-12">
-        <div className="inline-flex items-center justify-center p-3 bg-blue-50 rounded-2xl mb-6">
-          <ShieldCheck className="w-8 h-8 text-blue-600" />
+        <div className="inline-flex items-center justify-center p-3 bg-blue-50 dark:bg-blue-950/40 rounded-2xl mb-6">
+          <ShieldCheck className="w-8 h-8 text-blue-600 dark:text-blue-400" />
         </div>
-        <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-4">
           Privacy Policy
         </h1>
-        <p className="text-slate-500">Last updated 4 July 2026</p>
+        <p className="text-slate-500 dark:text-slate-400">Last updated 4 July 2026</p>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-200 p-6 md:p-10">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-700 p-6 md:p-10">
         <Section title="The short version">
           <p>
             UK Immigration Compass is a free, non-profit information tool. There is no account
@@ -81,7 +81,7 @@ export const PrivacyPolicy: React.FC = () => {
         <Section title="Questions">
           <p>
             If you have any questions about privacy on this site, reach out at{' '}
-            <a href="mailto:developerworld.net@gmail.com" className="text-blue-600 hover:underline">
+            <a href="mailto:developerworld.net@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline">
               developerworld.net@gmail.com
             </a>.
           </p>
