@@ -149,13 +149,13 @@ export const PetitionTracker: React.FC = () => {
         </div>
         
         {loading ? (
-            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {[1,2,3].map(i => (
                     <div key={i} className="h-48 bg-slate-100 rounded-2xl animate-pulse border border-slate-200"></div>
                 ))}
             </div>
         ) : petitions.length > 0 ? (
-            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {petitions.map((petition) => (
                     <a
                         key={petition.id}

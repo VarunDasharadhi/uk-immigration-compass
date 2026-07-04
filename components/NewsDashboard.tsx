@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { apiClient } from '../services/apiClient';
 import { AIResponse, NewsItem } from '../types';
 import { stripMarkdown } from '../utils/text';
@@ -448,8 +449,11 @@ export const NewsDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Detail Modal - Fixed positioning to ensure it's always centered in viewport */}
-      {selectedItem && (
+      {/* Detail Modal — rendered via a portal to document.body so its z-index
+          isn't capped by <main>'s own stacking context (App.tsx's <main> has
+          "relative z-10", which otherwise caps this modal below the header's
+          "sticky z-50" regardless of the modal's own z-index). */}
+      {selectedItem && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div 
@@ -480,7 +484,7 @@ export const NewsDashboard: React.FC = () => {
                         </h2>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8 p-8 sm:p-10">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8 sm:p-10">
                         {/* Main Content (2 cols) */}
                         <div className="md:col-span-2 space-y-8">
                             <div>
@@ -603,7 +607,8 @@ export const NewsDashboard: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

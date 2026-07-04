@@ -307,7 +307,7 @@ const Footer: FC = () => {
       className="bg-white border-t border-slate-200 pt-16 pb-12 mt-auto relative z-10"
       role="contentinfo"
     >
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 grid md:grid-cols-4 gap-12 mb-12">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
         {/* Brand Section */}
         <div className="md:col-span-2 pr-8">
           <div className="flex items-center gap-3 mb-6">
