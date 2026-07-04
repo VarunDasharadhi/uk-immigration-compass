@@ -1076,10 +1076,17 @@ export async function checkSponsor(companyName: string): Promise<SponsorCheckRes
   return retryFoundSomething ? retry : result;
 }
 
+// Versioned so a search-logic change (like this one) can't be masked by a
+// previously-cached result forever — bump the version instead of needing to
+// manually clear disk/Redis caches after every fix. Combined with the TTL
+// below so future changes self-heal without a version bump too.
+const SPONSOR_CACHE_VERSION = 'v2';
+const SPONSOR_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
 async function checkSponsorOnce(companyName: string): Promise<SponsorCheckResult> {
-  const cacheKey = `sponsor:${companyName.toLowerCase().trim()}`;
+  const cacheKey = `sponsor:${SPONSOR_CACHE_VERSION}:${companyName.toLowerCase().trim()}`;
   const cached = await cache.get(cacheKey);
-  if (cached) return cached;
+  if (cached && cache.ageMs(cacheKey) < SPONSOR_CACHE_TTL_MS) return cached;
 
   // 1. Exact/normalised register match — confirmed identity, no ambiguity.
   const exact = searchRegisterExact(companyName);
@@ -1142,14 +1149,33 @@ async function runDailyRefresh(): Promise<void> {
   console.log('[Cache] Daily refresh complete');
 }
 
+// Loads the current register + revoked index into THIS process's memory if
+// they aren't already there. Needed because workerRegister/revokedRegister
+// are in-memory only (too big for the shared Redis cache) — on Vercel,
+// api/sponsor-status.ts runs as its own isolated function, separate from the
+// cron job that calls refreshSponsorRegister() on its own schedule, so
+// nothing else ever populates this function's copy. Memoized so concurrent
+// requests on the same cold container share one in-flight load instead of
+// each kicking off their own GOV.UK fetch.
+let sponsorDataLoadPromise: Promise<void> | null = null;
+export function ensureSponsorDataLoaded(): Promise<void> {
+  if (workerRegister.length > 0 && revokedRegister.length > 0) return Promise.resolve();
+  if (!sponsorDataLoadPromise) {
+    sponsorDataLoadPromise = Promise.all([
+      workerRegister.length === 0 ? refreshSponsorRegister() : Promise.resolve(),
+      revokedRegister.length === 0 ? primeHistoryBucketsIfStale() : Promise.resolve(),
+    ]).then(() => {});
+  }
+  return sponsorDataLoadPromise;
+}
+
 export function initCache(): void {
   cache.load();
 
   // The sponsor register and historical ledger are what checkSponsor reads —
   // load them regardless of whether an AI key is configured, since neither
   // needs one.
-  refreshSponsorRegister().catch(err => console.error('[Register] Background load failed:', err));
-  primeHistoryBucketsIfStale().catch(err => console.error('[SponsorHistory] Background prefetch failed:', err));
+  ensureSponsorDataLoaded().catch(err => console.error('[Register] Background load failed:', err));
 
   if (!getApiKey()) {
     console.log('[Cache] No API key — skipping AI-backed feed warm-up; mock data will be used for updates/petitions/news');

@@ -9,6 +9,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'companyName query param is required' });
   }
   try {
+    // Register/revoked-index are in-memory only and this function runs
+    // isolated from the cron job that normally populates them — load them
+    // into this instance first if they aren't here yet.
+    await aiService.ensureSponsorDataLoaded();
     const data = await aiService.checkSponsor(companyName);
     // Cache per-company results for 1h
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
