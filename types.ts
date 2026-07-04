@@ -3,6 +3,8 @@ export enum Tab {
   PETITIONS = 'PETITIONS',
   SIMPLIFIER = 'SIMPLIFIER',
   SPONSORS = 'SPONSORS',
+  PRIVACY = 'PRIVACY',
+  TERMS = 'TERMS',
 }
 
 export interface GroundingChunk {
