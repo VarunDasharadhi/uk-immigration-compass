@@ -58,13 +58,13 @@ export const SponsorChecker: React.FC = () => {
     <div className="max-w-[1600px] mx-auto p-4 md:p-8">
       {/* Header */}
       <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center p-3 bg-indigo-50 rounded-2xl mb-4">
-          <Building2 className="w-8 h-8 text-indigo-600" />
+        <div className="inline-flex items-center justify-center p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-2xl mb-4">
+          <Building2 className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
         </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-4">
           Sponsor Checker & Updates
         </h2>
-        <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
           Verify if an employer holds a valid UK Sponsor License and track the latest Home Office compliance news.
         </p>
       </div>
@@ -73,17 +73,17 @@ export const SponsorChecker: React.FC = () => {
         {/* Left Column: Search & Result */}
         <div className="lg:col-span-2 space-y-8">
           {/* Search Card */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <Search className="w-5 h-5 text-indigo-500" />
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-black/30">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6 flex items-center gap-2">
+              <Search className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
               Check an Employer
             </h3>
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Company Name</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Company Name</label>
                 <input
                   type="text"
-                  className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all font-medium text-slate-800"
+                  className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all font-medium text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:focus:ring-indigo-900/40 dark:focus:border-indigo-500"
                   placeholder="e.g. Acme Solutions Ltd"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -92,12 +92,12 @@ export const SponsorChecker: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading || !searchTerm}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-200 dark:shadow-indigo-950/40 dark:disabled:bg-slate-700 flex items-center justify-center gap-2"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify License Status'}
               </button>
               {searchError && (
-                <div className="flex items-center gap-2 text-red-600 text-sm font-medium mt-2">
+                <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium mt-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   {searchError}
                 </div>
@@ -107,23 +107,23 @@ export const SponsorChecker: React.FC = () => {
 
           {/* Result Display */}
           {result && (
-            <div className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-lg">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-lg dark:shadow-black/40">
               {/* Status Banner */}
               <div className="p-8 pb-4 text-center">
-                <h3 className="text-2xl font-bold text-slate-900 mb-6">{result.companyName} ({result.town})</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">{result.companyName} ({result.town})</h3>
 
                 {result.status === 'Licensed' ? (
-                  <div className="flex items-center justify-center gap-2 p-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 font-bold">
+                  <div className="flex items-center justify-center gap-2 p-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 font-bold dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/40">
                     <CheckCircle className="w-5 h-5" />
                     <span>Active Sponsor License</span>
                   </div>
                 ) : result.status === 'Unknown' ? (
-                  <div className="flex items-center justify-center gap-2 p-4 bg-amber-50 text-amber-700 rounded-xl border border-amber-100 font-bold">
+                  <div className="flex items-center justify-center gap-2 p-4 bg-amber-50 text-amber-700 rounded-xl border border-amber-100 font-bold dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/40">
                     <AlertTriangle className="w-5 h-5" />
                     <span>{result.notes || 'Status Unknown'}</span>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center gap-2 p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 font-bold">
+                  <div className="flex items-center justify-center gap-2 p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 font-bold dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/40">
                     <XCircle className="w-5 h-5" />
                     <span>License Status: {result.status}</span>
                   </div>
@@ -132,41 +132,41 @@ export const SponsorChecker: React.FC = () => {
 
               <div className="p-8 pt-4">
                 {/* Status Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-slate-200 rounded-xl overflow-hidden mb-8">
-                  <div className="p-4 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200">
-                    <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Company</span>
-                    <span className="font-semibold text-slate-900">{result.companyName}</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden mb-8">
+                  <div className="p-4 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 dark:bg-slate-800 dark:border-slate-700">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Company</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{result.companyName}</span>
                   </div>
-                  <div className="p-4 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200">
-                    <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Location</span>
-                    <span className="font-semibold text-slate-900">{result.town}</span>
+                  <div className="p-4 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 dark:bg-slate-800 dark:border-slate-700">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Location</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{result.town}</span>
                   </div>
-                  <div className="p-4 bg-slate-50">
-                    <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Rating</span>
-                    <span className="font-semibold text-slate-900">{result.rating}</span>
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Rating</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{result.rating}</span>
                   </div>
                 </div>
 
                 {/* Details row */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                    <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Sponsor Type</span>
-                    <span className="font-semibold text-slate-900 text-sm">{result.sponsorType || 'Unknown'}</span>
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Sponsor Type</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{result.sponsorType || 'Unknown'}</span>
                   </div>
-                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                    <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Date Granted</span>
-                    <span className="font-semibold text-slate-900 text-sm">{result.dateGranted || 'Unknown'}</span>
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Date Granted</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{result.dateGranted || 'Unknown'}</span>
                   </div>
-                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                    <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Routes</span>
-                    <span className="font-semibold text-slate-900 text-sm">{result.routes?.length ? result.routes.join(', ') : 'Unknown'}</span>
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Routes</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{result.routes?.length ? result.routes.join(', ') : 'Unknown'}</span>
                   </div>
                 </div>
 
                 {/* Nature of Business */}
                 <div className="mb-8">
-                  <h4 className="text-sm font-bold text-slate-900 mb-3">Nature of business</h4>
-                  <div className="p-4 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-medium">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3">Nature of business</h4>
+                  <div className="p-4 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-medium dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                     {result.natureOfBusiness || 'Information unavailable'}
                   </div>
                 </div>
@@ -174,27 +174,27 @@ export const SponsorChecker: React.FC = () => {
                 {/* Licence History */}
                 {result.history && result.history.length > 0 && (
                   <div className="mb-8">
-                    <h4 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-indigo-500" />
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
                       Licence History
                     </h4>
-                    <div className="relative pl-4 border-l-2 border-slate-200 space-y-4">
+                    <div className="relative pl-4 border-l-2 border-slate-200 dark:border-slate-700 space-y-4">
                       {result.history.map((event, i) => {
                         const isGranted = /granted|licensed|added/i.test(event.status);
                         const isRevoked = /revoked|suspended|enforcement/i.test(event.status);
                         const dotColor = isGranted ? 'bg-emerald-500' : isRevoked ? 'bg-red-500' : 'bg-amber-400';
-                        const textColor = isGranted ? 'text-emerald-700' : isRevoked ? 'text-red-600' : 'text-amber-700';
-                        const bgColor = isGranted ? 'bg-emerald-50 border-emerald-100' : isRevoked ? 'bg-red-50 border-red-100' : 'bg-amber-50 border-amber-100';
+                        const textColor = isGranted ? 'text-emerald-700 dark:text-emerald-400' : isRevoked ? 'text-red-600 dark:text-red-400' : 'text-amber-700 dark:text-amber-400';
+                        const bgColor = isGranted ? 'bg-emerald-50 border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/40' : isRevoked ? 'bg-red-50 border-red-100 dark:bg-red-950/30 dark:border-red-900/40' : 'bg-amber-50 border-amber-100 dark:bg-amber-950/30 dark:border-amber-900/40';
                         return (
                           <div key={i} className="relative">
-                            <div className={`absolute -left-[21px] top-3 w-3 h-3 rounded-full border-2 border-white ${dotColor}`} />
+                            <div className={`absolute -left-[21px] top-3 w-3 h-3 rounded-full border-2 border-white dark:border-slate-900 ${dotColor}`} />
                             <div className={`p-4 rounded-xl border ${bgColor}`}>
                               <div className="flex items-center gap-2 mb-1">
                                 <ChevronRight className={`w-3.5 h-3.5 ${textColor}`} />
                                 <span className={`text-xs font-bold uppercase tracking-wider ${textColor}`}>{event.status}</span>
-                                <span className="text-xs text-slate-400 ml-auto">{event.date}</span>
+                                <span className="text-xs text-slate-400 dark:text-slate-500 ml-auto">{event.date}</span>
                               </div>
-                              <p className="text-sm text-slate-700">{event.details}</p>
+                              <p className="text-sm text-slate-700 dark:text-slate-300">{event.details}</p>
                             </div>
                           </div>
                         );
@@ -205,7 +205,7 @@ export const SponsorChecker: React.FC = () => {
 
                 {/* Notes (for non-licensed / revoked companies) */}
                 {result.notes && result.status !== 'Licensed' && (
-                  <div className="mb-8 p-4 rounded-xl border border-amber-100 bg-amber-50 text-sm text-amber-800">
+                  <div className="mb-8 p-4 rounded-xl border border-amber-100 bg-amber-50 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
                     <span className="font-bold block mb-1">Additional information</span>
                     {result.notes}
                   </div>
@@ -218,10 +218,10 @@ export const SponsorChecker: React.FC = () => {
                     looks like a live one. */}
                 {result.candidates && result.candidates.length > 0 && (
                   <div className="mb-8">
-                    <h4 className="text-sm font-bold text-slate-900 mb-1">
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">
                       {result.candidates.length === 1 ? 'Possible match' : 'Possible matches'}
                     </h4>
-                    <p className="text-xs text-slate-500 mb-4">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
                       No exact entry was found for "{searchTerm}". These are similarly named — select the one you meant to check its confirmed status.
                     </p>
                     <div className="space-y-2">
@@ -230,17 +230,17 @@ export const SponsorChecker: React.FC = () => {
                           key={i}
                           type="button"
                           onClick={() => handleCandidateSelect(candidate.name)}
-                          className="w-full text-left p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 transition-colors flex items-center justify-between gap-4"
+                          className="w-full text-left p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 transition-colors flex items-center justify-between gap-4 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-700"
                         >
                           <div>
-                            <span className="font-semibold text-slate-900 block">{candidate.name}</span>
-                            <span className="text-xs text-slate-500">{candidate.town} · {candidate.route}</span>
+                            <span className="font-semibold text-slate-900 dark:text-slate-100 block">{candidate.name}</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">{candidate.town} · {candidate.route}</span>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${candidate.status === 'Revoked' ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-700'}`}>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${candidate.status === 'Revoked' ? 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'}`}>
                               {candidate.status}
                             </span>
-                            <ChevronRight className="w-4 h-4 text-slate-400" />
+                            <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                           </div>
                         </button>
                       ))}
