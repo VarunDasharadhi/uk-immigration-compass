@@ -14,8 +14,11 @@ import {
   Mail,
   Copy,
   Check,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { Tab } from './types';
+import { useTheme } from './contexts/ThemeContext';
 import { NewsDashboard } from './components/NewsDashboard';
 import { PetitionTracker } from './components/PetitionTracker';
 import { SimplifierTool } from './components/SimplifierTool';
@@ -92,24 +95,37 @@ const NavItem: FC<NavItemProps> = ({ config, isActive, onClick }) => {
       className={`relative flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 text-sm font-medium whitespace-nowrap group
         ${
           isActive
-            ? 'text-blue-700 bg-blue-50 shadow-sm ring-1 ring-blue-200'
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            ? 'text-blue-700 bg-blue-50 shadow-sm ring-1 ring-blue-200 dark:text-blue-300 dark:bg-blue-950/40 dark:ring-blue-800'
+            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
         }`}
     >
       <Icon
         className={`w-4 h-4 transition-colors ${
           isActive
-            ? 'text-blue-600'
-            : 'text-slate-400 group-hover:text-slate-600'
+            ? 'text-blue-600 dark:text-blue-400'
+            : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300'
         }`}
       />
       {config.label}
       {isActive && (
         <span
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full mb-1.5"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-600 dark:bg-blue-400 rounded-full mb-1.5"
           aria-hidden="true"
         />
       )}
+    </button>
+  );
+};
+
+const ThemeToggle: FC = () => {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      onClick={toggleTheme}
+      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="p-2.5 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors"
+    >
+      {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
     </button>
   );
 };
@@ -137,7 +153,7 @@ const Header: FC<HeaderProps> = ({
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60"
+      className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:border-slate-800/80 dark:bg-slate-900/90 dark:supports-[backdrop-filter]:bg-slate-900/60"
       role="banner"
     >
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center justify-between">
@@ -147,14 +163,14 @@ const Header: FC<HeaderProps> = ({
           className="flex items-center gap-3 cursor-pointer group hover:opacity-80 transition-opacity"
           aria-label="Go to home"
         >
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-700 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/10 group-hover:scale-105 transition-transform duration-300">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-700 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/10 dark:shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
             <Landmark className="text-white w-5 h-5" />
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
               UK Immigration
             </h1>
-            <span className="block text-xs font-semibold text-blue-600 tracking-[0.18em] leading-tight">
+            <span className="block text-xs font-semibold text-blue-600 dark:text-blue-400 tracking-[0.18em] leading-tight">
               COMPASS
             </span>
           </div>
@@ -162,7 +178,7 @@ const Header: FC<HeaderProps> = ({
 
         {/* Desktop Nav */}
         <nav
-          className="hidden md:flex items-center gap-2 bg-white/50 p-1.5 rounded-full border border-slate-200/60 shadow-sm"
+          className="hidden md:flex items-center gap-2 bg-white/50 p-1.5 rounded-full border border-slate-200/60 shadow-sm dark:bg-slate-800/50 dark:border-slate-700/60"
           role="navigation"
           aria-label="Main navigation"
         >
@@ -176,25 +192,29 @@ const Header: FC<HeaderProps> = ({
           ))}
         </nav>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-          onClick={() => onMobileMenuToggle(!mobileMenuOpen)}
-          aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={mobileMenuOpen}
-        >
-          {mobileMenuOpen ? (
-            <X className="w-6 h-6" />
-          ) : (
-            <Menu className="w-6 h-6" />
-          )}
-        </button>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+
+          {/* Mobile Menu Toggle */}
+          <button
+            className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors dark:text-slate-400 dark:hover:bg-slate-800"
+            onClick={() => onMobileMenuToggle(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Nav */}
       {mobileMenuOpen && (
         <nav
-          className="md:hidden border-t border-slate-100 bg-white p-4 flex flex-col gap-2 shadow-xl absolute w-full z-40 animate-in slide-in-from-top-2"
+          className="md:hidden border-t border-slate-100 bg-white p-4 flex flex-col gap-2 shadow-xl absolute w-full z-40 animate-in slide-in-from-top-2 dark:border-slate-800 dark:bg-slate-900"
           role="navigation"
           aria-label="Mobile navigation"
         >
@@ -219,7 +239,7 @@ interface HeroSectionProps {
 const HeroSection: FC<HeroSectionProps> = ({ onExploreClick }) => {
   return (
     <section
-      className="relative overflow-hidden bg-slate-900 pb-20 z-0"
+      className="relative overflow-hidden bg-slate-900 dark:bg-slate-950 pb-20 z-0"
       aria-label="Hero section"
     >
       {/* Abstract Background */}
@@ -299,9 +319,9 @@ const FooterLink: FC<FooterLinkProps> = ({ href, label }) => (
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="hover:text-blue-600 transition flex items-center gap-2"
+      className="hover:text-blue-600 dark:hover:text-blue-400 transition flex items-center gap-2"
     >
-      <ArrowRight className="w-3 h-3 text-slate-300" />
+      <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" />
       {label}
     </a>
   </li>
@@ -329,35 +349,35 @@ const ContactModal: FC<{ onClose: () => void }> = ({ onClose }) => {
         onClick={onClose}
       ></div>
 
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative z-10 animate-in zoom-in-95 duration-200 p-8 text-center">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-sm relative z-10 animate-in zoom-in-95 duration-200 p-8 text-center">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
+          className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors dark:bg-slate-800 dark:hover:bg-slate-700"
           aria-label="Close"
         >
-          <X className="w-4 h-4 text-slate-600" />
+          <X className="w-4 h-4 text-slate-600 dark:text-slate-300" />
         </button>
 
-        <div className="inline-flex items-center justify-center p-3 bg-blue-50 rounded-2xl mb-5">
-          <Mail className="w-6 h-6 text-blue-600" />
+        <div className="inline-flex items-center justify-center p-3 bg-blue-50 dark:bg-blue-950/40 rounded-2xl mb-5">
+          <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
         </div>
-        <h3 className="text-lg font-bold text-slate-900 mb-2">Get in touch</h3>
-        <p className="text-sm text-slate-500 leading-relaxed mb-6">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">Get in touch</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
           Got a question, a concern, or found something not working right? Reach out anytime.
         </p>
 
         <button
           onClick={handleCopy}
-          className="w-full flex items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 hover:border-blue-300 transition-colors group"
+          className="w-full flex items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 hover:border-blue-300 transition-colors group dark:bg-slate-800 dark:border-slate-700 dark:hover:border-blue-500"
         >
-          <span className="text-sm font-semibold text-slate-800">{CONTACT_EMAIL}</span>
+          <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{CONTACT_EMAIL}</span>
           {copied ? (
-            <Check className="w-4 h-4 text-green-600 shrink-0" />
+            <Check className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" />
           ) : (
-            <Copy className="w-4 h-4 text-slate-400 group-hover:text-blue-600 shrink-0" />
+            <Copy className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:text-slate-500 dark:group-hover:text-blue-400 shrink-0" />
           )}
         </button>
-        <p className="text-xs text-slate-400 mt-3">
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
           {copied ? 'Copied to clipboard' : 'Tap to copy the email address'}
         </p>
       </div>
@@ -376,7 +396,7 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
 
   return (
     <footer
-      className="bg-white border-t border-slate-200 pt-16 pb-12 mt-auto relative z-10"
+      className="bg-white border-t border-slate-200 pt-16 pb-12 mt-auto relative z-10 dark:bg-slate-900 dark:border-slate-800"
       role="contentinfo"
     >
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
@@ -386,11 +406,11 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Landmark className="text-white w-4 h-4" />
             </div>
-            <span className="text-lg font-bold text-slate-900">
+            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">
               UK Immigration Compass
             </span>
           </div>
-          <p className="text-slate-500 text-sm leading-relaxed max-w-md">
+          <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-md">
             We believe information is a right. By combining official data streams
             with advanced AI, we empower applicants, students, and families to
             navigate the UK's complex immigration landscape with confidence.
@@ -399,10 +419,10 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
 
         {/* Resources Section */}
         <div>
-          <h3 className="font-bold text-slate-900 mb-6 text-sm uppercase tracking-wider">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-6 text-sm uppercase tracking-wider">
             Official Resources
           </h3>
-          <ul className="space-y-3 text-sm text-slate-600">
+          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
             <FooterLink
               href="https://www.gov.uk/browse/visas-immigration"
               label="Gov.uk Visas"
@@ -420,36 +440,36 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
 
         {/* Legal Section */}
         <div>
-          <h3 className="font-bold text-slate-900 mb-6 text-sm uppercase tracking-wider">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-6 text-sm uppercase tracking-wider">
             Legal & Data
           </h3>
-          <ul className="space-y-3 text-sm text-slate-600">
+          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
             <li className="flex items-center gap-2">
-              <ArrowRight className="w-3 h-3 text-slate-300" /> Data Refresh:
+              <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" /> Data Refresh:
               Daily
             </li>
             <li>
               <button
                 onClick={() => onNavigate(Tab.PRIVACY)}
-                className="hover:text-blue-600 transition flex items-center gap-2"
+                className="hover:text-blue-600 dark:hover:text-blue-400 transition flex items-center gap-2"
               >
-                <ArrowRight className="w-3 h-3 text-slate-300" /> Privacy Policy
+                <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" /> Privacy Policy
               </button>
             </li>
             <li>
               <button
                 onClick={() => onNavigate(Tab.TERMS)}
-                className="hover:text-blue-600 transition flex items-center gap-2"
+                className="hover:text-blue-600 dark:hover:text-blue-400 transition flex items-center gap-2"
               >
-                <ArrowRight className="w-3 h-3 text-slate-300" /> Terms of Service
+                <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" /> Terms of Service
               </button>
             </li>
             <li>
               <button
                 onClick={() => setContactOpen(true)}
-                className="hover:text-blue-600 transition flex items-center gap-2"
+                className="hover:text-blue-600 dark:hover:text-blue-400 transition flex items-center gap-2"
               >
-                <ArrowRight className="w-3 h-3 text-slate-300" /> Contact / Report an Issue
+                <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" /> Contact / Report an Issue
               </button>
             </li>
           </ul>
@@ -459,11 +479,11 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
       {contactOpen && <ContactModal onClose={() => setContactOpen(false)} />}
 
       {/* Bottom Bar */}
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p className="text-xs text-slate-400">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p className="text-xs text-slate-400 dark:text-slate-500">
           © {currentYear} UK Immigration Compass. Powered by AI.
         </p>
-        <div className="bg-amber-50 border border-amber-100 text-amber-900/70 px-4 py-2 rounded-lg text-xs font-medium max-w-xl text-center md:text-right">
+        <div className="bg-amber-50 border border-amber-100 text-amber-900/70 px-4 py-2 rounded-lg text-xs font-medium max-w-xl text-center md:text-right dark:bg-amber-950/30 dark:border-amber-900/40 dark:text-amber-200/70">
           Disclaimer: This is an AI-assisted information tool, not legal advice.
           Always verify with a qualified solicitor.
         </div>
@@ -496,7 +516,7 @@ const App: FC = () => {
 
   return (
     <div
-      className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900"
+      className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-900 dark:selection:text-blue-100"
       role="application"
     >
       <Analytics />
@@ -515,7 +535,7 @@ const App: FC = () => {
 
       {/* Main Content */}
       <main className="flex-grow relative z-10" id="feed-start">
-        <div className="h-8 bg-gradient-to-b from-slate-100 to-transparent opacity-50 pointer-events-none" />
+        <div className="h-8 bg-gradient-to-b from-slate-100 dark:from-slate-900 to-transparent opacity-50 pointer-events-none" />
         <ErrorBoundary>
           <ContentComponent />
         </ErrorBoundary>
