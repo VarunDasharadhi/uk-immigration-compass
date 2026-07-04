@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { timingSafeEqual } from 'crypto';
-import { refreshUpdates, refreshPetitions, refreshSponsorNews, refreshSponsorRegister, refreshAllHistoryBuckets } from '../../services/aiService.js';
+import { refreshUpdates, backfillThinCategories, refreshPetitions, refreshSponsorNews, refreshSponsorRegister, refreshAllHistoryBuckets } from '../../services/aiService.js';
 
 if (!process.env.CRON_SECRET) {
   console.warn('[Cron] CRON_SECRET is not set — /api/cron/refresh will reject all requests until it is configured.');
@@ -22,7 +22,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    await Promise.all([refreshUpdates(), refreshPetitions(), refreshSponsorNews(), refreshSponsorRegister(), refreshAllHistoryBuckets()]);
+    // backfillThinCategories reads the archive that refreshUpdates just
+    // wrote, so it must run after — everything else is independent.
+    await refreshUpdates();
+    await Promise.all([backfillThinCategories(), refreshPetitions(), refreshSponsorNews(), refreshSponsorRegister(), refreshAllHistoryBuckets()]);
     res.json({ ok: true, ts: new Date().toISOString() });
   } catch (err) {
     console.error('[Cron] Refresh failed:', err);

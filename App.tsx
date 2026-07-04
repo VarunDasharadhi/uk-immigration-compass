@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, FC } from 'react';
 import { createPortal } from 'react-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import {
   Newspaper,
@@ -26,6 +27,7 @@ import { SponsorChecker } from './components/SponsorChecker';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsOfService } from './components/TermsOfService';
+import { UpdatesArchivePage } from './components/UpdatesArchivePage';
 
 // ===================================================
 // CONSTANTS & CONFIGURATION
@@ -496,18 +498,18 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
 // MAIN APP COMPONENT
 // ===================================================
 
-const App: FC = () => {
+const MainApp: FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.NEWS);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const ContentComponent = useMemo(() => {
     return CONTENT_MAP[activeTab] || NewsDashboard;
   }, [activeTab]);
 
   const handleExploreClick = useCallback(() => {
-    const feedElement = document.getElementById('feed-start');
-    feedElement?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
+    navigate('/updates/archive');
+  }, [navigate]);
 
   const handleFooterNavigate = useCallback((tab: Tab) => {
     setActiveTab(tab);
@@ -519,7 +521,6 @@ const App: FC = () => {
       className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-900 dark:selection:text-blue-100"
       role="application"
     >
-      <Analytics />
       {/* Navigation */}
       <Header
         activeTab={activeTab}
@@ -544,6 +545,18 @@ const App: FC = () => {
       {/* Footer */}
       <Footer onNavigate={handleFooterNavigate} />
     </div>
+  );
+};
+
+const App: FC = () => {
+  return (
+    <>
+      <Analytics />
+      <Routes>
+        <Route path="/updates/archive" element={<UpdatesArchivePage />} />
+        <Route path="*" element={<MainApp />} />
+      </Routes>
+    </>
   );
 };
 
