@@ -31,34 +31,34 @@ export const SimplifierTool: React.FC = () => {
   return (
     <div className="max-w-[1600px] mx-auto p-4 md:p-8">
       <div className="text-center mb-12">
-        <div className="inline-flex items-center justify-center p-3 bg-pink-50 rounded-2xl mb-6">
-            <BookOpen className="w-8 h-8 text-pink-600" />
+        <div className="inline-flex items-center justify-center p-3 bg-pink-50 dark:bg-pink-950/40 rounded-2xl mb-6">
+            <BookOpen className="w-8 h-8 text-pink-600 dark:text-pink-400" />
         </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-4">
           Legal Jargon Buster
         </h2>
-        <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
-          Received a confusing letter from the Home Office? Paste the text below, and our AI will 
+        <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          Received a confusing letter from the Home Office? Paste the text below, and our AI will
           translate the "Legalese" into plain, human English.
         </p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8 items-stretch min-h-[60vh] lg:min-h-[70vh]">
         {/* Input */}
-        <div className="flex flex-col h-full bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-200 overflow-hidden group focus-within:ring-2 focus-within:ring-pink-100 transition-all">
-          <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center justify-between">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+        <div className="flex flex-col h-full bg-white dark:bg-slate-900 rounded-3xl shadow-lg shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-700 overflow-hidden group focus-within:ring-2 focus-within:ring-pink-100 dark:focus-within:ring-pink-900/40 transition-all">
+          <div className="bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 px-6 py-4 flex items-center justify-between">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-2">
                 <FileText className="w-4 h-4" /> Official Text
             </label>
           </div>
           <textarea
-            className="flex-grow w-full p-6 text-slate-700 placeholder:text-slate-300 resize-none focus:outline-none text-base leading-relaxed bg-transparent"
+            className="flex-grow w-full p-6 text-slate-700 placeholder:text-slate-300 resize-none focus:outline-none text-base leading-relaxed bg-transparent dark:text-slate-200 dark:placeholder:text-slate-600"
             placeholder="Paste text like: 'The leave to remain is granted pursuant to paragraph 276B of the Immigration Rules...'"
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-             <span className="text-xs text-slate-400 font-medium">{input.length} characters</span>
+          <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end dark:border-slate-700 dark:bg-slate-800/50">
+             <span className="text-xs text-slate-400 font-medium dark:text-slate-500">{input.length} characters</span>
           </div>
         </div>
 
