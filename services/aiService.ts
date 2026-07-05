@@ -1324,7 +1324,7 @@ export async function checkSponsor(companyName: string): Promise<SponsorCheckRes
 // previously-cached result forever — bump the version instead of needing to
 // manually clear disk/Redis caches after every fix. Combined with the TTL
 // below so future changes self-heal without a version bump too.
-const SPONSOR_CACHE_VERSION = 'v2';
+const SPONSOR_CACHE_VERSION = 'v3';
 const SPONSOR_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 async function checkSponsorOnce(companyName: string): Promise<SponsorCheckResult> {
