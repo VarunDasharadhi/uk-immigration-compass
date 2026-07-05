@@ -9,7 +9,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!companyName) {
     return res.status(400).json({ error: 'companyName query param is required' });
   }
-  const { allowed } = await checkRateLimit(`company-lookup:${clientKey(req)}`);
+  let allowed = true;
+  try {
+    ({ allowed } = await checkRateLimit(`company-lookup:${clientKey(req)}`));
+  } catch (err) {
+    // Rate limiter itself failing (e.g. Redis outage) must not turn this
+    // best-effort enrichment endpoint into a hard error — fail open.
+    console.error('[/api/company-lookup] rate limit check failed, failing open', err);
+  }
   if (!allowed) {
     return res.status(429).json({ error: 'Too many requests. Please try again in a minute.' });
   }
