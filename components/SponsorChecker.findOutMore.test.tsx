@@ -25,6 +25,20 @@ const LICENSED_RESULT = {
   history: [],
 };
 
+const NOT_FOUND_RESULT = {
+  companyName: 'Nonexistent Widgets Ltd',
+  town: 'Unknown',
+  rating: 'Unknown',
+  routes: [],
+  status: 'Not Found',
+  natureOfBusiness: 'Unknown',
+  dateGranted: 'Unknown',
+  sponsorType: 'Unknown',
+  notes: 'No matching entry was found in the register.',
+  history: [],
+  candidates: [],
+};
+
 async function searchFor(name: string) {
   const user = userEvent.setup();
   await user.type(screen.getByPlaceholderText(/Acme Solutions Ltd/i), name);
@@ -78,5 +92,19 @@ describe('SponsorChecker - Find out more links', () => {
       )
     );
     expect(await screen.findByText('Information technology consultancy activities')).toBeInTheDocument();
+  });
+
+  it('does not render the Find out more section for a Not Found result', async () => {
+    (apiClient.checkSponsor as jest.Mock).mockResolvedValue(NOT_FOUND_RESULT);
+
+    render(<SponsorChecker />);
+    await searchFor('Nonexistent Widgets Ltd');
+
+    await waitFor(() => expect(screen.getByText('Nonexistent Widgets Ltd (Unknown)')).toBeInTheDocument());
+
+    expect(screen.queryByText('Find out more')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Google' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Companies House' })).not.toBeInTheDocument();
+    expect(apiClient.lookupCompany).not.toHaveBeenCalled();
   });
 });

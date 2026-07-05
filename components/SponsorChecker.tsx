@@ -47,7 +47,7 @@ export const SponsorChecker: React.FC = () => {
   }, [result]);
 
   const companyDetailsLinks = useMemo(() => {
-    if (!result) return [];
+    if (!result || (result.status !== 'Licensed' && result.status !== 'Revoked')) return [];
     const links = buildCompanyDetailsLinks(result.companyName);
     if (!companyLookup?.companiesHouseUrl) return links;
     return links.map(link =>
@@ -56,7 +56,7 @@ export const SponsorChecker: React.FC = () => {
   }, [result, companyLookup]);
 
   const openRolesLinks = useMemo(() => {
-    if (!result) return [];
+    if (!result || (result.status !== 'Licensed' && result.status !== 'Revoked')) return [];
     return buildOpenRolesLinks(result.companyName);
   }, [result]);
 
@@ -211,47 +211,50 @@ export const SponsorChecker: React.FC = () => {
 
                 {/* Find out more — constructed search links, not guessed exact
                     URLs; the Companies House entry swaps in a real profile
-                    link once /api/company-lookup resolves a confident match. */}
-                <div className="mb-8">
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                    <ExternalLink className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-                    Find out more
-                  </h4>
-                  <div className="space-y-4">
-                    <div>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Company</span>
-                      <div className="flex flex-wrap gap-2">
-                        {companyDetailsLinks.map((link) => (
-                          <a
-                            key={link.label}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-700 dark:hover:text-indigo-300"
-                          >
-                            {link.label}
-                          </a>
-                        ))}
+                    link once /api/company-lookup resolves a confident match.
+                    Only for confirmed results — not the Not Found / candidate-picker state. */}
+                {(result.status === 'Licensed' || result.status === 'Revoked') && (
+                  <div className="mb-8">
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                      <ExternalLink className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                      Find out more
+                    </h4>
+                    <div className="space-y-4">
+                      <div>
+                        <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Company</span>
+                        <div className="flex flex-wrap gap-2">
+                          {companyDetailsLinks.map((link) => (
+                            <a
+                              key={link.label}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-700 dark:hover:text-indigo-300"
+                            >
+                              {link.label}
+                            </a>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Open roles</span>
-                      <div className="flex flex-wrap gap-2">
-                        {openRolesLinks.map((link) => (
-                          <a
-                            key={link.label}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-700 dark:hover:text-indigo-300"
-                          >
-                            {link.label}
-                          </a>
-                        ))}
+                      <div>
+                        <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Open roles</span>
+                        <div className="flex flex-wrap gap-2">
+                          {openRolesLinks.map((link) => (
+                            <a
+                              key={link.label}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-700 dark:hover:text-indigo-300"
+                            >
+                              {link.label}
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Licence History */}
                 {result.history && result.history.length > 0 && (
