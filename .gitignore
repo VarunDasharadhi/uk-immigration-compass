@@ -22,3 +22,5 @@ logs/
 /*.png
 /*.jpeg
 /*.jpg
+
+.vercel

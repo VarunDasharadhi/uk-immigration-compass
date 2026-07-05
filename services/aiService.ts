@@ -1167,6 +1167,35 @@ async function rebuildRevokedRegisterIndex(): Promise<void> {
   console.log(`[SponsorHistory] Revoked-company index built: ${revokedRegister.length} entries`);
 }
 
+// A real sponsor-license revocation-then-relicensing takes months (a fresh
+// application, vetting, etc.), never days. A 'removed' record immediately
+// followed by an 'added' record within this window is not a real event —
+// it's noise from a bad snapshot on the upstream scraper's side. Confirmed
+// live: a single scrape glitch marked ~789 companies "removed" on
+// 2026-06-05 and the same ~789 companies "added" again 3 days later, on
+// 2026-06-08 — an exact-matching count, across effectively the whole
+// register, that our ledger otherwise displays as a false revoke/re-grant
+// blip on every affected company's history.
+const SPURIOUS_REMOVAL_GAP_MS = 30 * 24 * 60 * 60 * 1000;
+
+function stripSpuriousRemovals(records: ExternalHistoryRecord[]): ExternalHistoryRecord[] {
+  const cleaned: ExternalHistoryRecord[] = [];
+  for (let i = 0; i < records.length; i++) {
+    const r = records[i];
+    const next = records[i + 1];
+    if (
+      r.type === 'removed' &&
+      next?.type === 'added' &&
+      new Date(next.date).getTime() - new Date(r.date).getTime() < SPURIOUS_REMOVAL_GAP_MS
+    ) {
+      i++; // also skip the paired 'added' — it isn't a real re-grant either
+      continue;
+    }
+    cleaned.push(r);
+  }
+  return cleaned;
+}
+
 // All historical records for one company, from our own pre-fetched ledger.
 // Shared by buildLicensedResult (currently-licensed companies) and
 // findExternalHistory (removed ones) — same data source, same lookup.
@@ -1176,9 +1205,10 @@ async function findCompanyRecords(companyName: string): Promise<ExternalHistoryR
   const records = await fetchHistoryBucket(prefix);
   if (records.length === 0) return [];
   const qNorm = canonicalName(companyName);
-  return records
+  const sorted = records
     .filter(r => canonicalName(r.data.company) === qNorm)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  return stripSpuriousRemovals(sorted);
 }
 
 function buildHistoryFromRecords(records: ExternalHistoryRecord[]): { date: string; status: string; details: string }[] {
