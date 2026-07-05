@@ -223,7 +223,7 @@ function normalizeName(s: string): string {
 // recompute the same regex work 4x over. Bounded by register size (~160k
 // entries total across current + revoked pools), not by query volume.
 const canonicalNameCache = new Map<string, string>();
-function canonicalName(s: string): string {
+export function canonicalName(s: string): string {
   const cached = canonicalNameCache.get(s);
   if (cached !== undefined) return cached;
   const result = stripLegalSuffix(normalizeName(s));
