@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { apiClient } from '../services/apiClient';
 import { SponsorCheckResult, SponsorNewsItem } from '../types';
-import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight } from 'lucide-react';
+import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight, ExternalLink } from 'lucide-react';
+import { buildCompanyDetailsLinks, buildOpenRolesLinks } from '../utils/companyLinks';
+import { CompanyLookupResult } from '../types';
 
 export const SponsorChecker: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -10,6 +12,8 @@ export const SponsorChecker: React.FC = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [news, setNews] = useState<SponsorNewsItem[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
+  const [companyLookup, setCompanyLookup] = useState<CompanyLookupResult | null>(null);
+  const [companyLookupLoading, setCompanyLookupLoading] = useState(false);
 
   useEffect(() => {
     const loadNews = async () => {
@@ -25,6 +29,36 @@ export const SponsorChecker: React.FC = () => {
     };
     loadNews();
   }, []);
+
+  useEffect(() => {
+    if (!result || (result.status !== 'Licensed' && result.status !== 'Revoked')) {
+      setCompanyLookup(null);
+      setCompanyLookupLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setCompanyLookup(null);
+    setCompanyLookupLoading(true);
+    apiClient.lookupCompany(result.companyName)
+      .then((data) => { if (!cancelled) setCompanyLookup(data); })
+      .catch(() => { if (!cancelled) setCompanyLookup(null); })
+      .finally(() => { if (!cancelled) setCompanyLookupLoading(false); });
+    return () => { cancelled = true; };
+  }, [result]);
+
+  const companyDetailsLinks = useMemo(() => {
+    if (!result) return [];
+    const links = buildCompanyDetailsLinks(result.companyName);
+    if (!companyLookup?.companiesHouseUrl) return links;
+    return links.map(link =>
+      link.label === 'Companies House' ? { ...link, url: companyLookup.companiesHouseUrl! } : link
+    );
+  }, [result, companyLookup]);
+
+  const openRolesLinks = useMemo(() => {
+    if (!result) return [];
+    return buildOpenRolesLinks(result.companyName);
+  }, [result]);
 
   const runSearch = async (name: string) => {
     if (!name.trim()) return;
@@ -167,7 +201,55 @@ export const SponsorChecker: React.FC = () => {
                 <div className="mb-8">
                   <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3">Nature of business</h4>
                   <div className="p-4 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-medium dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                    {result.natureOfBusiness || 'Information unavailable'}
+                    {companyLookupLoading && !companyLookup ? (
+                      <span className="inline-block h-4 w-40 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                    ) : (
+                      companyLookup?.natureOfBusiness || result.natureOfBusiness || 'Information unavailable'
+                    )}
+                  </div>
+                </div>
+
+                {/* Find out more — constructed search links, not guessed exact
+                    URLs; the Companies House entry swaps in a real profile
+                    link once /api/company-lookup resolves a confident match. */}
+                <div className="mb-8">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                    <ExternalLink className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                    Find out more
+                  </h4>
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Company</span>
+                      <div className="flex flex-wrap gap-2">
+                        {companyDetailsLinks.map((link) => (
+                          <a
+                            key={link.label}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-700 dark:hover:text-indigo-300"
+                          >
+                            {link.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Open roles</span>
+                      <div className="flex flex-wrap gap-2">
+                        {openRolesLinks.map((link) => (
+                          <a
+                            key={link.label}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-700 dark:hover:text-indigo-300"
+                          >
+                            {link.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
 

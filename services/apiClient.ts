@@ -1,5 +1,5 @@
 // API Client Service - Calls backend endpoints from frontend
-import { UpdatesResponse, NewsItem, SponsorCheckResult, SponsorNewsItem, PetitionsResult } from '../types';
+import { UpdatesResponse, NewsItem, SponsorCheckResult, SponsorNewsItem, PetitionsResult, CompanyLookupResult } from '../types';
 
 // In the browser, use Vite's import.meta.env (not process.env which crashes at runtime).
 // In Node (server-side imports if ever needed), fall back to process.env.
@@ -137,6 +137,19 @@ class ApiClient {
       `/api/sponsor-status?companyName=${encodeURIComponent(companyName)}`,
       { method: 'GET' },
       `sponsor:${companyName}`
+    );
+  }
+
+  /**
+   * Best-effort lookup of a confirmed company's Companies House profile
+   * and nature of business. Returns nulls (never throws) when there's no
+   * confident match.
+   */
+  async lookupCompany(companyName: string): Promise<CompanyLookupResult> {
+    return this.fetch<CompanyLookupResult>(
+      `/api/company-lookup?companyName=${encodeURIComponent(companyName)}`,
+      { method: 'GET' },
+      `company-lookup:${companyName}`
     );
   }
 
