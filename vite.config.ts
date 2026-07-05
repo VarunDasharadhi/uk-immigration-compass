@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
       port: PORT,
       host: 'localhost',
       cors: true,
-      hmr: { host: 'localhost', port: PORT, protocol: 'ws' },
+      hmr: { host: 'localhost', protocol: 'ws' },
       proxy: {
         '/api': { target: 'http://localhost:10000', changeOrigin: true },
       },
