@@ -41,17 +41,22 @@ async function searchCompanies(companyName: string): Promise<ChSearchItem[]> {
     `https://api.company-information.service.gov.uk/search/companies?q=${encodeURIComponent(companyName)}`,
     { headers: { Authorization: authHeader() } }
   );
-  if (!resp.ok) return [];
+  // A non-ok response (rate limit, outage, etc.) is a failed search, not a
+  // successful search that happened to find nothing — throw so the caller
+  // treats it as transient and doesn't cache a false "no match".
+  if (!resp.ok) throw new Error(`Companies House search failed: ${resp.status}`);
   const json = (await resp.json()) as ChSearchResponse;
   return json.items || [];
 }
 
-async function getCompanyProfile(companyNumber: string): Promise<ChProfile | null> {
+async function getCompanyProfile(companyNumber: string): Promise<ChProfile> {
   const resp = await fetch(
     `https://api.company-information.service.gov.uk/company/${companyNumber}`,
     { headers: { Authorization: authHeader() } }
   );
-  if (!resp.ok) return null;
+  // Same reasoning as searchCompanies: a non-ok response must not be treated
+  // as "profile fetched, it just has no sic_codes".
+  if (!resp.ok) throw new Error(`Companies House profile fetch failed: ${resp.status}`);
   return (await resp.json()) as ChProfile;
 }
 
@@ -77,7 +82,20 @@ export async function lookupCompany(companyName: string): Promise<CompanyLookupR
     return NO_MATCH;
   }
 
-  const profile = await getCompanyProfile(match.company_number).catch(() => null);
+  // The company match itself is confirmed at this point (exact name match on
+  // a real search result), so a profile-fetch failure only means we couldn't
+  // resolve the nature-of-business — it doesn't invalidate the match. Return
+  // the partial result but skip caching, so a transient failure (rate limit,
+  // outage) gets retried on the next lookup instead of being locked in for
+  // 90 days as "no nature of business".
+  let profile: ChProfile | null = null;
+  let profileFetchFailed = false;
+  try {
+    profile = await getCompanyProfile(match.company_number);
+  } catch (err) {
+    console.error('[companiesHouse] profile fetch failed:', err);
+    profileFetchFailed = true;
+  }
   const sicCode = profile?.sic_codes?.[0];
   const natureOfBusiness = sicCode ? await getSicDescription(sicCode) : null;
 
@@ -85,6 +103,8 @@ export async function lookupCompany(companyName: string): Promise<CompanyLookupR
     companiesHouseUrl: `https://find-and-update.company-information.service.gov.uk/company/${match.company_number}`,
     natureOfBusiness,
   };
-  await cache.set(cacheKey, result);
+  if (!profileFetchFailed) {
+    await cache.set(cacheKey, result);
+  }
   return result;
 }

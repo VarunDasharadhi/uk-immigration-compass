@@ -108,4 +108,35 @@ describe('companiesHouse.lookupCompany', () => {
     expect(result).toEqual({ companiesHouseUrl: null, natureOfBusiness: null });
     expect(mockCacheSet).not.toHaveBeenCalled();
   });
+
+  it('returns no match without caching when the search response is not ok (e.g. rate limited)', async () => {
+    mockCacheGet.mockResolvedValue(undefined);
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 429 });
+
+    const { lookupCompany } = await import('./companiesHouse.js');
+    const result = await lookupCompany('Acme Ltd');
+
+    expect(result).toEqual({ companiesHouseUrl: null, natureOfBusiness: null });
+    expect(mockCacheSet).not.toHaveBeenCalled();
+  });
+
+  it('returns a partial result without caching when the profile fetch response is not ok', async () => {
+    mockCacheGet.mockResolvedValue(undefined);
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ items: [{ title: 'acme ltd', company_number: '01234567' }] }),
+      })
+      .mockResolvedValueOnce({ ok: false, status: 429 });
+
+    const { lookupCompany } = await import('./companiesHouse.js');
+    const result = await lookupCompany('Acme Ltd');
+
+    expect(result).toEqual({
+      companiesHouseUrl: 'https://find-and-update.company-information.service.gov.uk/company/01234567',
+      natureOfBusiness: null,
+    });
+    expect(mockGetSicDescription).not.toHaveBeenCalled();
+    expect(mockCacheSet).not.toHaveBeenCalled();
+  });
 });
