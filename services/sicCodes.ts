@@ -40,12 +40,19 @@ async function ensureSicCodesLoaded(): Promise<void> {
     sicMap = new Map(Object.entries(cached as Record<string, string>));
     return;
   }
-  const resp = await fetch(SIC_CODES_URL);
-  if (!resp.ok) {
+  let text: string;
+  try {
+    const resp = await fetch(SIC_CODES_URL);
+    if (!resp.ok) {
+      sicMap = new Map();
+      return;
+    }
+    text = await resp.text();
+  } catch {
+    // Network failure, DNS failure, timeout, etc. — degrade silently.
     sicMap = new Map();
     return;
   }
-  const text = await resp.text();
   sicMap = parseSicCsv(text);
   await cache.set(SIC_CACHE_KEY, Object.fromEntries(sicMap));
 }

@@ -62,4 +62,14 @@ describe('sicCodes', () => {
     expect(result).toBe('Information technology consultancy activities');
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  it('resolves to null instead of throwing when fetch itself rejects', async () => {
+    mockCacheGet.mockResolvedValue(undefined);
+    (global.fetch as jest.Mock).mockRejectedValue(new Error('network down'));
+
+    const { getSicDescription } = await import('./sicCodes.js');
+    const result = await getSicDescription('62020');
+
+    expect(result).toBeNull();
+  });
 });
