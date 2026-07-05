@@ -110,3 +110,8 @@ export interface SponsorNewsItem {
   summary: string;
   changeType: 'added' | 'revoked' | 'info' | string;
 }
+
+export interface CompanyLookupResult {
+  companiesHouseUrl: string | null;
+  natureOfBusiness: string | null;
+}
