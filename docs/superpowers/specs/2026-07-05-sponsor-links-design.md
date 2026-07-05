@@ -31,6 +31,17 @@ look anything up for.
   `find-and-update.company-information.service.gov.uk/company/{number}` link,
   and the SIC code description becomes the real `natureOfBusiness` value,
   replacing the hardcoded `'Unknown'`.
+- **SIC code descriptions.** The Companies House profile endpoint
+  (`GET /company/{number}`) only returns bare numeric `sic_codes` (e.g.
+  `"62020"`), not descriptions. Companies House's own GitHub org publishes
+  the official condensed SIC 2007 code → description mapping (731 codes) as
+  a plain CSV at
+  `https://raw.githubusercontent.com/companieshouse/sic-code-data/master/src/source_datafiles/condensed_sic_codes.csv`
+  (columns: `sic_code`, `sic_description`). This is fetched once and cached
+  indefinitely in Redis (it's a static reference table, not live data),
+  mirroring the existing lazy-load-and-cache pattern already used for the
+  sponsor register CSV. The first `sic_codes[0]` on a company maps through
+  this table to become `natureOfBusiness`.
 - **Cached in Redis per company, ~90 day TTL** (new key namespace
   `ch-lookup:v1:{name}`), using the existing `cache` service. Company details
   and SIC codes rarely change, and this keeps the live API call rare in
