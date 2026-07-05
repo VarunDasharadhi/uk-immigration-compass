@@ -12,6 +12,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import compression from 'compression';
 import * as aiService from './services/aiService.js';
+import * as companiesHouse from './services/companiesHouse.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -113,6 +114,20 @@ app.get('/api/sponsor-news', async (_req, res) => {
   } catch (err) {
     console.error('[/api/sponsor-news]', err);
     res.status(500).json({ error: 'Something went wrong fetching sponsor news.' });
+  }
+});
+
+app.get('/api/company-lookup', async (req, res) => {
+  const companyName = String(req.query.companyName || '').trim();
+  if (!companyName) {
+    return res.status(400).json({ error: 'companyName query param is required' });
+  }
+  try {
+    const data = await companiesHouse.lookupCompany(companyName);
+    res.json(data);
+  } catch (err) {
+    console.error('[/api/company-lookup]', err);
+    res.json({ companiesHouseUrl: null, natureOfBusiness: null });
   }
 });
 
