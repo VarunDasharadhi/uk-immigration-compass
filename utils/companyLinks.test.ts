@@ -1,7 +1,7 @@
 import { buildCompanyDetailsLinks, buildOpenRolesLinks } from './companyLinks';
 
 describe('buildCompanyDetailsLinks', () => {
-  it('returns Google, LinkedIn, Facebook, and Companies House links with the company name encoded', () => {
+  it('returns Google, LinkedIn, Facebook, and GOV.UK links with the company name encoded', () => {
     const links = buildCompanyDetailsLinks('Acme Solutions Ltd');
     const byLabel = Object.fromEntries(links.map(l => [l.label, l.url]));
 
@@ -11,7 +11,7 @@ describe('buildCompanyDetailsLinks', () => {
       'https://www.linkedin.com/search/results/companies/?keywords=Acme%20Solutions%20Ltd'
     );
     expect(byLabel['Facebook']).toBe('https://www.facebook.com/search/top?q=Acme%20Solutions%20Ltd');
-    expect(byLabel['Companies House']).toBe(
+    expect(byLabel['GOV.UK']).toBe(
       'https://find-and-update.company-information.service.gov.uk/search/companies?q=Acme%20Solutions%20Ltd'
     );
   });

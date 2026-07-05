@@ -53,7 +53,7 @@ export const SponsorChecker: React.FC = () => {
     const links = buildCompanyDetailsLinks(result!.companyName);
     if (!companyLookup?.companiesHouseUrl) return links;
     return links.map(link =>
-      link.label === 'Companies House' ? { ...link, url: companyLookup.companiesHouseUrl! } : link
+      link.label === 'GOV.UK' ? { ...link, url: companyLookup.companiesHouseUrl! } : link
     );
   }, [result, isConfirmedResult, companyLookup]);
 
@@ -167,15 +167,18 @@ export const SponsorChecker: React.FC = () => {
               </div>
 
               <div className="p-8 pt-4">
-                {/* Status Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden mb-8">
-                  <div className="p-4 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 dark:bg-slate-800 dark:border-slate-700">
-                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Company</span>
-                    <span className="font-semibold text-slate-900 dark:text-slate-100">{result.companyName}</span>
-                  </div>
+                {/* Status Row — company name is already shown in the heading
+                    above, so this only needs to add Location and Rating. */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden mb-8">
                   <div className="p-4 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 dark:bg-slate-800 dark:border-slate-700">
                     <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Location</span>
-                    <span className="font-semibold text-slate-900 dark:text-slate-100">{result.town}</span>
+                    {/* The town is already in the heading above, so this
+                        swaps in the full registered office address from
+                        Companies House once resolved, rather than repeating
+                        the same town twice. */}
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">
+                      {companyLookup?.registeredOfficeAddress || result.town}
+                    </span>
                   </div>
                   <div className="p-4 bg-slate-50 dark:bg-slate-800">
                     <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Rating</span>
@@ -195,18 +198,34 @@ export const SponsorChecker: React.FC = () => {
                   </div>
                   <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
                     <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Routes</span>
-                    <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{result.routes?.length ? result.routes.join(', ') : 'Unknown'}</span>
+                    {result.routes?.length ? (
+                      <ul className="list-disc pl-4 space-y-0.5 font-semibold text-slate-900 dark:text-slate-100 text-sm">
+                        {result.routes.map((route) => (
+                          <li key={route}>{route}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">Unknown</span>
+                    )}
                   </div>
                 </div>
 
-                {/* Nature of Business */}
+                {/* Nature of Business — Companies House allows up to 4 SIC
+                    codes per company, so this renders every one it resolved,
+                    not just the primary code. */}
                 <div className="mb-8">
                   <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3">Nature of business</h4>
                   <div className="p-4 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-medium dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                     {companyLookupLoading && !companyLookup ? (
                       <span className="inline-block h-4 w-40 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                    ) : companyLookup?.natureOfBusiness?.length ? (
+                      <ul className="list-disc pl-4 space-y-1">
+                        {companyLookup.natureOfBusiness.map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
                     ) : (
-                      companyLookup?.natureOfBusiness || result.natureOfBusiness || 'Information unavailable'
+                      result.natureOfBusiness || 'Information unavailable'
                     )}
                   </div>
                 </div>

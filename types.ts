@@ -113,5 +113,12 @@ export interface SponsorNewsItem {
 
 export interface CompanyLookupResult {
   companiesHouseUrl: string | null;
-  natureOfBusiness: string | null;
+  // Companies House allows up to 4 SIC codes per company; this holds every
+  // description that resolved, in the order Companies House returned them
+  // (primary code first). Null when none resolved.
+  natureOfBusiness: string[] | null;
+  // Pre-formatted registered office address from Companies House (street,
+  // locality, postcode), more specific than the sponsor register's bare
+  // town name. Null when there's no confident Companies House match.
+  registeredOfficeAddress: string | null;
 }

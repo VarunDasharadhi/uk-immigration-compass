@@ -14,10 +14,18 @@ import type { CompanyLookupResult } from '../types.js';
 
 const getApiKey = () => process.env.COMPANIES_HOUSE_API_KEY || '';
 
-const CH_LOOKUP_CACHE_VERSION = 'v1';
+// v2: natureOfBusiness changed from a single string to a string[] (a company
+// can have up to 4 SIC codes). v3: added registeredOfficeAddress. Bumped on
+// every shape change so old cache entries are never served back into code
+// that expects a newer shape.
+const CH_LOOKUP_CACHE_VERSION = 'v3';
 const CH_LOOKUP_TTL_MS = 90 * 24 * 60 * 60 * 1000; // 90 days — company details rarely change
 
-const NO_MATCH: CompanyLookupResult = { companiesHouseUrl: null, natureOfBusiness: null };
+const NO_MATCH: CompanyLookupResult = {
+  companiesHouseUrl: null,
+  natureOfBusiness: null,
+  registeredOfficeAddress: null,
+};
 
 interface ChSearchItem {
   title: string;
@@ -28,8 +36,31 @@ interface ChSearchResponse {
   items?: ChSearchItem[];
 }
 
+interface ChAddress {
+  address_line_1?: string;
+  address_line_2?: string;
+  locality?: string;
+  region?: string;
+  postal_code?: string;
+  country?: string;
+}
+
 interface ChProfile {
   sic_codes?: string[];
+  registered_office_address?: ChAddress;
+}
+
+function formatAddress(address: ChAddress | undefined): string | null {
+  if (!address) return null;
+  const parts = [
+    address.address_line_1,
+    address.address_line_2,
+    address.locality,
+    address.region,
+    address.postal_code,
+    address.country,
+  ].filter((part): part is string => Boolean(part && part.trim()));
+  return parts.length > 0 ? parts.join(', ') : null;
 }
 
 function authHeader(): string {
@@ -96,12 +127,17 @@ export async function lookupCompany(companyName: string): Promise<CompanyLookupR
     console.error('[companiesHouse] profile fetch failed:', err);
     profileFetchFailed = true;
   }
-  const sicCode = profile?.sic_codes?.[0];
-  const natureOfBusiness = sicCode ? await getSicDescription(sicCode) : null;
+  const sicCodes = profile?.sic_codes || [];
+  const descriptions = (await Promise.all(sicCodes.map(code => getSicDescription(code)))).filter(
+    (d): d is string => d !== null
+  );
+  const natureOfBusiness = descriptions.length > 0 ? descriptions : null;
+  const registeredOfficeAddress = formatAddress(profile?.registered_office_address);
 
   const result: CompanyLookupResult = {
     companiesHouseUrl: `https://find-and-update.company-information.service.gov.uk/company/${match.company_number}`,
     natureOfBusiness,
+    registeredOfficeAddress,
   };
   if (!profileFetchFailed) {
     await cache.set(cacheKey, result);

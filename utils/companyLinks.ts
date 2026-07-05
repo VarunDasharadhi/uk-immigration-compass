@@ -20,7 +20,10 @@ export function buildCompanyDetailsLinks(companyName: string): CompanyLink[] {
     { label: 'LinkedIn', url: `https://www.linkedin.com/search/results/companies/?keywords=${name}` },
     { label: 'Facebook', url: `https://www.facebook.com/search/top?q=${name}` },
     {
-      label: 'Companies House',
+      // Labelled "GOV.UK" rather than "Companies House" — more recognisable
+      // to laypeople, even though the link itself is the Companies House
+      // register (a GOV.UK service).
+      label: 'GOV.UK',
       url: `https://find-and-update.company-information.service.gov.uk/search/companies?q=${name}`,
     },
   ];

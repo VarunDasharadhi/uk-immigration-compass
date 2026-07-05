@@ -62,10 +62,39 @@ export const SimplifierTool: React.FC = () => {
           </div>
         </div>
 
-        {/* Output Wrapper */}
-        <div className="relative flex flex-col h-full bg-slate-900 rounded-3xl shadow-xl overflow-hidden">
-             {/* Action Button Centered on Desktop between cols */}
-             <div className="absolute top-1/2 -left-4 -translate-y-1/2 z-10 hidden lg:block">
+        {/* Mobile translate button — a normal block between the stacked
+            panels (not absolutely positioned over the output), so it never
+            overlaps translated text no matter how long the output gets. */}
+        <div className="lg:hidden flex justify-center">
+            <button
+                onClick={handleSimplify}
+                disabled={loading || !input}
+                className="bg-pink-600 hover:bg-pink-500 disabled:bg-slate-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all"
+            >
+                {loading ? <Wand2 className="w-6 h-6 animate-spin" /> : <ArrowRight className="w-6 h-6 rotate-90" />}
+            </button>
+        </div>
+
+        {/* Output Wrapper — the button lives in this outer `relative` div,
+            NOT inside the rounded/`overflow-hidden` card below it. That card
+            clips to its rounded corners, and the button sits right at the
+            top-left corner (anchored to the header row), so if it were a
+            child of the clipped card its own corner curve would chop the
+            button unevenly instead of the clean straight-edge cut it got
+            back when the button sat at the panel's vertical center. */}
+        <div className="relative flex flex-col h-full">
+             {/* Action Button Centered on Desktop between cols — anchored to
+                 the header row's height (fixed), not the whole panel's
+                 height (which stays constant while output text grows), so
+                 it can never end up overlapping long translated output.
+                 -left-10 centers the button's own center (not its edge) in
+                 the 32px (gap-8) column gap: the button is 48px wide, wider
+                 than the gap, so it necessarily pokes ~8px into each
+                 panel's padding either side — harmless empty space — rather
+                 than the previous offset, which put the button's *left*
+                 edge at the gap's center and pushed it 24px further right,
+                 straight into the "Plain English" label. */}
+             <div className="absolute top-6 -left-10 -translate-y-1/2 z-10 hidden lg:block">
                  <button
                     onClick={handleSimplify}
                     disabled={loading || !input}
@@ -75,45 +104,36 @@ export const SimplifierTool: React.FC = () => {
                 </button>
              </div>
 
-             {/* Mobile Button */}
-             <div className="lg:hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                 <button
-                    onClick={handleSimplify}
-                    disabled={loading || !input}
-                    className="bg-pink-600 hover:bg-pink-500 disabled:bg-slate-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all"
-                >
-                    {loading ? <Wand2 className="w-6 h-6 animate-spin" /> : <ArrowRight className="w-6 h-6" />}
-                </button>
-             </div>
+            <div className="flex flex-col h-full bg-slate-900 rounded-3xl shadow-xl overflow-hidden">
+                <div className="bg-slate-800/50 border-b border-slate-700/50 px-6 py-4 flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-2">
+                        <Wand2 className="w-4 h-4" /> Plain English
+                    </label>
+                    {output && (
+                        <button
+                            onClick={handleCopy}
+                            className="text-slate-400 hover:text-white transition-colors flex items-center gap-1 text-xs font-medium"
+                        >
+                            {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                            {copied ? 'Copied' : 'Copy'}
+                        </button>
+                    )}
+                </div>
 
-            <div className="bg-slate-800/50 border-b border-slate-700/50 px-6 py-4 flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-2">
-                    <Wand2 className="w-4 h-4" /> Plain English
-                </label>
-                {output && (
-                    <button 
-                        onClick={handleCopy}
-                        className="text-slate-400 hover:text-white transition-colors flex items-center gap-1 text-xs font-medium"
-                    >
-                        {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                        {copied ? 'Copied' : 'Copy'}
-                    </button>
-                )}
-            </div>
-            
-            <div className="flex-grow p-8 overflow-y-auto custom-scrollbar">
-                {output ? (
-                    <div className="prose prose-invert max-w-none">
-                        <p className="text-slate-200 text-lg leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-500">
-                            {output}
-                        </p>
-                    </div>
-                ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-600 space-y-4 opacity-50">
-                        <Wand2 className="w-12 h-12" />
-                        <p className="text-sm">Translation will appear here...</p>
-                    </div>
-                )}
+                <div className="flex-grow p-8 overflow-y-auto custom-scrollbar">
+                    {output ? (
+                        <div className="prose prose-invert max-w-none">
+                            <p className="text-slate-200 text-lg leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                {output}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-slate-600 space-y-4 opacity-50">
+                            <Wand2 className="w-12 h-12" />
+                            <p className="text-sm">Translation will appear here...</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
       </div>
