@@ -42,7 +42,8 @@ interface OrMessage {
 async function callOpenRouter(
   messages: OrMessage[],
   model?: string,
-  maxTokens: number = 8192
+  maxTokens: number = 8192,
+  temperature?: number
 ): Promise<{ text: string; annotations: any[] }> {
   const apiKey = getApiKey();
   const resolvedModel = model ?? getOnlineModel();
@@ -63,7 +64,12 @@ async function callOpenRouter(
         'HTTP-Referer': 'http://localhost:10000',
         'X-Title': 'UK Immigration Compass',
       },
-      body: JSON.stringify({ model: resolvedModel, messages, max_tokens: maxTokens }),
+      body: JSON.stringify({
+        model: resolvedModel,
+        messages,
+        max_tokens: maxTokens,
+        ...(temperature !== undefined ? { temperature } : {}),
+      }),
     });
 
     if (!resp.ok) {
@@ -553,7 +559,7 @@ For EACH update use this EXACT format:
 
 ${UPDATE_ITEM_FORMAT}`,
 
-  // Used once to seed the archive for a category the daily search hasn't
+  // Used to seed the archive for a category the daily search hasn't
   // surfaced anything for yet (e.g. no Family news in the last 30-60 days) —
   // looks back further so a quiet category still gets real past coverage
   // instead of sitting empty.
@@ -566,6 +572,26 @@ Find up to 4 genuinely distinct, real changes. If fewer than 4 real changes exis
 For EACH update use this EXACT format:
 
 ${UPDATE_ITEM_FORMAT}`,
+
+  // Standalone classifier call, not the generation call — asking the search/
+  // generation prompt to self-censor against a known-titles list was tested
+  // live and failed (it re-generated a 4th paraphrase of an already-archived
+  // story despite an explicit exclusion list). A narrow, single-purpose
+  // judgment call on a candidate + existing titles is far more reliable.
+  duplicateCheck: (candidateTitle: string, existingTitles: string[]) => `You are checking for duplicate news coverage of the same real-world policy event.
+
+CANDIDATE HEADLINE: "${candidateTitle}"
+
+EXISTING HEADLINES ALREADY IN THE ARCHIVE:
+${existingTitles.map(t => `- ${t}`).join('\n')}
+
+Does the candidate headline describe the SAME underlying real-world policy change as any existing headline, even worded completely differently, covering the same policy from a different angle (e.g. the announcement vs. the guidance/instructions that implement it vs. the legal instrument vs. a minister's statement about it)? Treat all of these as ONE event, not separate news.
+
+Example: "Skilled Worker salary threshold raised to GBP 41,700" and "Home Office publishes updated sponsor guidance on new salary threshold" are the SAME event (one is the announcement, one is the implementing guidance for that same change) -> DUPLICATE.
+
+Only answer NEW if the candidate is a genuinely different policy decision, not just a different document/angle covering the same decision.
+
+Answer with exactly one word: DUPLICATE or NEW. No explanation.`,
 
   simplify: (text: string) => `You are an expert translator of legal jargon to plain English.
 Rewrite the following text so that a non-native English speaker or someone without a law degree can easily understand it.
@@ -600,18 +626,57 @@ const ARCHIVE_MAX_AGE_MS = 370 * 24 * 60 * 60 * 1000;
 // homepage feed when today's fresh batch alone doesn't have that many.
 const CATEGORY_DISPLAY_COUNT = 4;
 
+// Asks a narrow, single-purpose classifier call whether a candidate headline
+// covers the same real-world event as one already archived (same category
+// only, to keep the comparison relevant and the call count bounded). Catches
+// what newsDedupeKey's lexical key can't: independent AI calls (daily refresh
+// vs. category backfill) phrasing the identical policy change differently
+// (e.g. "Visa Brake Imposed on..." vs "Suspension of Visa Routes for...").
+// Fails open (treats as not-a-duplicate) so a classifier hiccup never costs a
+// real item.
+async function isDuplicateEvent(candidateTitle: string, existingTitles: string[]): Promise<boolean> {
+  if (existingTitles.length === 0) return false;
+  try {
+    // temperature: 0 — this is a yes/no judgment call, not creative
+    // generation. Left at the default (sampling) temperature, the same
+    // candidate/existing pair was observed to flip between DUPLICATE and NEW
+    // across runs.
+    const { text } = await callOpenRouter(
+      [{ role: 'user', content: PROMPTS.duplicateCheck(candidateTitle, existingTitles) }],
+      getBaseModel(),
+      10,
+      0
+    );
+    return text.trim().toUpperCase().startsWith('DUPLICATE');
+  } catch (err) {
+    console.error('[aiService] Duplicate check failed, keeping item:', err);
+    return false;
+  }
+}
+
 // Rebuilds both the archive (merge + prune) and the homepage display cache
 // from a fresh set of parsed items. Shared by the main daily refresh and the
 // thin-category backfill below, which both need to do this same bookkeeping.
 async function mergeIntoArchiveAndRebuildDisplay(freshItems: NewsItem[], sources: any[]): Promise<UpdatesResponse> {
   const archive: NewsItem[] = (await cache.get('updates-archive')) || [];
   const existingKeys = new Set(archive.map(a => newsDedupeKey(a.title)));
+
+  // Lexical pass first (cheap, catches literal repeats), then a semantic
+  // pass against same-category archive titles. Sequential, not parallel: two
+  // duplicate items can arrive in the very same AI response (seen live —
+  // "Visa Brake Imposed on Student Visas for Four Countries" and "Visa Brake
+  // Imposed on Four Countries Due to Asylum Claims" both came back from one
+  // categoryBackfill call for Student). Checking in parallel against a fixed
+  // archive snapshot misses that, since neither existed in the archive yet —
+  // only comparing each candidate against the growing archive, one at a
+  // time, catches duplicates within the same batch too.
   for (const item of freshItems) {
     const key = newsDedupeKey(item.title);
-    if (!existingKeys.has(key)) {
-      archive.push(item);
-      existingKeys.add(key);
-    }
+    if (existingKeys.has(key)) continue;
+    const sameCategoryTitles = archive.filter(a => a.category === item.category).map(a => a.title);
+    if (await isDuplicateEvent(item.title, sameCategoryTitles)) continue;
+    archive.push(item);
+    existingKeys.add(key);
   }
 
   const cutoff = Date.now() - ARCHIVE_MAX_AGE_MS;
