@@ -44,13 +44,15 @@ async function ensureSicCodesLoaded(): Promise<void> {
   try {
     const resp = await fetch(SIC_CODES_URL);
     if (!resp.ok) {
-      sicMap = new Map();
+      // Leave sicMap as null (not an empty Map) so the next call retries
+      // the fetch instead of permanently latching a false negative.
       return;
     }
     text = await resp.text();
   } catch {
-    // Network failure, DNS failure, timeout, etc. — degrade silently.
-    sicMap = new Map();
+    // Network failure, DNS failure, timeout, etc. — degrade silently, but
+    // leave sicMap as null so a later call can retry once the network
+    // recovers, rather than latching an empty table forever.
     return;
   }
   sicMap = parseSicCsv(text);

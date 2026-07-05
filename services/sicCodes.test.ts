@@ -72,4 +72,19 @@ describe('sicCodes', () => {
 
     expect(result).toBeNull();
   });
+
+  it('retries the fetch on a later call after a prior failure, instead of latching an empty table', async () => {
+    mockCacheGet.mockResolvedValue(undefined);
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('network down'));
+
+    const { getSicDescription } = await import('./sicCodes.js');
+    const firstResult = await getSicDescription('62020');
+    expect(firstResult).toBeNull();
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, text: async () => SAMPLE_CSV });
+    const secondResult = await getSicDescription('62020');
+
+    expect(secondResult).toBe('Information technology consultancy activities');
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
 });

@@ -15,6 +15,8 @@ export const SponsorChecker: React.FC = () => {
   const [companyLookup, setCompanyLookup] = useState<CompanyLookupResult | null>(null);
   const [companyLookupLoading, setCompanyLookupLoading] = useState(false);
 
+  const isConfirmedResult = result?.status === 'Licensed' || result?.status === 'Revoked';
+
   useEffect(() => {
     const loadNews = async () => {
       try {
@@ -31,7 +33,7 @@ export const SponsorChecker: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!result || (result.status !== 'Licensed' && result.status !== 'Revoked')) {
+    if (!isConfirmedResult) {
       setCompanyLookup(null);
       setCompanyLookupLoading(false);
       return;
@@ -39,26 +41,26 @@ export const SponsorChecker: React.FC = () => {
     let cancelled = false;
     setCompanyLookup(null);
     setCompanyLookupLoading(true);
-    apiClient.lookupCompany(result.companyName)
+    apiClient.lookupCompany(result!.companyName)
       .then((data) => { if (!cancelled) setCompanyLookup(data); })
       .catch(() => { if (!cancelled) setCompanyLookup(null); })
       .finally(() => { if (!cancelled) setCompanyLookupLoading(false); });
     return () => { cancelled = true; };
-  }, [result]);
+  }, [result, isConfirmedResult]);
 
   const companyDetailsLinks = useMemo(() => {
-    if (!result || (result.status !== 'Licensed' && result.status !== 'Revoked')) return [];
-    const links = buildCompanyDetailsLinks(result.companyName);
+    if (!isConfirmedResult) return [];
+    const links = buildCompanyDetailsLinks(result!.companyName);
     if (!companyLookup?.companiesHouseUrl) return links;
     return links.map(link =>
       link.label === 'Companies House' ? { ...link, url: companyLookup.companiesHouseUrl! } : link
     );
-  }, [result, companyLookup]);
+  }, [result, isConfirmedResult, companyLookup]);
 
   const openRolesLinks = useMemo(() => {
-    if (!result || (result.status !== 'Licensed' && result.status !== 'Revoked')) return [];
-    return buildOpenRolesLinks(result.companyName);
-  }, [result]);
+    if (!isConfirmedResult) return [];
+    return buildOpenRolesLinks(result!.companyName);
+  }, [result, isConfirmedResult]);
 
   const runSearch = async (name: string) => {
     if (!name.trim()) return;
@@ -213,7 +215,7 @@ export const SponsorChecker: React.FC = () => {
                     URLs; the Companies House entry swaps in a real profile
                     link once /api/company-lookup resolves a confident match.
                     Only for confirmed results — not the Not Found / candidate-picker state. */}
-                {(result.status === 'Licensed' || result.status === 'Revoked') && (
+                {isConfirmedResult && (
                   <div className="mb-8">
                     <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
                       <ExternalLink className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
