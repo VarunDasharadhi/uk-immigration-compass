@@ -265,7 +265,7 @@ const HeroSection: FC<HeroSectionProps> = ({ onExploreClick }) => {
         </svg>
       </div>
       <div
-        className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"
+        className="absolute inset-0 bg-[url('/textures/cubes.png')] opacity-10 pointer-events-none"
         aria-hidden="true"
       />
 
