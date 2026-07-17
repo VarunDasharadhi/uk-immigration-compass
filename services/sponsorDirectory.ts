@@ -13,7 +13,12 @@ import type { RegisterEntry } from './aiService.js';
 import { canonicalName } from '../utils/canonicalName.js';
 import { SIC_SECTION_LABELS, SicSectionId } from './sicSections.js';
 import type { SponsorDirectoryEntry, SponsorDirectoryFacet, SponsorDirectoryResponse } from '../types.js';
-import industryMapArtifact from '../data/sponsor-industry-map.json';
+// Requires the explicit "type: json" import attribute: Vercel's Node.js
+// runtime executes this as native ESM (package.json has "type": "module"),
+// and Node throws ERR_IMPORT_ATTRIBUTE_MISSING on an un-attributed JSON
+// import under native ESM. tsx's esbuild-based dev loader tolerates a plain
+// JSON import without complaint, which is why this only broke in production.
+import industryMapArtifact from '../data/sponsor-industry-map.json' with { type: 'json' };
 
 const UNKNOWN_INDUSTRY = 'unknown';
 const ALL_SECTION_IDS = Object.keys(SIC_SECTION_LABELS) as SicSectionId[];
