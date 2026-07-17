@@ -1,0 +1,6 @@
+# Every file directly under api/ becomes its own Vercel Serverless Function
+# (filesystem-based routing, zero-config). Jest test files live alongside
+# their source files by convention, so without this they get deployed as
+# functions too, silently eating into the Hobby plan's 12-function cap.
+**/*.test.ts
+**/*.test.tsx
