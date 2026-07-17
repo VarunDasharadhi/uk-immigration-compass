@@ -1,5 +1,5 @@
 // API Client Service - Calls backend endpoints from frontend
-import { UpdatesResponse, NewsItem, SponsorCheckResult, SponsorNewsItem, PetitionsResult, CompanyLookupResult } from '../types';
+import { UpdatesResponse, NewsItem, SponsorCheckResult, SponsorNewsItem, PetitionsResult, CompanyLookupResult, SponsorDirectoryResponse } from '../types';
 
 // In the browser, use Vite's import.meta.env (not process.env which crashes at runtime).
 // In Node (server-side imports if ever needed), fall back to process.env.
@@ -151,6 +151,23 @@ class ApiClient {
       { method: 'GET' },
       `company-lookup:${companyName}`
     );
+  }
+
+  /**
+   * Browse the full sponsor register, filtered by industry/route/name.
+   * Keys sort so param order never fragments the 5-minute response cache.
+   */
+  async fetchSponsorDirectory(params: {
+    industry?: string;
+    route?: string;
+    q?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<SponsorDirectoryResponse> {
+    const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== '');
+    entries.sort(([a], [b]) => a.localeCompare(b));
+    const qs = new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString();
+    return this.fetch<SponsorDirectoryResponse>(`/api/sponsor-directory?${qs}`, { method: 'GET' }, `sponsor-directory:${qs}`);
   }
 
   /**

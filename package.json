@@ -11,6 +11,7 @@
     "server": "tsx server.js",
     "server:dev": "nodemon --exec tsx server.js",
     "start": "tsx server.js",
+    "build:industry-map": "tsx scripts/build-industry-map.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -41,6 +42,7 @@
     "@types/node": "^20.10.6",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
+    "@types/unzipper": "^0.10.11",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",
     "@vercel/node": "^5.8.12",
@@ -57,6 +59,7 @@
     "terser": "^5.46.2",
     "ts-jest": "^29.1.1",
     "typescript": "^5.3.3",
+    "unzipper": "^0.12.5",
     "vite": "^5.0.8"
   },
   "engines": {

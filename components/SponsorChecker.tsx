@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { apiClient } from '../services/apiClient';
 import { SponsorCheckResult, SponsorNewsItem } from '../types';
-import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight, ExternalLink } from 'lucide-react';
+import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight, ExternalLink, ListFilter } from 'lucide-react';
 import { buildCompanyDetailsLinks, buildOpenRolesLinks } from '../utils/companyLinks';
 import { CompanyLookupResult } from '../types';
+import { SponsorDirectory } from './SponsorDirectory';
 
 export const SponsorChecker: React.FC = () => {
+  const [view, setView] = useState<'check' | 'browse'>('check');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SponsorCheckResult | null>(null);
@@ -90,6 +92,12 @@ export const SponsorChecker: React.FC = () => {
     runSearch(candidateName);
   };
 
+  const handleDirectorySelect = (companyName: string) => {
+    setView('check');
+    setSearchTerm(companyName);
+    runSearch(companyName);
+  };
+
   return (
     <div className="max-w-[1600px] mx-auto p-4 md:p-8">
       {/* Header */}
@@ -105,6 +113,43 @@ export const SponsorChecker: React.FC = () => {
         </p>
       </div>
 
+      {/* Check / Browse toggle */}
+      <div className="flex justify-center mb-8">
+        <div role="tablist" className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800 gap-1">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === 'check'}
+            onClick={() => setView('check')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              view === 'check'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+            }`}
+          >
+            <Search className="w-4 h-4" />
+            Check a company
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === 'browse'}
+            onClick={() => setView('browse')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              view === 'browse'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+            }`}
+          >
+            <ListFilter className="w-4 h-4" />
+            Browse sponsors
+          </button>
+        </div>
+      </div>
+
+      {view === 'browse' && <SponsorDirectory onSelectCompany={handleDirectorySelect} />}
+
+      {view === 'check' && (
       <div className="grid lg:grid-cols-3 gap-8 items-start">
         {/* Left Column: Search & Result */}
         <div className="lg:col-span-2 space-y-8">
@@ -401,6 +446,7 @@ export const SponsorChecker: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };

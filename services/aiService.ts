@@ -8,6 +8,9 @@ import { NewsItem, UpdatesResponse, SponsorCheckResult, SponsorNewsItem, Sponsor
 import * as cache from './cache.js';
 import { stripMarkdown } from '../utils/text.js';
 import { parseUpdatesText, newsDedupeKey, NEWS_CATEGORIES } from '../utils/newsParsing.js';
+import { canonicalName } from '../utils/canonicalName.js';
+
+export { canonicalName };
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const CALL_TIMEOUT_MS = 45_000;
@@ -95,7 +98,7 @@ function annotationsToSources(annotations: any[]): { web?: { uri?: string; title
 
 // ─── GOV.UK sponsor register (CSV-based, authoritative) ──────────────────────
 
-interface RegisterEntry {
+export interface RegisterEntry {
   name: string;
   town: string;
   typeRating: string;
@@ -104,13 +107,22 @@ interface RegisterEntry {
 
 const workerRegister: RegisterEntry[] = [];
 
+// Bumped every time refreshSponsorRegister() repopulates workerRegister, so
+// consumers that build a derived view of the register (e.g. the sponsor
+// directory) know when to rebuild rather than serving a stale snapshot.
+let registerVersion = 0;
+
+export function getRegisterSnapshot(): { entries: readonly RegisterEntry[]; version: number } {
+  return { entries: workerRegister, version: registerVersion };
+}
+
 // Companies whose latest historical-ledger event is 'removed' — i.e. no
 // longer licensed. Built from the same pre-fetched ledger data as
 // findExternalHistory, so a half-word search for a revoked company can
 // surface it as a candidate too, not just currently-active ones.
 const revokedRegister: RegisterEntry[] = [];
 
-function parseCsvLine(line: string): string[] {
+export function parseCsvLine(line: string): string[] {
   const cells: string[] = [];
   let inQuotes = false;
   let cell = '';
@@ -130,7 +142,7 @@ function parseCsvLine(line: string): string[] {
   return cells;
 }
 
-async function fetchRegisterCsvUrl(): Promise<string | null> {
+export async function fetchRegisterCsvUrl(): Promise<string | null> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 15_000);
   try {
@@ -200,35 +212,11 @@ export async function refreshSponsorRegister(): Promise<void> {
         route: routeIdx >= 0 ? row[routeIdx]?.trim() ?? '' : '',
       });
     }
+    registerVersion++;
     console.log(`[Register] Loaded ${workerRegister.length} licensed sponsors`);
   } catch (err) {
     console.error('[Register] Failed to load:', err);
   }
-}
-
-function stripLegalSuffix(s: string): string {
-  return s
-    .replace(/\b(ltd|limited|llp|plc|inc|corp|group|holdings?|uk|international|services?|solutions?|consulting|consultants?|consultancy)\b/gi, '')
-    .replace(/\s+/g, ' ').trim();
-}
-
-// Lowercase, strip punctuation (&, ., ', -, etc.) and collapse whitespace, so
-// "M&S", "M & S" and "M and S"-style variants line up for comparison.
-function normalizeName(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
-}
-
-// Pure function of `s`, called on every register/ledger entry across up to 4
-// candidate-search tiers per query — memoized so a 142k-row scan doesn't
-// recompute the same regex work 4x over. Bounded by register size (~160k
-// entries total across current + revoked pools), not by query volume.
-const canonicalNameCache = new Map<string, string>();
-export function canonicalName(s: string): string {
-  const cached = canonicalNameCache.get(s);
-  if (cached !== undefined) return cached;
-  const result = stripLegalSuffix(normalizeName(s));
-  canonicalNameCache.set(s, result);
-  return result;
 }
 
 // Substring check anchored to word boundaries, so "tesco" doesn't match inside

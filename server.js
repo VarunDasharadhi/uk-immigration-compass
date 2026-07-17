@@ -13,6 +13,7 @@ import { fileURLToPath } from 'url';
 import compression from 'compression';
 import * as aiService from './services/aiService.js';
 import * as companiesHouse from './services/companiesHouse.js';
+import { queryDirectory, isValidIndustryId } from './services/sponsorDirectory.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -114,6 +115,32 @@ app.get('/api/sponsor-news', async (_req, res) => {
   } catch (err) {
     console.error('[/api/sponsor-news]', err);
     res.status(500).json({ error: 'Something went wrong fetching sponsor news.' });
+  }
+});
+
+app.get('/api/sponsor-directory', async (req, res) => {
+  const industry = String(req.query.industry || 'all').trim();
+  if (!isValidIndustryId(industry)) {
+    return res.status(400).json({ error: 'Invalid industry parameter.' });
+  }
+  const route = req.query.route ? String(req.query.route).trim() : 'all';
+  const q = String(req.query.q || '').trim().slice(0, 100);
+  const page = parseInt(String(req.query.page || '1'), 10);
+  if (!Number.isFinite(page) || page < 1) {
+    return res.status(400).json({ error: 'Invalid page parameter.' });
+  }
+  const rawPageSize = parseInt(String(req.query.pageSize || '24'), 10);
+  if (!Number.isFinite(rawPageSize) || rawPageSize < 1) {
+    return res.status(400).json({ error: 'Invalid pageSize parameter.' });
+  }
+  const pageSize = Math.min(rawPageSize, 100);
+  try {
+    await aiService.ensureSponsorDataLoaded();
+    const data = queryDirectory({ industry, route, q, page, pageSize });
+    res.json(data);
+  } catch (err) {
+    console.error('[/api/sponsor-directory]', err);
+    res.status(500).json({ error: 'Something went wrong loading the sponsor directory.' });
   }
 });
 

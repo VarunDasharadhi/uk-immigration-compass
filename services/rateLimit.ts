@@ -18,11 +18,22 @@ const redis = getRedisClient();
 // 20 requests per minute per IP is generous for a human using the search
 // UI, but bounds the cost/abuse surface of endpoints that call a paid AI
 // API or do CSV/register lookups per request.
-const limiter = redis
+const defaultLimiter = redis
   ? new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(20, '60 s'),
       prefix: 'ratelimit',
+    })
+  : null;
+
+// Looser limit for interactive browsing (pill clicks, debounced typing,
+// "Load more") that can legitimately fire more requests per minute than a
+// one-shot lookup, without doing any AI or per-company external calls.
+const browseLimiter = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(60, '60 s'),
+      prefix: 'ratelimit-browse',
     })
   : null;
 
@@ -31,7 +42,8 @@ export interface RateLimitResult {
   remaining: number;
 }
 
-export async function checkRateLimit(key: string): Promise<RateLimitResult> {
+export async function checkRateLimit(key: string, preset: 'default' | 'browse' = 'default'): Promise<RateLimitResult> {
+  const limiter = preset === 'browse' ? browseLimiter : defaultLimiter;
   if (!limiter) return { allowed: true, remaining: Infinity };
   const { success, remaining } = await limiter.limit(key);
   return { allowed: success, remaining };

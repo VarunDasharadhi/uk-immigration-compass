@@ -122,3 +122,33 @@ export interface CompanyLookupResult {
   // town name. Null when there's no confident Companies House match.
   registeredOfficeAddress: string | null;
 }
+
+export interface SponsorDirectoryEntry {
+  name: string;
+  town: string;
+  routes: string[];
+  rating: string;
+  // SIC 2007 section id (A-U), or 'unknown' when the company has no
+  // confident match in the offline Companies House industry map.
+  industry: string;
+  industryLabel: string;
+}
+
+export interface SponsorDirectoryFacet {
+  id: string;
+  label: string;
+  count: number;
+}
+
+export interface SponsorDirectoryResponse {
+  total: number;
+  page: number;
+  pageSize: number;
+  items: SponsorDirectoryEntry[];
+  industries: SponsorDirectoryFacet[];
+  routes: SponsorDirectoryFacet[];
+  // ISO timestamp the industry map was last built, so the UI can show
+  // "industry data as of <date>" and explain why very recent sponsors show
+  // as Unknown.
+  mapGeneratedAt: string;
+}
