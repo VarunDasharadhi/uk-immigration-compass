@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SponsorDirectory } from './SponsorDirectory';
+import { SponsorDirectory, clearSponsorDirectoryCache } from './SponsorDirectory';
 import { apiClient } from '../services/apiClient';
 
 jest.mock('../services/apiClient', () => ({
@@ -34,6 +34,7 @@ const SAMPLE_RESPONSE = {
 
 describe('SponsorDirectory', () => {
   beforeEach(() => {
+    clearSponsorDirectoryCache();
     jest.clearAllMocks();
     mockFetchSponsorDirectory.mockResolvedValue(SAMPLE_RESPONSE);
   });
