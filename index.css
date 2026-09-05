@@ -11,14 +11,14 @@ body {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #e0f2fe;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #7dd3fc;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #38bdf8;
 }
 .dark ::-webkit-scrollbar-track {
   background: #1e293b;
@@ -28,4 +28,114 @@ body {
 }
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+}
+
+/* ============================================
+   Ambient motion: waves, orbs, scroll reveal
+   ============================================ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f0f9ff;
+}
+.dark body {
+  background-color: #020617;
+}
+
+/* Each wave track is double the viewport width and holds a seamless
+   double-width wave, so translating by -50% loops without a seam. */
+.wave-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  animation: wave-drift linear infinite;
+  will-change: transform;
+}
+.wave-1 {
+  height: 100%;
+  animation-duration: 26s;
+}
+.wave-2 {
+  height: 82%;
+  animation-duration: 19s;
+  animation-direction: reverse;
+}
+.wave-3 {
+  height: 64%;
+  animation-duration: 14s;
+}
+@keyframes wave-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  will-change: transform;
+}
+.orb-1 {
+  width: 32rem;
+  height: 32rem;
+  top: -8rem;
+  left: -10rem;
+  animation: orb-drift-1 24s ease-in-out infinite alternate;
+}
+.orb-2 {
+  width: 26rem;
+  height: 26rem;
+  top: 30%;
+  right: -8rem;
+  animation: orb-drift-2 20s ease-in-out infinite alternate;
+}
+.orb-3 {
+  width: 24rem;
+  height: 24rem;
+  bottom: 18%;
+  left: 22%;
+  animation: orb-drift-3 28s ease-in-out infinite alternate;
+}
+@keyframes orb-drift-1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(7rem, 4rem) scale(1.15);
+  }
+}
+@keyframes orb-drift-2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-6rem, -5rem) scale(0.9);
+  }
+}
+@keyframes orb-drift-3 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(5rem, -4rem) scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .wave-track,
+  .orb {
+    animation: none !important;
+  }
 }

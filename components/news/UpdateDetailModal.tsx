@@ -84,7 +84,7 @@ export const UpdateDetailModal: React.FC<UpdateDetailModalProps> = ({ item, offi
                     href={primary.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-transform hover:-translate-y-0.5 shadow-lg shadow-slate-900/20 w-full"
+                    className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-semibold hover:from-blue-500 hover:to-cyan-400 transition-transform hover:-translate-y-0.5 shadow-lg shadow-blue-500/30 w-full"
                   >
                     <ExternalLink className="w-4 h-4" />
                     {primary.label}

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '../services/apiClient';
 import { SponsorDirectoryEntry, SponsorDirectoryFacet } from '../types';
 import { Search, Filter, AlertCircle, ChevronRight } from 'lucide-react';
+import { Reveal } from './Reveal';
 
 const PAGE_SIZE = 24;
 const DEBOUNCE_MS = 350;
@@ -121,7 +122,7 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
             onClick={() => setIndustry(f.id)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
               industry === f.id
-                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 dark:bg-slate-100 dark:text-slate-900 dark:shadow-black/40'
+                ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30'
                 : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:text-slate-200'
             }`}
           >
@@ -182,8 +183,8 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {items.map((item, i) => (
+              <Reveal key={`${item.name}-${i}`} delay={(i % 3) * 80}>
               <button
-                key={`${item.name}-${i}`}
                 type="button"
                 onClick={() => onSelectCompany(item.name)}
                 aria-label={`Check ${item.name}`}
@@ -223,6 +224,7 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
                   )}
                 </div>
               </button>
+              </Reveal>
             ))}
           </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, FC } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, FC } from 'react';
 import { createPortal } from 'react-dom';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
@@ -6,9 +6,8 @@ import {
   Newspaper,
   ScrollText,
   BookOpen,
-  Menu,
   X,
-  Landmark,
+  Compass,
   ArrowRight,
   ChevronRight,
   Building2,
@@ -28,6 +27,10 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsOfService } from './components/TermsOfService';
 import { UpdatesArchivePage } from './components/UpdatesArchivePage';
+import { AnimatedBackground } from './components/AnimatedBackground';
+import { Reveal } from './components/Reveal';
+import { HeroSkyline } from './components/HeroSkyline';
+import { setPageMeta } from './utils/seo';
 
 // ===================================================
 // CONSTANTS & CONFIGURATION
@@ -94,24 +97,24 @@ const NavItem: FC<NavItemProps> = ({ config, isActive, onClick }) => {
       onClick={onClick}
       aria-label={config.ariaLabel}
       aria-current={isActive ? 'page' : undefined}
-      className={`relative flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 text-sm font-medium whitespace-nowrap group
+      className={`relative shrink-0 flex items-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all duration-300 text-xs sm:text-sm font-medium whitespace-nowrap group
         ${
           isActive
-            ? 'text-blue-700 bg-blue-50 shadow-sm ring-1 ring-blue-200 dark:text-blue-300 dark:bg-blue-950/40 dark:ring-blue-800'
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
+            ? 'text-sky-200 bg-sky-400/10 shadow-sm ring-1 ring-sky-300/30'
+            : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
         }`}
     >
       <Icon
         className={`w-4 h-4 transition-colors ${
           isActive
-            ? 'text-blue-600 dark:text-blue-400'
-            : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300'
+            ? 'text-sky-300'
+            : 'text-slate-500 group-hover:text-slate-300'
         }`}
       />
       {config.label}
       {isActive && (
         <span
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-600 dark:bg-blue-400 rounded-full mb-1.5"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-sky-300 rounded-full mb-1.5"
           aria-hidden="true"
         />
       )}
@@ -125,7 +128,7 @@ const ThemeToggle: FC = () => {
     <button
       onClick={toggleTheme}
       aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="p-2.5 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors"
+      className="p-2.5 rounded-full text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-colors"
     >
       {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
     </button>
@@ -135,27 +138,19 @@ const ThemeToggle: FC = () => {
 interface HeaderProps {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
-  mobileMenuOpen: boolean;
-  onMobileMenuToggle: (open: boolean) => void;
 }
 
-const Header: FC<HeaderProps> = ({
-  activeTab,
-  onTabChange,
-  mobileMenuOpen,
-  onMobileMenuToggle,
-}) => {
+const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
   const handleNavClick = useCallback(
     (tab: Tab) => {
       onTabChange(tab);
-      onMobileMenuToggle(false);
     },
-    [onTabChange, onMobileMenuToggle]
+    [onTabChange]
   );
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:border-slate-800/80 dark:bg-slate-900/90 dark:supports-[backdrop-filter]:bg-slate-900/60"
+      className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-xl supports-[backdrop-filter]:bg-slate-900/60"
       role="banner"
     >
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center justify-between">
@@ -165,14 +160,14 @@ const Header: FC<HeaderProps> = ({
           className="flex items-center gap-3 cursor-pointer group hover:opacity-80 transition-opacity"
           aria-label="Go to home"
         >
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-700 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/10 dark:shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
-            <Landmark className="text-white w-5 h-5" />
+          <div className="w-10 h-10 bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/40 ring-1 ring-white/25 group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300">
+            <Compass className="text-white w-6 h-6" />
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
+            <h1 className="text-lg font-bold text-slate-100 tracking-tight leading-tight">
               UK Immigration
             </h1>
-            <span className="block text-xs font-semibold text-blue-600 dark:text-blue-400 tracking-[0.18em] leading-tight">
+            <span className="block text-xs font-bold bg-gradient-to-r from-sky-300 to-cyan-300 bg-clip-text text-transparent tracking-[0.18em] leading-tight">
               COMPASS
             </span>
           </div>
@@ -180,7 +175,7 @@ const Header: FC<HeaderProps> = ({
 
         {/* Desktop Nav */}
         <nav
-          className="hidden md:flex items-center gap-2 bg-white/50 p-1.5 rounded-full border border-slate-200/60 shadow-sm dark:bg-slate-800/50 dark:border-slate-700/60"
+          className="hidden md:flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-full border border-slate-700/60 shadow-sm"
           role="navigation"
           aria-label="Main navigation"
         >
@@ -196,40 +191,24 @@ const Header: FC<HeaderProps> = ({
 
         <div className="flex items-center gap-1">
           <ThemeToggle />
-
-          {/* Mobile Menu Toggle */}
-          <button
-            className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors dark:text-slate-400 dark:hover:bg-slate-800"
-            onClick={() => onMobileMenuToggle(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
         </div>
       </div>
 
-      {/* Mobile Nav */}
-      {mobileMenuOpen && (
-        <nav
-          className="md:hidden border-t border-slate-100 bg-white p-4 flex flex-col gap-2 shadow-xl absolute w-full z-40 animate-in slide-in-from-top-2 dark:border-slate-800 dark:bg-slate-900"
-          role="navigation"
-          aria-label="Mobile navigation"
-        >
-          {NAV_ITEMS.map((item) => (
-            <NavItem
-              key={item.tab}
-              config={item}
-              isActive={activeTab === item.tab}
-              onClick={() => handleNavClick(item.tab)}
-            />
-          ))}
-        </nav>
-      )}
+      {/* Mobile Nav — always visible, no menu button needed */}
+      <nav
+        className="md:hidden border-t border-slate-800 bg-slate-900/95 px-3 py-2 flex flex-wrap items-center gap-1.5"
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        {NAV_ITEMS.map((item) => (
+          <NavItem
+            key={item.tab}
+            config={item}
+            isActive={activeTab === item.tab}
+            onClick={() => handleNavClick(item.tab)}
+          />
+        ))}
+      </nav>
     </header>
   );
 };
@@ -241,36 +220,18 @@ interface HeroSectionProps {
 const HeroSection: FC<HeroSectionProps> = ({ onExploreClick }) => {
   return (
     <section
-      className="relative overflow-hidden bg-slate-900 dark:bg-slate-950 pb-20 z-0"
+      className="relative overflow-hidden bg-slate-900 dark:bg-slate-950 pb-20 z-[1]"
       aria-label="Hero section"
     >
-      {/* Abstract Background */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <svg
-          className="h-full w-full"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d="M0 100 C 20 0 50 0 100 100 Z" fill="url(#grad1)" />
-          <defs>
-            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
-              <stop
-                offset="100%"
-                style={{ stopColor: '#0f172a', stopOpacity: 1 }}
-              />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
+      {/* Westminster skyline silhouette along the bottom edge */}
+      <HeroSkyline />
       <div
         className="absolute inset-0 bg-[url('/textures/cubes.png')] opacity-10 pointer-events-none"
         aria-hidden="true"
       />
 
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-20 md:py-24 relative z-10">
-        <div className="max-w-4xl">
+        <Reveal className="max-w-4xl">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold tracking-wider mb-8 backdrop-blur-sm">
             <span className="relative flex h-2 w-2">
@@ -283,28 +244,28 @@ const HeroSection: FC<HeroSectionProps> = ({ onExploreClick }) => {
           {/* Heading */}
           <h2 className="text-4xl md:text-7xl font-extrabold tracking-tight mb-8 text-white leading-[1.3] md:leading-[1.2] pb-4">
             Clarity in a changing <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 inline-block pb-2">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-cyan-300 to-teal-300 inline-block pb-2">
               Immigration System.
             </span>
           </h2>
 
           {/* Description */}
           <p className="text-xl md:text-2xl text-slate-300 mb-10 leading-relaxed max-w-3xl font-light">
-            We monitor government bills, visa rule changes, and MP debates 24/7.
-            Our AI translates legal jargon into plain English, so you know exactly
-            where you stand.
+            We watch government bills, visa rule changes, and parliamentary
+            debates around the clock. Then we translate the legal jargon into
+            plain English, so you always know where you stand.
           </p>
 
           {/* CTA Button */}
           <button
             onClick={onExploreClick}
-            className="group bg-blue-600 hover:bg-blue-500 text-white pl-8 pr-6 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-blue-900/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 flex items-center gap-3"
-            aria-label="Explore updates section"
+            className="group bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white pl-8 pr-6 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-blue-500/30 hover:shadow-cyan-500/40 hover:-translate-y-0.5 flex items-center gap-3"
+            aria-label="See the latest updates"
           >
-            Explore Updates
+            See What's Changed
             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -321,9 +282,9 @@ const FooterLink: FC<FooterLinkProps> = ({ href, label }) => (
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="hover:text-blue-600 dark:hover:text-blue-400 transition flex items-center gap-2"
+      className="hover:text-blue-400 transition flex items-center gap-2"
     >
-      <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" />
+      <ArrowRight className="w-3 h-3 text-slate-600" />
       {label}
     </a>
   </li>
@@ -365,7 +326,7 @@ const ContactModal: FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
         <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">Get in touch</h3>
         <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
-          Got a question, a concern, or found something not working right? Reach out anytime.
+          Questions, feedback, or something not working right? We read every message. Reach out anytime.
         </p>
 
         <button
@@ -398,33 +359,33 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
 
   return (
     <footer
-      className="bg-white border-t border-slate-200 pt-16 pb-12 mt-auto relative z-10 dark:bg-slate-900 dark:border-slate-800"
+      className="bg-slate-900 border-t border-slate-800 pt-16 pb-12 mt-auto relative z-10"
       role="contentinfo"
     >
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
         {/* Brand Section */}
         <div className="md:col-span-2 pr-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Landmark className="text-white w-4 h-4" />
+            <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-lg flex items-center justify-center shadow-md shadow-sky-500/30">
+              <Compass className="text-white w-5 h-5" />
             </div>
-            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            <span className="text-lg font-bold text-slate-100">
               UK Immigration Compass
             </span>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-md">
-            We believe information is a right. By combining official data streams
-            with advanced AI, we empower applicants, students, and families to
-            navigate the UK's complex immigration landscape with confidence.
+          <p className="text-slate-400 text-sm leading-relaxed max-w-md">
+            We believe clear information is a right. UK Immigration Compass takes
+            official government data and turns it into clear, simple guidance for
+            applicants, students, and families, free of charge.
           </p>
         </div>
 
         {/* Resources Section */}
         <div>
-          <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-6 text-sm uppercase tracking-wider">
+          <h3 className="font-bold text-slate-100 mb-6 text-sm uppercase tracking-wider">
             Official Resources
           </h3>
-          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
+          <ul className="space-y-3 text-sm text-slate-400">
             <FooterLink
               href="https://www.gov.uk/browse/visas-immigration"
               label="Gov.uk Visas"
@@ -442,36 +403,36 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
 
         {/* Legal Section */}
         <div>
-          <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-6 text-sm uppercase tracking-wider">
+          <h3 className="font-bold text-slate-100 mb-6 text-sm uppercase tracking-wider">
             Legal & Data
           </h3>
-          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
+          <ul className="space-y-3 text-sm text-slate-400">
             <li className="flex items-center gap-2">
-              <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" /> Data Refresh:
-              Daily
+              <ArrowRight className="w-3 h-3 text-slate-600" /> Refreshed daily
+              from official sources
             </li>
             <li>
               <button
                 onClick={() => onNavigate(Tab.PRIVACY)}
-                className="hover:text-blue-600 dark:hover:text-blue-400 transition flex items-center gap-2"
+                className="hover:text-blue-400 transition flex items-center gap-2"
               >
-                <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" /> Privacy Policy
+                <ArrowRight className="w-3 h-3 text-slate-600" /> Privacy Policy
               </button>
             </li>
             <li>
               <button
                 onClick={() => onNavigate(Tab.TERMS)}
-                className="hover:text-blue-600 dark:hover:text-blue-400 transition flex items-center gap-2"
+                className="hover:text-blue-400 transition flex items-center gap-2"
               >
-                <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" /> Terms of Service
+                <ArrowRight className="w-3 h-3 text-slate-600" /> Terms of Use
               </button>
             </li>
             <li>
               <button
                 onClick={() => setContactOpen(true)}
-                className="hover:text-blue-600 dark:hover:text-blue-400 transition flex items-center gap-2"
+                className="hover:text-blue-400 transition flex items-center gap-2"
               >
-                <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" /> Contact / Report an Issue
+                <ArrowRight className="w-3 h-3 text-slate-600" /> Contact / Report an Issue
               </button>
             </li>
           </ul>
@@ -481,13 +442,13 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
       {contactOpen && <ContactModal onClose={() => setContactOpen(false)} />}
 
       {/* Bottom Bar */}
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p className="text-xs text-slate-400 dark:text-slate-500">
-          © {currentYear} UK Immigration Compass. Powered by AI.
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p className="text-xs text-slate-400">
+          © {currentYear} UK Immigration Compass. Built on official data, explained by AI.
         </p>
-        <div className="bg-amber-50 border border-amber-100 text-amber-900/70 px-4 py-2 rounded-lg text-xs font-medium max-w-xl text-center md:text-right dark:bg-amber-950/30 dark:border-amber-900/40 dark:text-amber-200/70">
-          Disclaimer: This is an AI-assisted information tool, not legal advice.
-          Always verify with a qualified solicitor.
+        <div className="bg-amber-950/30 border border-amber-900/40 text-amber-200/70 px-4 py-2 rounded-lg text-xs font-medium max-w-xl text-center md:text-right">
+          This is an AI-assisted information tool, not legal advice. For anything
+          that matters to your case, verify with GOV.UK or a qualified adviser.
         </div>
       </div>
     </footer>
@@ -500,8 +461,48 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
 
 const MainApp: FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.NEWS);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  // Per-tab page titles and descriptions so each section can rank for its
+  // own search topic. The index.html defaults cover the News feed.
+  const pageMeta: Record<Tab, { title: string; description: string }> = {
+    [Tab.NEWS]: {
+      title: 'Latest UK Immigration News and Rule Changes',
+      description:
+        'Live feed of UK immigration news: Home Office rule changes, parliamentary debates and visa policy updates, explained in plain English.',
+    },
+    [Tab.SPONSORS]: {
+      title: 'UK Sponsor Licence Checker',
+      description:
+        'Check whether a UK employer holds a valid Home Office sponsor licence, browse licensed sponsors by industry, and track compliance changes.',
+    },
+    [Tab.PETITIONS]: {
+      title: 'Track UK Immigration Petitions',
+      description:
+        'Follow immigration petitions before the UK Parliament, with live signature counts and progress toward a Commons debate.',
+    },
+    [Tab.SIMPLIFIER]: {
+      title: 'Immigration Jargon Buster',
+      description:
+        'Paste any Home Office letter or immigration clause and get an instant plain-English translation, free.',
+    },
+    [Tab.PRIVACY]: {
+      title: 'Privacy Policy',
+      description:
+        'What UK Immigration Compass collects (almost nothing), what we never do with data, and how to contact us.',
+    },
+    [Tab.TERMS]: {
+      title: 'Terms of Use',
+      description:
+        'The plain-English terms of use for UK Immigration Compass: free, no account needed, and not legal advice.',
+    },
+  };
+
+  useEffect(() => {
+    const meta = pageMeta[activeTab] ?? pageMeta[Tab.NEWS];
+    setPageMeta(meta.title, meta.description);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   const ContentComponent = useMemo(() => {
     return CONTENT_MAP[activeTab] || NewsDashboard;
@@ -518,16 +519,14 @@ const MainApp: FC = () => {
 
   return (
     <div
-      className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-900 dark:selection:text-blue-100"
+      className="relative min-h-screen bg-gradient-to-b from-sky-50 via-blue-50 to-cyan-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-900 dark:selection:text-blue-100 overflow-x-hidden"
       role="application"
     >
+      {/* Ambient animated backdrop (waves + orbs) */}
+      <AnimatedBackground />
+
       {/* Navigation */}
-      <Header
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        mobileMenuOpen={mobileMenuOpen}
-        onMobileMenuToggle={setMobileMenuOpen}
-      />
+      <Header activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Hero Section (Only shows on News Tab) */}
       {activeTab === Tab.NEWS && (
@@ -536,7 +535,7 @@ const MainApp: FC = () => {
 
       {/* Main Content */}
       <main className="flex-grow relative z-10" id="feed-start">
-        <div className="h-8 bg-gradient-to-b from-slate-100 dark:from-slate-900 to-transparent opacity-50 pointer-events-none" />
+        <div className="h-8 bg-gradient-to-b from-sky-100/80 dark:from-slate-900 to-transparent opacity-60 pointer-events-none" />
         <ErrorBoundary>
           <ContentComponent />
         </ErrorBoundary>

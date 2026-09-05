@@ -1,12 +1,102 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UK Immigration Compass</title>
+    <title>UK Immigration Compass | Immigration News in Plain English</title>
+    <meta name="description" content="Live UK immigration updates, sponsor licence checks and petition tracking, all explained in plain English. Free for everyone." />
+    <meta name="keywords" content="UK immigration news, Home Office rule changes, sponsor licence checker, UK sponsor register, immigration petitions, parliament petitions, visa updates, immigration jargon buster" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://uk-immigration-compass.vercel.app/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0f172a" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="UK Immigration Compass" />
+    <meta property="og:title" content="UK Immigration Compass | Immigration News in Plain English" />
+    <meta property="og:description" content="Live UK immigration updates, sponsor licence checks and petition tracking, all explained in plain English. Free for everyone." />
+    <meta property="og:url" content="https://uk-immigration-compass.vercel.app/" />
+    <meta property="og:locale" content="en_GB" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="UK Immigration Compass | Immigration News in Plain English" />
+    <meta name="twitter:description" content="Live UK immigration updates, sponsor licence checks and petition tracking, all explained in plain English. Free for everyone." />
+
+    <!-- Structured data for search engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://uk-immigration-compass.vercel.app/#website",
+          "url": "https://uk-immigration-compass.vercel.app/",
+          "name": "UK Immigration Compass",
+          "alternateName": "Immigration News in Plain English",
+          "description": "Live UK immigration updates, sponsor licence checks and petition tracking, all explained in plain English. Free for everyone.",
+          "inLanguage": "en-GB"
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://uk-immigration-compass.vercel.app/#app",
+          "url": "https://uk-immigration-compass.vercel.app/",
+          "name": "UK Immigration Compass",
+          "applicationCategory": "NewsApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "description": "Free tool that tracks UK immigration news, Home Office rule changes, sponsor licences and parliamentary petitions, and translates legal jargon into plain English.",
+          "isAccessibleForFree": true,
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+          "featureList": [
+            "Live UK immigration news and rule changes",
+            "Sponsor licence checker and licensed sponsor directory",
+            "UK Parliament petition tracker with live signature counts",
+            "Legal jargon buster that explains Home Office letters in plain English"
+          ],
+          "publisher": { "@id": "https://uk-immigration-compass.vercel.app/#website" }
+        }
+      ]
+    }
+    </script>
+
+    <!-- FAQ structured data matching the visible "Common questions" section -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I check if a company is a licensed sponsor in the UK?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Use the Sponsors tab to search any employer. Results come from the official GOV.UK register of licensed sponsors, so you can see whether the licence is active and browse other companies in the same industry." }
+        },
+        {
+          "@type": "Question",
+          "name": "Where can I find the latest UK immigration rule changes?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The Latest Updates feed tracks Home Office announcements, visa policy changes and parliamentary debates as they happen, with the impact and timeline spelled out for each update." }
+        },
+        {
+          "@type": "Question",
+          "name": "What does leave to remain mean?",
+          "acceptedAnswer": { "@type": "Answer", "text": "It means permission to stay in the UK for a limited time. Paste any Home Office letter into the Legal Jargon Buster and terms like this will be explained in plain English." }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I follow immigration petitions in the UK?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The Petitions tab shows live signature counts for immigration petitions before UK Parliament, and how close each one is to being considered for a debate." }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google Search Console ownership verification -->
+    <meta name="google-site-verification" content="pjIZwONfOC4Qka0d74-eLmYjxl692BlwT8T7JRYk_ec" />
+
     <script src="/theme-init.js"></script>
   </head>
-  <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased">
+  <body class="bg-sky-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

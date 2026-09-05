@@ -5,7 +5,11 @@ import { NewsItem } from '../types';
 import { UpdateCard } from './news/UpdateCard';
 import { UpdateDetailModal } from './news/UpdateDetailModal';
 import { CategoryIcon, CATEGORIES } from './news/newsShared';
-import { ArrowLeft, Search, AlertCircle, Filter, Landmark } from 'lucide-react';
+import { ArrowLeft, Search, AlertCircle, Filter, Compass, Archive } from 'lucide-react';
+import { AnimatedBackground } from './AnimatedBackground';
+import { SectionMotif } from './SectionMotif';
+import { setPageMeta } from '../utils/seo';
+import { Reveal } from './Reveal';
 
 const PAGE_SIZE = 12;
 
@@ -19,6 +23,13 @@ export const UpdatesArchivePage: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<NewsItem | null>(null);
 
   useEffect(() => {
+    setPageMeta(
+      'UK Immigration Updates Archive',
+      'Search every UK immigration update from the past year: Home Office rule changes, visa news and parliamentary activity, organised by category.'
+    );
+  }, []);
+
+  useEffect(() => {
     (async () => {
       setLoading(true);
       setError(null);
@@ -26,7 +37,7 @@ export const UpdatesArchivePage: React.FC = () => {
         const result = await apiClient.fetchUpdatesArchive();
         setItems(result.items || []);
       } catch {
-        setError('Unable to load the update archive. Please check your connection.');
+        setError("We couldn't load the archive. Check your connection and try again.");
       } finally {
         setLoading(false);
       }
@@ -50,12 +61,13 @@ export const UpdatesArchivePage: React.FC = () => {
   }, [selectedCategory, query]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950">
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:border-slate-800/80 dark:bg-slate-900/90 dark:supports-[backdrop-filter]:bg-slate-900/60">
+    <div className="relative min-h-screen bg-gradient-to-b from-sky-50 via-blue-50 to-cyan-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 overflow-x-hidden">
+      <AnimatedBackground />
+      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-xl supports-[backdrop-filter]:bg-slate-900/60">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center gap-4">
           <Link
             to="/"
-            className="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-blue-700 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
+            className="flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-blue-400 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to UK Immigration Compass
@@ -63,16 +75,19 @@ export const UpdatesArchivePage: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-[1600px] mx-auto p-4 md:p-8">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-700 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/10 dark:shadow-blue-500/20">
-            <Landmark className="text-white w-5 h-5" />
+      <div className="relative z-10 max-w-[1600px] mx-auto p-4 md:p-8">
+        <SectionMotif icon={Archive} className="top-2 right-2 w-40 h-40 text-slate-900/[0.05] dark:text-slate-400/10 -rotate-12" />
+        <Reveal>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/40 ring-1 ring-white/25">
+              <Compass className="text-white w-6 h-6" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Update Archive</h1>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Update Archive</h1>
-        </div>
-        <p className="text-slate-500 dark:text-slate-400 mb-8 text-lg font-light max-w-2xl">
-          Every immigration update from the past year, searchable and organized by category.
-        </p>
+          <p className="text-slate-600 dark:text-slate-400 mb-8 text-lg font-light max-w-2xl">
+            Every immigration update from the past year, searchable and organised by category.
+          </p>
+        </Reveal>
 
         {/* Search */}
         <div className="relative mb-6 max-w-xl">
@@ -94,7 +109,7 @@ export const UpdatesArchivePage: React.FC = () => {
               onClick={() => setSelectedCategory(cat)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200
               ${selectedCategory === cat
-                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 translate-y-[-1px] dark:bg-slate-100 dark:text-slate-900 dark:shadow-black/40'
+                ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30 translate-y-[-1px]'
                 : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:text-slate-200'}`}
             >
               {cat !== 'All' && <CategoryIcon category={cat} />}
@@ -129,8 +144,10 @@ export const UpdatesArchivePage: React.FC = () => {
         ) : (
           <>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              {visibleItems.map(item => (
-                <UpdateCard key={item.id} item={item} onClick={() => setSelectedItem(item)} />
+              {visibleItems.map((item, i) => (
+                <Reveal key={item.id} delay={(i % 4) * 90}>
+                  <UpdateCard item={item} onClick={() => setSelectedItem(item)} />
+                </Reveal>
               ))}
             </div>
 

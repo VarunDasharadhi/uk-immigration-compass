@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { apiClient } from '../services/apiClient';
 import { SponsorCheckResult, SponsorNewsItem } from '../types';
 import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight, ExternalLink, ListFilter } from 'lucide-react';
+import { Reveal } from './Reveal';
+import { SectionMotif } from './SectionMotif';
 import { buildCompanyDetailsLinks, buildOpenRolesLinks } from '../utils/companyLinks';
 import { CompanyLookupResult } from '../types';
 import { SponsorDirectory } from './SponsorDirectory';
@@ -101,15 +103,16 @@ export const SponsorChecker: React.FC = () => {
   return (
     <div className="max-w-[1600px] mx-auto p-4 md:p-8">
       {/* Header */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-2xl mb-4">
-          <Building2 className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+      <div className="relative isolate text-center mb-10">
+        <SectionMotif icon={Building2} className="-top-8 right-2 w-48 h-48 text-sky-500/10 dark:text-sky-400/10 rotate-6" />
+        <div className="inline-flex items-center justify-center p-3 bg-sky-100 dark:bg-sky-950/40 rounded-2xl mb-4">
+          <Building2 className="w-8 h-8 text-sky-600 dark:text-sky-400" />
         </div>
         <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-4">
           Sponsor Checker & Updates
         </h2>
         <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Verify if an employer holds a valid UK Sponsor License and track the latest Home Office compliance news.
+          Check whether an employer holds a valid UK sponsor licence, and keep up with the latest Home Office compliance news.
         </p>
       </div>
 
@@ -123,12 +126,12 @@ export const SponsorChecker: React.FC = () => {
             onClick={() => setView('check')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               view === 'check'
-                ? 'bg-indigo-600 text-white shadow-sm'
+                ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-sm'
                 : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Search className="w-4 h-4" />
-            Check a company
+            Check a Company
           </button>
           <button
             type="button"
@@ -137,12 +140,12 @@ export const SponsorChecker: React.FC = () => {
             onClick={() => setView('browse')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               view === 'browse'
-                ? 'bg-indigo-600 text-white shadow-sm'
+                ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-sm'
                 : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <ListFilter className="w-4 h-4" />
-            Browse sponsors
+            Browse Sponsors
           </button>
         </div>
       </div>
@@ -154,6 +157,7 @@ export const SponsorChecker: React.FC = () => {
         {/* Left Column: Search & Result */}
         <div className="lg:col-span-2 space-y-8">
           {/* Search Card */}
+          <Reveal>
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-black/30">
             <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6 flex items-center gap-2">
               <Search className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
@@ -173,7 +177,7 @@ export const SponsorChecker: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading || !searchTerm}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-200 dark:shadow-indigo-950/40 dark:disabled:bg-slate-700 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/30 dark:disabled:from-slate-700 dark:disabled:to-slate-700 flex items-center justify-center gap-2"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify License Status'}
               </button>
@@ -185,9 +189,11 @@ export const SponsorChecker: React.FC = () => {
               )}
             </form>
           </div>
+          </Reveal>
 
           {/* Result Display */}
           {result && (
+            <Reveal>
             <div className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-lg dark:shadow-black/40">
               {/* Status Banner */}
               <div className="p-8 pb-4 text-center">
@@ -196,7 +202,7 @@ export const SponsorChecker: React.FC = () => {
                 {result.status === 'Licensed' ? (
                   <div className="flex items-center justify-center gap-2 p-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 font-bold dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/40">
                     <CheckCircle className="w-5 h-5" />
-                    <span>Active Sponsor License</span>
+                    <span>Active Sponsor Licence</span>
                   </div>
                 ) : result.status === 'Unknown' ? (
                   <div className="flex items-center justify-center gap-2 p-4 bg-amber-50 text-amber-700 rounded-xl border border-amber-100 font-bold dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/40">
@@ -206,7 +212,7 @@ export const SponsorChecker: React.FC = () => {
                 ) : (
                   <div className="flex items-center justify-center gap-2 p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 font-bold dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/40">
                     <XCircle className="w-5 h-5" />
-                    <span>License Status: {result.status}</span>
+                    <span>Licence status: {result.status}</span>
                   </div>
                 )}
               </div>
@@ -278,7 +284,7 @@ export const SponsorChecker: React.FC = () => {
                 {/* Find out more — constructed search links, not guessed exact
                     URLs; the Companies House entry swaps in a real profile
                     link once /api/company-lookup resolves a confident match.
-                    Only for confirmed results — not the Not Found / candidate-picker state. */}
+                    Only for confirmed results, not the Not Found / candidate-picker state. */}
                 {isConfirmedResult && (
                   <div className="mb-8">
                     <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
@@ -373,7 +379,7 @@ export const SponsorChecker: React.FC = () => {
                       {result.candidates.length === 1 ? 'Possible match' : 'Possible matches'}
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-                      No exact entry was found for "{searchTerm}". These are similarly named — select the one you meant to check its confirmed status.
+                      No exact entry was found for "{searchTerm}". These are similarly named. Pick the one you meant and we'll check its confirmed status.
                     </p>
                     <div className="space-y-2">
                       {result.candidates.map((candidate, i) => (
@@ -401,6 +407,7 @@ export const SponsorChecker: React.FC = () => {
 
               </div>
             </div>
+            </Reveal>
           )}
         </div>
 
@@ -411,7 +418,7 @@ export const SponsorChecker: React.FC = () => {
           <div className="relative z-10">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
               <RefreshCcw className="w-5 h-5 text-indigo-400" />
-              Recently Added & Revoked
+              Recent Licence Changes
             </h3>
 
             <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent hover:scrollbar-thumb-slate-500 transition-colors">
@@ -439,7 +446,7 @@ export const SponsorChecker: React.FC = () => {
               ) : (
                 <div className="text-center p-4">
                   <ShieldAlert className="w-6 h-6 mx-auto text-slate-600 mb-2" />
-                  <p className="text-sm text-slate-500">No recent compliance updates found.</p>
+                  <p className="text-sm text-slate-500">No compliance changes to show right now.</p>
                 </div>
               )}
             </div>

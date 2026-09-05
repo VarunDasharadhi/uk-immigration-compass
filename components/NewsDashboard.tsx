@@ -5,9 +5,11 @@ import { isOfficialUrl } from '../utils/newsParsing';
 import { UpdateCard } from './news/UpdateCard';
 import { UpdateDetailModal } from './news/UpdateDetailModal';
 import { CategoryIcon, CATEGORIES } from './news/newsShared';
+import { Reveal } from './Reveal';
 import {
-  ExternalLink, Filter, AlertCircle, CheckCircle2,
+  ExternalLink, Filter, AlertCircle, CheckCircle2, Newspaper,
 } from 'lucide-react';
+import { SectionMotif } from './SectionMotif';
 
 export const NewsDashboard: React.FC = () => {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
@@ -25,7 +27,7 @@ export const NewsDashboard: React.FC = () => {
       setSources(result.sources || []);
       setNewsItems(result.items || []);
     } catch (err) {
-      setError('Unable to retrieve the latest news. Please check your connection.');
+      setError("We couldn't load the latest updates. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -47,24 +49,25 @@ export const NewsDashboard: React.FC = () => {
   return (
     <div className="max-w-[1600px] mx-auto p-4 md:p-8">
       {/* Header & Controls */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 gap-6">
+      <Reveal className="relative isolate flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 gap-6">
+        <SectionMotif icon={Newspaper} className="-top-10 right-0 w-44 h-44 text-slate-900/[0.05] dark:text-slate-400/10 -rotate-12" />
         <div>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Recent Updates</h2>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Latest Updates</h2>
           <p className="text-slate-500 dark:text-slate-400 mt-3 text-lg font-light max-w-2xl">
-            Real-time feed of parliamentary activity and Home Office rule changes.
+            Straight from Parliament and the Home Office, tracked as it happens and explained in plain English.
           </p>
         </div>
-      </div>
+      </Reveal>
 
       {/* Category Pills */}
-      <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-100 dark:border-slate-800 pb-2 sticky top-20 z-30 bg-[#F8FAFC]/95 dark:bg-slate-950/95 backdrop-blur-sm py-2 -mx-2 px-2">
+      <div className="flex flex-wrap gap-2 mb-8 border-b border-sky-100/80 dark:border-slate-800 pb-2 sticky top-20 z-30 bg-sky-50/80 dark:bg-slate-950/95 backdrop-blur-sm py-2 -mx-2 px-2 rounded-b-xl">
         {CATEGORIES.map(cat => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200
             ${selectedCategory === cat
-              ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 translate-y-[-1px] dark:bg-slate-100 dark:text-slate-900 dark:shadow-black/40'
+              ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30 translate-y-[-1px]'
               : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:text-slate-200'}`}
           >
             {cat !== 'All' && <CategoryIcon category={cat} />}
@@ -100,8 +103,8 @@ export const NewsDashboard: React.FC = () => {
             {filteredItems.length === 0 ? (
               <div className="text-center py-24 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
                 <Filter className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No updates found</h3>
-                <p className="text-slate-400 dark:text-slate-500">There are no recent updates for this category.</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Nothing in this category yet</h3>
+                <p className="text-slate-400 dark:text-slate-500">No updates here right now. Try another category, or view everything.</p>
                 {selectedCategory !== 'All' && (
                   <button
                     onClick={() => setSelectedCategory('All')}
@@ -113,8 +116,10 @@ export const NewsDashboard: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {filteredItems.map((item) => (
-                  <UpdateCard key={item.id} item={item} onClick={() => setSelectedItem(item)} />
+                {filteredItems.map((item, i) => (
+                  <Reveal key={item.id} delay={(i % 4) * 90}>
+                    <UpdateCard item={item} onClick={() => setSelectedItem(item)} />
+                  </Reveal>
                 ))}
               </div>
             )}
@@ -122,7 +127,8 @@ export const NewsDashboard: React.FC = () => {
 
           {/* Sidebar Sources */}
           <aside className="lg:col-span-4 xl:col-span-3">
-            <div className="bg-slate-900 text-slate-200 rounded-3xl p-6 sm:p-8 sticky top-28 shadow-2xl ring-1 ring-white/10">
+            <Reveal delay={150} className="sticky top-28">
+              <div className="bg-slate-900 text-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl ring-1 ring-white/10">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-emerald-400" />
@@ -157,14 +163,72 @@ export const NewsDashboard: React.FC = () => {
                   ))
                 ) : (
                   <div className="text-slate-500 text-sm p-4 text-center border border-slate-800 rounded-xl border-dashed">
-                    No verified official sources linked to this search.
+                    No official sources tied to these updates yet.
                   </div>
                 )}
               </div>
-            </div>
+              </div>
+            </Reveal>
           </aside>
         </div>
       )}
+
+      {/* Common questions: helps people (and search engines) find each tool */}
+      <Reveal className="mt-12">
+        <section
+          aria-labelledby="faq-heading"
+          className="bg-white/70 dark:bg-slate-900/60 rounded-3xl border border-slate-200/70 dark:border-slate-800 p-6 md:p-8"
+        >
+          <h2
+            id="faq-heading"
+            className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-5"
+          >
+            Common questions
+          </h2>
+          <div className="space-y-3">
+            <details className="rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-slate-800 dark:text-slate-200">
+                How do I check if a company is a licensed sponsor in the UK?
+              </summary>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Open the Sponsors tab and search any employer. Results come from the
+                official GOV.UK register of licensed sponsors, so you can see whether
+                the licence is active and browse other companies in the same industry.
+              </p>
+            </details>
+            <details className="rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-slate-800 dark:text-slate-200">
+                Where can I find the latest UK immigration rule changes?
+              </summary>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                This feed tracks Home Office announcements, visa policy changes and
+                parliamentary debates as they happen, with the impact and timeline
+                spelled out for each update.
+              </p>
+            </details>
+            <details className="rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-slate-800 dark:text-slate-200">
+                What does &quot;leave to remain&quot; mean?
+              </summary>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                It means permission to stay in the UK for a limited time. Paste any
+                Home Office letter into the Jargon Buster tab and terms like this will
+                be explained in plain English.
+              </p>
+            </details>
+            <details className="rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-slate-800 dark:text-slate-200">
+                How can I follow immigration petitions in the UK?
+              </summary>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                The Petitions tab shows live signature counts for immigration
+                petitions before UK Parliament, and how close each one is to being
+                considered for a debate.
+              </p>
+            </details>
+          </div>
+        </section>
+      </Reveal>
 
       {selectedItem && (
         <UpdateDetailModal

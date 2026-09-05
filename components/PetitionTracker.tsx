@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { apiClient } from '../services/apiClient';
 import { PetitionsResult } from '../types';
 import { ScrollText, TrendingUp, PenTool, AlertCircle } from 'lucide-react';
+import { SectionMotif } from './SectionMotif';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
+import { Reveal } from './Reveal';
 
 export const PetitionTracker: React.FC = () => {
   const { theme } = useTheme();
@@ -64,14 +66,15 @@ export const PetitionTracker: React.FC = () => {
 
   return (
     <div className="max-w-[1600px] mx-auto p-4 md:p-8">
-      <div className="mb-10 text-center md:text-left">
+      <Reveal className="relative isolate mb-10 text-center md:text-left">
+        <SectionMotif icon={ScrollText} className="-top-8 right-0 w-44 h-44 text-indigo-500/10 dark:text-indigo-400/10 rotate-12" />
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">
              <ScrollText className="w-3.5 h-3.5" />
              Parliament Live
         </div>
         <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Active Petitions</h2>
-        <p className="text-lg text-slate-500 dark:text-slate-400 mt-2 font-light">Track the public voice on immigration policy changes.</p>
-      </div>
+        <p className="text-lg text-slate-500 dark:text-slate-400 mt-2 font-light">Follow the public's voice on immigration policy, and watch signatures climb toward a Commons debate.</p>
+      </Reveal>
 
       <div className="mb-12">
         {/* Engagement Chart */}
@@ -165,9 +168,9 @@ export const PetitionTracker: React.FC = () => {
             </div>
         ) : petitions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {petitions.map((petition) => (
+                {petitions.map((petition, i) => (
+                    <Reveal key={petition.id} delay={(i % 3) * 90}>
                     <a
-                        key={petition.id}
                         href={petition.url}
                         target="_blank"
                         rel="noreferrer"
@@ -202,18 +205,19 @@ export const PetitionTracker: React.FC = () => {
                              {/* Progress Bar */}
                              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
                                 <div
-                                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000"
+                                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-1000"
                                     style={{ width: `${getProgressWidth(petition.signatures)}%` }}
                                 ></div>
                              </div>
                         </div>
                     </a>
+                    </Reveal>
                 ))}
             </div>
         ) : (
             <div className="prose prose-slate dark:prose-invert max-w-none text-slate-600 bg-white p-8 rounded-2xl shadow-sm border border-slate-200 leading-relaxed dark:text-slate-400 dark:bg-slate-900 dark:border-slate-700">
                  <AlertCircle className="w-8 h-8 text-slate-300 mb-4 dark:text-slate-600" />
-                 <p>No trending immigration petitions found at this time.</p>
+                 <p>No trending immigration petitions right now. Check back soon.</p>
             </div>
         )}
 
