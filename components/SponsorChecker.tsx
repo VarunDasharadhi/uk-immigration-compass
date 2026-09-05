@@ -445,9 +445,15 @@ export const SponsorChecker: React.FC = () => {
                 ))
               ) : changes.length > 0 ? (
                 changes.map((item, idx) => (
-                  <div key={`${item.company}-${idx}`} className="flex items-start justify-between gap-3 border-b border-slate-800 pb-3 last:border-0 last:pb-0">
+                  <button
+                    key={`${item.company}-${idx}`}
+                    type="button"
+                    onClick={() => handleDirectorySelect(item.company)}
+                    aria-label={`Check ${item.company}`}
+                    className="w-full text-left flex items-start justify-between gap-3 border-b border-slate-800 pb-3 last:border-0 last:pb-0 group cursor-pointer"
+                  >
                     <div className="min-w-0">
-                      <h4 className="text-sm font-semibold text-slate-100 truncate">{item.company}</h4>
+                      <h4 className="text-sm font-semibold text-slate-100 truncate group-hover:text-sky-300 transition-colors">{item.company}</h4>
                       <p className="text-xs text-slate-400 mt-0.5 truncate">{item.town || 'UK'}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
@@ -456,7 +462,7 @@ export const SponsorChecker: React.FC = () => {
                       </span>
                       <p className="text-[10px] text-slate-500 mt-1">{item.date.slice(0, 10)}</p>
                     </div>
-                  </div>
+                  </button>
                 ))
               ) : (
                 <div className="text-center p-4">
