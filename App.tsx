@@ -150,7 +150,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-xl supports-[backdrop-filter]:bg-slate-900/60"
+      className="sticky top-0 z-50 border-b border-slate-800 bg-gradient-to-r from-[#0a1428] via-slate-900 to-[#0a1428]"
       role="banner"
     >
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center justify-between">
@@ -175,7 +175,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
         {/* Desktop Nav */}
         <nav
-          className="hidden md:flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-full border border-slate-700/60 shadow-sm"
+          className="hidden md:flex items-center gap-2 bg-white/[0.06] p-1.5 rounded-full border border-white/10 shadow-sm"
           role="navigation"
           aria-label="Main navigation"
         >
@@ -196,7 +196,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
       {/* Mobile Nav — always visible, no menu button needed */}
       <nav
-        className="md:hidden border-t border-slate-800 bg-slate-900/95 px-3 py-2 flex flex-wrap items-center gap-1.5"
+        className="md:hidden border-t border-white/10 bg-[#0c1428]/95 px-3 py-2 flex flex-wrap items-center gap-1.5"
         role="navigation"
         aria-label="Main navigation"
       >

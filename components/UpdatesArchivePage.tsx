@@ -63,7 +63,7 @@ export const UpdatesArchivePage: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-sky-50 via-blue-50 to-cyan-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 overflow-x-hidden">
       <AnimatedBackground />
-      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-xl supports-[backdrop-filter]:bg-slate-900/60">
+      <header className="sticky top-0 z-50 border-b border-slate-800 bg-gradient-to-r from-[#0a1428] via-slate-900 to-[#0a1428]">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center gap-4">
           <Link
             to="/"
