@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { apiClient } from '../services/apiClient';
-import { SponsorCheckResult, SponsorNewsItem } from '../types';
+import { SponsorCheckResult, SponsorChangeItem } from '../types';
 import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight, ExternalLink, ListFilter } from 'lucide-react';
 import { Reveal } from './Reveal';
 import { SectionMotif } from './SectionMotif';
@@ -16,8 +16,8 @@ export const SponsorChecker: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SponsorCheckResult | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [news, setNews] = useState<SponsorNewsItem[]>([]);
-  const [newsLoading, setNewsLoading] = useState(true);
+  const [changes, setChanges] = useState<SponsorChangeItem[]>(() => cacheGet<SponsorChangeItem[]>('sponsors:changes') ?? []);
+  const [changesLoading, setChangesLoading] = useState(() => !cacheHas('sponsors:changes'));
   const [companyLookup, setCompanyLookup] = useState<CompanyLookupResult | null>(null);
   const [companyLookupLoading, setCompanyLookupLoading] = useState(false);
 
@@ -27,24 +27,23 @@ export const SponsorChecker: React.FC = () => {
     // Warm the sponsor directory cache in the background so opening
     // Browse Sponsors renders instantly instead of waiting on a fetch.
     prefetchSponsorDirectory();
-    if (cacheHas('sponsors:news')) {
-      setNews(cacheGet('sponsors:news') ?? []);
-      setNewsLoading(false);
+    if (cacheHas('sponsors:changes')) {
+      setChanges(cacheGet<SponsorChangeItem[]>('sponsors:changes') ?? []);
+      setChangesLoading(false);
       return;
     }
-    const loadNews = async () => {
+    const loadChanges = async () => {
       try {
-        const news = await apiClient.fetchSponsorNews();
-        cacheSet('sponsors:news', Array.isArray(news) ? news : []);
-        setNews(Array.isArray(news) ? news : []);
+        const items = await apiClient.fetchSponsorChanges();
+        cacheSet('sponsors:changes', items);
+        setChanges(items);
       } catch (err) {
-        console.error('Error loading news:', err);
-        setNews([]);
+        console.error('Error loading sponsor changes:', err);
       } finally {
-        setNewsLoading(false);
+        setChangesLoading(false);
       }
     };
-    loadNews();
+    loadChanges();
   }, []);
 
   useEffect(() => {
@@ -427,37 +426,42 @@ export const SponsorChecker: React.FC = () => {
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
           <div className="relative z-10">
-            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <RefreshCcw className="w-5 h-5 text-indigo-400" />
-              Recent Licence Changes
+            <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+              <RefreshCcw className="w-5 h-5 text-sky-400" />
+              Recently Added &amp; Removed
             </h3>
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed border-b border-slate-800 pb-4">
+              The newest companies on the official sponsor register, and the ones
+              that just lost their licence.
+            </p>
 
-            <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent hover:scrollbar-thumb-slate-500 transition-colors">
-              {newsLoading ? (
+            <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent hover:scrollbar-thumb-slate-500 transition-colors">
+              {changesLoading ? (
                 [1, 2, 3].map(i => (
                   <div key={i} className="animate-pulse space-y-2">
                     <div className="h-4 bg-slate-700 rounded w-3/4"></div>
-                    <div className="h-12 bg-slate-800 rounded w-full"></div>
+                    <div className="h-10 bg-slate-800 rounded w-full"></div>
                   </div>
                 ))
-              ) : news.length > 0 ? (
-                news.map((item, idx) => (
-                  <div key={idx} className="group border-b border-slate-700 pb-4 last:border-0 last:pb-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                        {item.date || 'Recent'}
-                      </span>
+              ) : changes.length > 0 ? (
+                changes.map((item, idx) => (
+                  <div key={`${item.company}-${idx}`} className="flex items-start justify-between gap-3 border-b border-slate-800 pb-3 last:border-0 last:pb-0">
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-semibold text-slate-100 truncate">{item.company}</h4>
+                      <p className="text-xs text-slate-400 mt-0.5 truncate">{item.town || 'UK'}</p>
                     </div>
-                    <h4 className="font-semibold text-slate-100 group-hover:text-white transition-colors">
-                      {item.title || item.summary}
-                    </h4>
-                    <p className="text-xs text-slate-400 mt-1">{item.summary || ''}</p>
+                    <div className="text-right flex-shrink-0">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${item.type === 'added' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
+                        {item.type === 'added' ? 'Added' : 'Removed'}
+                      </span>
+                      <p className="text-[10px] text-slate-500 mt-1">{item.date.slice(0, 10)}</p>
+                    </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center p-4">
                   <ShieldAlert className="w-6 h-6 mx-auto text-slate-600 mb-2" />
-                  <p className="text-sm text-slate-500">No compliance changes to show right now.</p>
+                  <p className="text-sm text-slate-500">No sponsor movements recorded yet.</p>
                 </div>
               )}
             </div>

@@ -8,6 +8,8 @@ jest.mock('../services/apiClient', () => ({
   apiClient: {
     checkSponsor: jest.fn(),
     fetchSponsorNews: jest.fn(),
+    fetchSponsorDirectory: jest.fn().mockResolvedValue({ items: [], total: 0, industries: [], routes: [], mapGeneratedAt: null }),
+    fetchSponsorChanges: jest.fn().mockResolvedValue([]),
     lookupCompany: jest.fn(),
   },
 }));

@@ -111,6 +111,13 @@ export interface SponsorNewsItem {
   changeType: 'added' | 'revoked' | 'info' | string;
 }
 
+export interface SponsorChangeItem {
+  company: string;
+  town: string;
+  type: 'added' | 'removed';
+  date: string;
+}
+
 export interface CompanyLookupResult {
   companiesHouseUrl: string | null;
   // Companies House allows up to 4 SIC codes per company; this holds every

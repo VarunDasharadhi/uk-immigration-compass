@@ -1,5 +1,5 @@
 // API Client Service - Calls backend endpoints from frontend
-import { UpdatesResponse, NewsItem, SponsorCheckResult, SponsorNewsItem, PetitionsResult, CompanyLookupResult, SponsorDirectoryResponse } from '../types';
+import { UpdatesResponse, NewsItem, SponsorCheckResult, SponsorNewsItem, SponsorChangeItem, PetitionsResult, CompanyLookupResult, SponsorDirectoryResponse } from '../types';
 
 // In the browser, use Vite's import.meta.env (not process.env which crashes at runtime).
 // In Node (server-side imports if ever needed), fall back to process.env.
@@ -175,6 +175,14 @@ class ApiClient {
    */
   async fetchSponsorNews(): Promise<SponsorNewsItem[]> {
     return this.fetch<SponsorNewsItem[]>('/api/sponsor-news', { method: 'GET' }, 'sponsor-news');
+  }
+
+  /**
+   * Most recently added and removed sponsors, from the historical register
+   * ledger
+   */
+  async fetchSponsorChanges(): Promise<SponsorChangeItem[]> {
+    return this.fetch<SponsorChangeItem[]>('/api/sponsor-changes', { method: 'GET' }, 'sponsor-changes');
   }
 
   /**

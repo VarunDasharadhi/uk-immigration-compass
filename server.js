@@ -118,6 +118,16 @@ app.get('/api/sponsor-news', async (_req, res) => {
   }
 });
 
+app.get('/api/sponsor-changes', async (_req, res) => {
+  try {
+    const data = await aiService.getRecentSponsorChanges();
+    res.json(data);
+  } catch (err) {
+    console.error('[/api/sponsor-changes]', err);
+    res.status(500).json({ error: 'Something went wrong loading recent sponsor changes.' });
+  }
+});
+
 app.get('/api/sponsor-directory', async (req, res) => {
   const industry = String(req.query.industry || 'all').trim();
   if (!isValidIndustryId(industry)) {

@@ -4,7 +4,7 @@
  * Responses are disk-cached and refreshed once per day at local midnight.
  */
 
-import { NewsItem, UpdatesResponse, SponsorCheckResult, SponsorNewsItem, SponsorCandidate, PetitionItem, PetitionsResult, PetitionSignatureSnapshot } from '../types.js';
+import { NewsItem, UpdatesResponse, SponsorCheckResult, SponsorNewsItem, SponsorChangeItem, SponsorCandidate, PetitionItem, PetitionsResult, PetitionSignatureSnapshot } from '../types.js';
 import * as cache from './cache.js';
 import { stripMarkdown } from '../utils/text.js';
 import { parseUpdatesText, newsDedupeKey, NEWS_CATEGORIES } from '../utils/newsParsing.js';
@@ -904,6 +904,63 @@ export async function getSponsorNews(): Promise<SponsorNewsItem[]> {
     console.error('[aiService] refreshSponsorNews failed:', err);
     return MOCK.sponsorNews;
   }
+}
+
+// --- recent register movements (newest adds and removals from the ledger) ---
+
+let recentChangesCache: { at: number; items: SponsorChangeItem[] } | null = null;
+const RECENT_CHANGES_TTL_MS = 10 * 60 * 1000;
+
+/**
+ * The most recently added and removed sponsors, computed from the same
+ * historical ledger the licence-history view reads. Every company's records
+ * are grouped and reduced to its latest genuine event, then the newest adds
+ * and removals are returned. Computed at most once every 10 minutes per
+ * instance; the scan runs in memory over buckets already primed by the
+ * nightly job.
+ */
+export async function getRecentSponsorChanges(): Promise<SponsorChangeItem[]> {
+  if (recentChangesCache && Date.now() - recentChangesCache.at < RECENT_CHANGES_TTL_MS) {
+    return recentChangesCache.items;
+  }
+  await ensureSponsorDataLoaded();
+
+  const prefixes: string[] = [];
+  for (const a of 'abcdefghijklmnopqrstuvwxyz'.split('')) {
+    for (const b of 'abcdefghijklmnopqrstuvwxyz'.split('')) prefixes.push(a + b);
+  }
+
+  const latestByCanon = new Map<string, ExternalHistoryRecord>();
+  for (const prefix of prefixes) {
+    const records = await fetchHistoryBucket(prefix);
+    for (const r of records) {
+      const canon = canonicalName(r.data.company);
+      if (!canon) continue;
+      const existing = latestByCanon.get(canon);
+      if (!existing || new Date(r.date).getTime() > new Date(existing.date).getTime()) {
+        latestByCanon.set(canon, r);
+      }
+    }
+  }
+
+  const added: SponsorChangeItem[] = [];
+  const removed: SponsorChangeItem[] = [];
+  for (const r of latestByCanon.values()) {
+    if (r.type !== 'added' && r.type !== 'removed') continue;
+    const item: SponsorChangeItem = {
+      company: r.data.company,
+      town: r.data.city || '',
+      type: r.type,
+      date: r.date,
+    };
+    (r.type === 'added' ? added : removed).push(item);
+  }
+  added.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  removed.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const items = [...added.slice(0, 6), ...removed.slice(0, 6)];
+  recentChangesCache = { at: Date.now(), items };
+  return items;
 }
 
 export async function simplify(complexText: string): Promise<{ simplified: string }> {
