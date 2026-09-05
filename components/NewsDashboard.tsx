@@ -7,6 +7,7 @@ import { UpdateCard } from './news/UpdateCard';
 import { UpdateDetailModal } from './news/UpdateDetailModal';
 import { CategoryIcon, CATEGORIES } from './news/newsShared';
 import { Reveal } from './Reveal';
+import { cacheGet, cacheSet, cacheHas } from '../utils/cache';
 import {
   ExternalLink, Filter, AlertCircle, CheckCircle2, Newspaper,
 } from 'lucide-react';
@@ -15,9 +16,9 @@ import { SectionMotif } from './SectionMotif';
 export const NewsDashboard: React.FC = () => {
   // Keep the feed light: recent updates only, full history lives in the archive.
   const FEED_LIMIT = 8;
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-  const [sources, setSources] = useState<GroundingChunk[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(() => cacheGet<NewsItem[]>('news:items') ?? []);
+  const [sources, setSources] = useState<GroundingChunk[]>(() => cacheGet<GroundingChunk[]>('news:sources') ?? []);
+  const [loading, setLoading] = useState<boolean>(() => !cacheHas('news:items'));
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedItem, setSelectedItem] = useState<NewsItem | null>(null);
@@ -27,10 +28,16 @@ export const NewsDashboard: React.FC = () => {
     setError(null);
     try {
       const result = await apiClient.fetchUpdates();
+      cacheSet('news:items', result.items || []);
+      cacheSet('news:sources', result.sources || []);
       setSources(result.sources || []);
       setNewsItems(result.items || []);
     } catch (err) {
-      setError("We couldn't load the latest updates. Check your connection and try again.");
+      // A failed refresh keeps the cached feed on screen; only a cold visit
+      // with nothing to show surfaces the error.
+      if (!cacheHas('news:items')) {
+        setError("We couldn't load the latest updates. Check your connection and try again.");
+      }
     } finally {
       setLoading(false);
     }

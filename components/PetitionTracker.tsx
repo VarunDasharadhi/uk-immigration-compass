@@ -6,23 +6,26 @@ import { SectionMotif } from './SectionMotif';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
 import { Reveal } from './Reveal';
+import { cacheGet, cacheSet, cacheHas } from '../utils/cache';
 
 export const PetitionTracker: React.FC = () => {
   const { theme } = useTheme();
-  const [data, setData] = useState<PetitionsResult | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [data, setData] = useState<PetitionsResult | null>(() => cacheGet<PetitionsResult>('petitions') ?? null);
+  const [loading, setLoading] = useState<boolean>(() => !cacheHas('petitions'));
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
-      setLoading(true);
       setError(null);
       try {
         const result = await apiClient.fetchPetitions();
+        cacheSet('petitions', result);
         setData(result);
       } catch (e) {
         console.error(e);
-        setError('Unable to load petitions right now. Please try again later.');
+        if (!cacheHas('petitions')) {
+          setError('Unable to load petitions right now. Please try again later.');
+        }
       } finally {
         setLoading(false);
       }

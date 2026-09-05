@@ -1,11 +1,14 @@
 import { FC } from 'react';
 
 /**
- * Fixed, full-viewport ambient background: three slowly drifting gradient orbs
- * plus three stacked wave layers looping horizontally at the bottom of the
- * screen. Purely decorative — pointer-events are disabled and the whole layer
- * is hidden from assistive tech. All motion is CSS-only (GPU-friendly
- * transforms) and disabled for users who prefer reduced motion.
+ * Fixed, full-viewport ambient background: three slowly drifting gradient
+ * orbs plus three stacked wave layers looping horizontally at the bottom of
+ * the screen. Purely decorative — pointer-events are disabled and the whole
+ * layer is hidden from assistive tech. The orbs use radial gradients instead
+ * of a blur filter, so the browser composites plain layers instead of
+ * re-rasterizing large blurred textures while you scroll. All motion is
+ * CSS-only (GPU-friendly transforms) and disabled for users who prefer
+ * reduced motion.
  */
 export const AnimatedBackground: FC = () => {
   return (
@@ -14,9 +17,9 @@ export const AnimatedBackground: FC = () => {
       aria-hidden="true"
     >
       {/* Drifting gradient orbs */}
-      <div className="orb orb-1 bg-sky-300/45 dark:bg-blue-800/25" />
-      <div className="orb orb-2 bg-cyan-200/40 dark:bg-indigo-900/25" />
-      <div className="orb orb-3 bg-blue-200/40 dark:bg-sky-900/20" />
+      <div className="orb orb-1" />
+      <div className="orb orb-2" />
+      <div className="orb orb-3" />
 
       {/* Stacked waves anchored to the bottom edge of the viewport */}
       <div className="absolute inset-x-0 bottom-0 h-[42vh]">

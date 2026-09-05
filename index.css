@@ -81,29 +81,42 @@ body {
 .orb {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(70px);
+  /* Radial gradients fade out on their own, so no blur filter is needed:
+     blurred layers are expensive to keep composited during scroll. */
   will-change: transform;
 }
 .orb-1 {
-  width: 32rem;
-  height: 32rem;
+  width: 36rem;
+  height: 36rem;
   top: -8rem;
   left: -10rem;
+  background: radial-gradient(circle closest-side, rgba(125, 211, 252, 0.5), rgba(125, 211, 252, 0) 72%);
   animation: orb-drift-1 24s ease-in-out infinite alternate;
 }
+.dark .orb-1 {
+  background: radial-gradient(circle closest-side, rgba(30, 64, 175, 0.4), rgba(30, 64, 175, 0) 72%);
+}
 .orb-2 {
-  width: 26rem;
-  height: 26rem;
+  width: 30rem;
+  height: 30rem;
   top: 30%;
   right: -8rem;
+  background: radial-gradient(circle closest-side, rgba(165, 243, 252, 0.45), rgba(165, 243, 252, 0) 72%);
   animation: orb-drift-2 20s ease-in-out infinite alternate;
 }
+.dark .orb-2 {
+  background: radial-gradient(circle closest-side, rgba(49, 46, 129, 0.35), rgba(49, 46, 129, 0) 72%);
+}
 .orb-3 {
-  width: 24rem;
-  height: 24rem;
+  width: 28rem;
+  height: 28rem;
   bottom: 18%;
   left: 22%;
+  background: radial-gradient(circle closest-side, rgba(191, 219, 254, 0.45), rgba(191, 219, 254, 0) 72%);
   animation: orb-drift-3 28s ease-in-out infinite alternate;
+}
+.dark .orb-3 {
+  background: radial-gradient(circle closest-side, rgba(8, 47, 73, 0.3), rgba(8, 47, 73, 0) 72%);
 }
 @keyframes orb-drift-1 {
   from {

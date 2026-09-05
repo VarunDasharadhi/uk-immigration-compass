@@ -4,6 +4,8 @@ import { SponsorCheckResult, SponsorNewsItem } from '../types';
 import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight, ExternalLink, ListFilter } from 'lucide-react';
 import { Reveal } from './Reveal';
 import { SectionMotif } from './SectionMotif';
+import { prefetchSponsorDirectory } from './SponsorDirectory';
+import { cacheGet, cacheSet, cacheHas } from '../utils/cache';
 import { buildCompanyDetailsLinks, buildOpenRolesLinks } from '../utils/companyLinks';
 import { CompanyLookupResult } from '../types';
 import { SponsorDirectory } from './SponsorDirectory';
@@ -22,14 +24,23 @@ export const SponsorChecker: React.FC = () => {
   const isConfirmedResult = result?.status === 'Licensed' || result?.status === 'Revoked';
 
   useEffect(() => {
+    // Warm the sponsor directory cache in the background so opening
+    // Browse Sponsors renders instantly instead of waiting on a fetch.
+    prefetchSponsorDirectory();
+    if (cacheHas('sponsors:news')) {
+      setNews(cacheGet('sponsors:news') ?? []);
+      setNewsLoading(false);
+      return;
+    }
     const loadNews = async () => {
       try {
         const news = await apiClient.fetchSponsorNews();
+        cacheSet('sponsors:news', Array.isArray(news) ? news : []);
         setNews(Array.isArray(news) ? news : []);
-        setNewsLoading(false);
       } catch (err) {
         console.error('Error loading news:', err);
         setNews([]);
+      } finally {
         setNewsLoading(false);
       }
     };

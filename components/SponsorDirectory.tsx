@@ -1,11 +1,44 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '../services/apiClient';
-import { SponsorDirectoryEntry, SponsorDirectoryFacet } from '../types';
+import { SponsorDirectoryEntry, SponsorDirectoryFacet, SponsorDirectoryResponse } from '../types';
 import { Search, Filter, AlertCircle, ChevronRight } from 'lucide-react';
 import { Reveal } from './Reveal';
+import { cacheGet, cacheSet, cacheHas, cacheDelete, cacheKeys } from '../utils/cache';
 
 const PAGE_SIZE = 24;
 const DEBOUNCE_MS = 350;
+
+// Default view key, also used by the prefetch warm-up below.
+const DEFAULT_KEY = 'dir:all:all:';
+
+const dirKey = (industry: string, route: string, q: string) =>
+  `dir:${industry}:${route}:${q}`;
+
+let prefetched = false;
+
+/**
+ * Warm the default directory view (facets + first page) in the background so
+ * the first click on "Browse Sponsors" renders from cache instantly instead
+ * of waiting on a network round trip. Safe to call repeatedly.
+ */
+export function prefetchSponsorDirectory(): void {
+  if (prefetched || cacheHas(DEFAULT_KEY)) return;
+  prefetched = true;
+  apiClient
+    .fetchSponsorDirectory({ industry: 'all', route: 'all', q: '', page: 1, pageSize: PAGE_SIZE })
+    .then(res => cacheSet(DEFAULT_KEY, res))
+    .catch(() => { prefetched = false; });
+}
+
+/**
+ * Drops every cached directory view. Exists mainly for tests, where each
+ * case mocks its own API response and must not see a previous case's data.
+ */
+export function clearSponsorDirectoryCache(): void {
+  for (const key of cacheKeys()) {
+    if (key.startsWith('dir:')) cacheDelete(key);
+  }
+}
 
 interface SponsorDirectoryProps {
   onSelectCompany: (name: string) => void;
@@ -17,13 +50,13 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
-  const [items, setItems] = useState<SponsorDirectoryEntry[]>([]);
-  const [total, setTotal] = useState(0);
-  const [industries, setIndustries] = useState<SponsorDirectoryFacet[]>([]);
-  const [routes, setRoutes] = useState<SponsorDirectoryFacet[]>([]);
+  const [items, setItems] = useState<SponsorDirectoryEntry[]>(() => cacheGet<SponsorDirectoryResponse>(DEFAULT_KEY)?.items ?? []);
+  const [total, setTotal] = useState(() => cacheGet<SponsorDirectoryResponse>(DEFAULT_KEY)?.total ?? 0);
+  const [industries, setIndustries] = useState<SponsorDirectoryFacet[]>(() => cacheGet<SponsorDirectoryResponse>(DEFAULT_KEY)?.industries ?? []);
+  const [routes, setRoutes] = useState<SponsorDirectoryFacet[]>(() => cacheGet<SponsorDirectoryResponse>(DEFAULT_KEY)?.routes ?? []);
   const [mapGeneratedAt, setMapGeneratedAt] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !cacheHas(DEFAULT_KEY));
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,12 +71,26 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
 
   useEffect(() => {
     const id = ++requestId.current;
-    setLoading(true);
     setError(null);
+    // Register data only changes daily, so a filter combination seen before
+    // this session renders straight from cache with no network round trip.
+    const cached = cacheGet<SponsorDirectoryResponse>(dirKey(industry, route, debouncedQuery));
+    if (cached) {
+      setItems(cached.items);
+      setTotal(cached.total);
+      setIndustries(cached.industries);
+      setRoutes(cached.routes);
+      setMapGeneratedAt(cached.mapGeneratedAt);
+      setPage(1);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     apiClient
       .fetchSponsorDirectory({ industry, route, q: debouncedQuery, page: 1, pageSize: PAGE_SIZE })
       .then(res => {
         if (id !== requestId.current) return;
+        cacheSet(dirKey(industry, route, debouncedQuery), res);
         setItems(res.items);
         setTotal(res.total);
         setIndustries(res.industries);
