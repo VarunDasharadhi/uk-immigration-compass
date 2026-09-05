@@ -100,21 +100,21 @@ const NavItem: FC<NavItemProps> = ({ config, isActive, onClick }) => {
       className={`relative shrink-0 flex items-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all duration-300 text-xs sm:text-sm font-medium whitespace-nowrap group
         ${
           isActive
-            ? 'text-sky-200 bg-sky-400/10 shadow-sm ring-1 ring-sky-300/30'
-            : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+            ? 'text-white bg-gradient-to-r from-blue-600 to-cyan-500 shadow-md shadow-blue-500/30 dark:text-sky-200 dark:bg-sky-400/10 dark:shadow-none dark:ring-1 dark:ring-sky-300/30'
+            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
         }`}
     >
       <Icon
         className={`w-4 h-4 transition-colors ${
           isActive
-            ? 'text-sky-300'
-            : 'text-slate-500 group-hover:text-slate-300'
+            ? 'text-white dark:text-sky-300'
+            : 'text-slate-400 group-hover:text-slate-900 dark:text-slate-500 dark:group-hover:text-slate-300'
         }`}
       />
       {config.label}
       {isActive && (
         <span
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-sky-300 rounded-full mb-1.5"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full mb-1.5 dark:bg-sky-300"
           aria-hidden="true"
         />
       )}
@@ -128,7 +128,7 @@ const ThemeToggle: FC = () => {
     <button
       onClick={toggleTheme}
       aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="p-2.5 rounded-full text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-colors"
+      className="p-2.5 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors"
     >
       {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
     </button>
@@ -150,7 +150,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-slate-800 bg-gradient-to-r from-[#0a1428] via-slate-900 to-[#0a1428]"
+      className="sticky top-0 z-50 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-gradient-to-r dark:from-[#0a1428] dark:via-slate-900 dark:to-[#0a1428]"
       role="banner"
     >
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center justify-between">
@@ -164,10 +164,10 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
             <Compass className="text-white w-6 h-6" />
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="text-lg font-bold text-slate-100 tracking-tight leading-tight">
+            <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
               UK Immigration
             </h1>
-            <span className="block text-xs font-bold bg-gradient-to-r from-sky-300 to-cyan-300 bg-clip-text text-transparent tracking-[0.18em] leading-tight">
+            <span className="block text-xs font-bold bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-sky-300 dark:to-cyan-300 bg-clip-text text-transparent tracking-[0.18em] leading-tight">
               COMPASS
             </span>
           </div>
@@ -175,7 +175,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
         {/* Desktop Nav */}
         <nav
-          className="hidden md:flex items-center gap-2 bg-white/[0.06] p-1.5 rounded-full border border-white/10 shadow-sm"
+          className="hidden md:flex items-center gap-2 bg-slate-100 p-1.5 rounded-full border border-slate-200 shadow-sm dark:bg-white/[0.06] dark:border-white/10"
           role="navigation"
           aria-label="Main navigation"
         >
@@ -196,7 +196,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
       {/* Mobile Nav — always visible, no menu button needed */}
       <nav
-        className="md:hidden border-t border-white/10 bg-[#0c1428]/95 px-3 py-2 flex flex-wrap items-center gap-1.5"
+        className="md:hidden border-t border-slate-200 bg-white px-3 py-2 flex flex-wrap items-center gap-1.5 dark:border-slate-800 dark:bg-[#0c1428]/95"
         role="navigation"
         aria-label="Main navigation"
       >
