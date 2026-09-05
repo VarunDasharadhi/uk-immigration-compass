@@ -106,27 +106,27 @@ body {
   animation: orb-drift-3 28s ease-in-out infinite alternate;
 }
 @keyframes orb-drift-1 {
-  0% {
-    transform: translate(0, 0) scale(1);
+  from {
+    transform: translate(0, 0);
   }
-  100% {
-    transform: translate(7rem, 4rem) scale(1.15);
+  to {
+    transform: translate(7rem, 4rem);
   }
 }
 @keyframes orb-drift-2 {
-  0% {
-    transform: translate(0, 0) scale(1);
+  from {
+    transform: translate(0, 0);
   }
-  100% {
-    transform: translate(-6rem, -5rem) scale(0.9);
+  to {
+    transform: translate(-6rem, -5rem);
   }
 }
 @keyframes orb-drift-3 {
-  0% {
-    transform: translate(0, 0) scale(1);
+  from {
+    transform: translate(0, 0);
   }
-  100% {
-    transform: translate(5rem, -4rem) scale(1.1);
+  to {
+    transform: translate(5rem, -4rem);
   }
 }
 

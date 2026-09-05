@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { apiClient } from '../services/apiClient';
 import { GroundingChunk, NewsItem } from '../types';
 import { isOfficialUrl } from '../utils/newsParsing';
+import { Link } from 'react-router-dom';
 import { UpdateCard } from './news/UpdateCard';
 import { UpdateDetailModal } from './news/UpdateDetailModal';
 import { CategoryIcon, CATEGORIES } from './news/newsShared';
@@ -12,6 +13,8 @@ import {
 import { SectionMotif } from './SectionMotif';
 
 export const NewsDashboard: React.FC = () => {
+  // Keep the feed light: recent updates only, full history lives in the archive.
+  const FEED_LIMIT = 8;
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [sources, setSources] = useState<GroundingChunk[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -115,13 +118,23 @@ export const NewsDashboard: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {filteredItems.map((item, i) => (
-                  <Reveal key={item.id} delay={(i % 4) * 90}>
-                    <UpdateCard item={item} onClick={() => setSelectedItem(item)} />
-                  </Reveal>
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  {filteredItems.slice(0, FEED_LIMIT).map((item, i) => (
+                    <Reveal key={item.id} delay={(i % 4) * 90}>
+                      <UpdateCard item={item} onClick={() => setSelectedItem(item)} />
+                    </Reveal>
+                  ))}
+                </div>
+                {filteredItems.length > FEED_LIMIT && (
+                  <Link
+                    to="/updates/archive"
+                    className="block text-center bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-semibold px-6 py-3.5 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5"
+                  >
+                    View all {filteredItems.length} updates in the archive
+                  </Link>
+                )}
+              </>
             )}
           </div>
 
