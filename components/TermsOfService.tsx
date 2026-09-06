@@ -18,7 +18,7 @@ export const TermsOfService: React.FC = () => {
         <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-4">
           Terms of Use
         </h1>
-        <p className="text-slate-500 dark:text-slate-400">Last updated 4 July 2026</p>
+        <p className="text-slate-500 dark:text-slate-400">Last updated 6 September 2026</p>
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-700 p-6 md:p-10">
