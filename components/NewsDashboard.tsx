@@ -69,6 +69,22 @@ export const NewsDashboard: React.FC = () => {
         </div>
       </Reveal>
 
+      {/* Feed at a glance */}
+      {newsItems.length > 0 && (
+        <Reveal className="grid grid-cols-3 gap-4 mb-8">
+          {[
+            { value: newsItems.length.toLocaleString(), label: 'live updates tracked' },
+            { value: String(new Set(newsItems.map(n => n.category)).size), label: 'categories covered' },
+            { value: 'Daily', label: 'refresh from official sources' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white/70 dark:bg-slate-900/60 rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4 text-center">
+              <p className="text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">{stat.value}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{stat.label}</p>
+            </div>
+          ))}
+        </Reveal>
+      )}
+
       {/* Category Pills */}
       <div className="flex flex-wrap gap-2 mb-8 border-b border-sky-100/80 dark:border-slate-800 pb-2 sticky top-20 z-30 bg-sky-50/80 dark:bg-slate-950/95 backdrop-blur-sm py-2 -mx-2 px-2 rounded-b-xl">
         {CATEGORIES.map(cat => (
@@ -157,7 +173,7 @@ export const NewsDashboard: React.FC = () => {
               </div>
 
               <p className="text-xs text-slate-400 mb-6 leading-relaxed border-b border-slate-800 pb-4">
-                Every update comes from official Gov.uk, House of Commons Library, and Hansard records.
+                Every update comes from official GOV.UK, House of Commons Library, and Hansard records.
               </p>
 
               <div className="space-y-3">

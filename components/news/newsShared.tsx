@@ -91,5 +91,5 @@ export function getPrimaryLink(item: NewsItem, officialSources: GroundingChunk[]
     case 'Asylum': categoryUrl = 'https://www.gov.uk/browse/visas-immigration/asylum'; break;
   }
 
-  return { url: categoryUrl, label: 'View Section on Gov.uk' };
+  return { url: categoryUrl, label: 'View Section on GOV.UK' };
 }

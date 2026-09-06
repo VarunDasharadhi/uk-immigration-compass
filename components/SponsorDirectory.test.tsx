@@ -44,7 +44,7 @@ describe('SponsorDirectory', () => {
 
     expect(await screen.findByText('Tesco Stores Ltd')).toBeInTheDocument();
     expect(screen.getByText('Deloitte LLP')).toBeInTheDocument();
-    expect(screen.getByText('2 sponsors')).toBeInTheDocument();
+    expect(screen.getByText('licensed sponsors on the register')).toBeInTheDocument();
     expect(mockFetchSponsorDirectory).toHaveBeenCalledWith(
       expect.objectContaining({ industry: 'all', route: 'all', page: 1, pageSize: 24 })
     );

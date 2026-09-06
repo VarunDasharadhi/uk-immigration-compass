@@ -205,9 +205,18 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
       )}
 
       {!loading && !error && (
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4" aria-live="polite">
-          {total.toLocaleString()} sponsor{total === 1 ? '' : 's'}
-        </p>
+        <Reveal className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          {[
+            { value: total.toLocaleString(), label: 'licensed sponsors on the register' },
+            { value: String(industries.filter(f => f.id !== 'all' && f.id !== 'unknown').length), label: 'industries covered' },
+            { value: String(routes.filter(r => r.id !== 'all').length), label: 'visa routes listed' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white/70 dark:bg-slate-900/60 rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4 text-center">
+              <p className="text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">{stat.value}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{stat.label}</p>
+            </div>
+          ))}
+        </Reveal>
       )}
 
       {loading ? (

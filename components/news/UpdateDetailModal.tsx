@@ -90,7 +90,7 @@ export const UpdateDetailModal: React.FC<UpdateDetailModalProps> = ({ item, offi
                     {primary.label}
                   </a>
                   <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 text-center">
-                    Direct link to official Gov.uk content.
+                    Direct link to official GOV.UK content.
                   </p>
                 </div>
               </div>

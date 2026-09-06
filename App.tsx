@@ -362,7 +362,7 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
       className="bg-slate-900 border-t border-slate-800 pt-16 pb-12 mt-auto relative z-10"
       role="contentinfo"
     >
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-5 gap-12 mb-12">
         {/* Brand Section */}
         <div className="md:col-span-2 pr-8">
           <div className="flex items-center gap-3 mb-6">
@@ -380,6 +380,30 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
           </p>
         </div>
 
+        {/* Explore Section */}
+        <div>
+          <h3 className="font-bold text-slate-100 mb-6 text-sm uppercase tracking-wider">
+            Explore
+          </h3>
+          <ul className="space-y-3 text-sm text-slate-400">
+            {([
+              ['News & Updates', Tab.NEWS],
+              ['Sponsor Checker', Tab.SPONSORS],
+              ['Petitions', Tab.PETITIONS],
+              ['Jargon Buster', Tab.SIMPLIFIER],
+            ] as [string, Tab][]).map(([label, tab]) => (
+              <li key={tab}>
+                <button
+                  onClick={() => onNavigate(tab)}
+                  className="hover:text-blue-400 transition flex items-center gap-2"
+                >
+                  <ArrowRight className="w-3 h-3 text-slate-600" /> {label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         {/* Resources Section */}
         <div>
           <h3 className="font-bold text-slate-100 mb-6 text-sm uppercase tracking-wider">
@@ -388,7 +412,7 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
           <ul className="space-y-3 text-sm text-slate-400">
             <FooterLink
               href="https://www.gov.uk/browse/visas-immigration"
-              label="Gov.uk Visas"
+              label="GOV.UK Visas"
             />
             <FooterLink
               href="https://petition.parliament.uk/"
