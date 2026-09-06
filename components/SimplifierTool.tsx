@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { apiClient } from '../services/apiClient';
 import { stripMarkdown } from '../utils/text';
 import { BookOpen, Wand2, Copy, Check, FileText, Languages } from 'lucide-react';
-import { SectionMotif } from './SectionMotif';
+import { PageHero } from './PageHero';
 import { Reveal } from './Reveal';
 
 export const SimplifierTool: React.FC = () => {
@@ -31,22 +31,14 @@ export const SimplifierTool: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4 md:p-8">
-      {/* Header */}
-      <div className="relative isolate text-center mb-10">
-        <SectionMotif icon={Languages} className="-top-8 right-4 w-44 h-44 text-sky-500/10 dark:text-sky-400/10 -rotate-12" />
-        <div className="inline-flex items-center justify-center p-3 bg-sky-100 dark:bg-sky-950/40 rounded-2xl mb-6">
-          <BookOpen className="w-8 h-8 text-sky-600 dark:text-sky-400" />
-        </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-4">
-          Legal Jargon Buster
-        </h2>
-        <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Received a confusing Home Office letter, or stuck on a clause you can't unpick? Paste it
-          below and our AI will turn the legalese into plain, human English.
-        </p>
-      </div>
+    <div>
+      <PageHero
+        icon={BookOpen}
+        title="Legal Jargon Buster"
+        description="Received a confusing Home Office letter, or stuck on a clause you can't unpick? Paste it below and our AI will turn the legalese into plain, human English."
+      />
 
+      <div className="max-w-3xl mx-auto p-4 md:p-8">
       <Reveal>
         <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-700 overflow-hidden">
           {/* Official text */}
@@ -114,6 +106,7 @@ export const SimplifierTool: React.FC = () => {
           </div>
         </div>
       </Reveal>
+      </div>
     </div>
   );
 };

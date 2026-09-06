@@ -535,7 +535,6 @@ const MainApp: FC = () => {
 
       {/* Main Content */}
       <main className="flex-grow relative z-10" id="feed-start">
-        <div className="h-8 bg-gradient-to-b from-sky-100/80 dark:from-slate-900 to-transparent opacity-60 pointer-events-none" />
         <ErrorBoundary>
           <ContentComponent />
         </ErrorBoundary>

@@ -3,7 +3,7 @@ import { apiClient } from '../services/apiClient';
 import { SponsorCheckResult, SponsorChangeItem } from '../types';
 import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight, ExternalLink, ListFilter } from 'lucide-react';
 import { Reveal } from './Reveal';
-import { SectionMotif } from './SectionMotif';
+import { PageHero } from './PageHero';
 import { prefetchSponsorDirectory } from './SponsorDirectory';
 import { cacheGet, cacheSet, cacheHas } from '../utils/cache';
 import { buildCompanyDetailsLinks, buildOpenRolesLinks } from '../utils/companyLinks';
@@ -111,24 +111,15 @@ export const SponsorChecker: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto p-4 md:p-8">
-      {/* Header */}
-      <div className="relative isolate text-center mb-10">
-        <SectionMotif icon={Building2} className="-top-8 right-2 w-48 h-48 text-sky-500/10 dark:text-sky-400/10 rotate-6" />
-        <div className="inline-flex items-center justify-center p-3 bg-sky-100 dark:bg-sky-950/40 rounded-2xl mb-4">
-          <Building2 className="w-8 h-8 text-sky-600 dark:text-sky-400" />
-        </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-4">
-          Sponsor Checker & Updates
-        </h2>
-        <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Check whether an employer holds a valid UK sponsor licence, and keep up with the latest Home Office compliance news.
-        </p>
-      </div>
-
+    <div>
+      <PageHero
+        icon={Building2}
+        title="Sponsor Checker & Updates"
+        description="Check whether an employer holds a valid UK sponsor licence, and keep up with the latest Home Office compliance news."
+      >
       {/* Check / Browse toggle */}
-      <div className="flex justify-center mb-8">
-        <div role="tablist" className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800 gap-1">
+      <div className="flex justify-center">
+        <div role="tablist" className="inline-flex p-1 rounded-xl bg-white/10 ring-1 ring-white/15 gap-1">
           <button
             type="button"
             role="tab"
@@ -137,7 +128,7 @@ export const SponsorChecker: React.FC = () => {
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               view === 'check'
                 ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                : 'text-slate-300 hover:text-white'
             }`}
           >
             <Search className="w-4 h-4" />
@@ -151,7 +142,7 @@ export const SponsorChecker: React.FC = () => {
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               view === 'browse'
                 ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                : 'text-slate-300 hover:text-white'
             }`}
           >
             <ListFilter className="w-4 h-4" />
@@ -159,6 +150,7 @@ export const SponsorChecker: React.FC = () => {
           </button>
         </div>
       </div>
+      </PageHero>
 
       {view === 'browse' && <SponsorDirectory onSelectCompany={handleDirectorySelect} />}
 

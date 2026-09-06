@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { apiClient } from '../services/apiClient';
 import { PetitionsResult } from '../types';
 import { ScrollText, TrendingUp, PenTool, AlertCircle } from 'lucide-react';
-import { SectionMotif } from './SectionMotif';
+import { PageHero } from './PageHero';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
 import { Reveal } from './Reveal';
@@ -68,16 +68,19 @@ export const PetitionTracker: React.FC = () => {
     : { axis: '#475569', barActive: '#4f46e5', barInactive: '#e2e8f0', tooltipCursor: '#f8fafc', tooltipBg: '#ffffff', tooltipText: '#1e293b' };
 
   return (
-    <div className="max-w-[1600px] mx-auto p-4 md:p-8">
-      <Reveal className="relative isolate mb-10 text-center md:text-left">
-        <SectionMotif icon={ScrollText} className="-top-8 right-0 w-44 h-44 text-indigo-500/10 dark:text-indigo-400/10 rotate-12" />
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">
-             <ScrollText className="w-3.5 h-3.5" />
-             Parliament Live
-        </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Active Petitions</h2>
-        <p className="text-lg text-slate-500 dark:text-slate-400 mt-2 font-light">Follow the public's voice on immigration policy, and watch signatures climb toward a Commons debate.</p>
-      </Reveal>
+    <div>
+      <PageHero
+        icon={ScrollText}
+        title="Active Petitions"
+        description="Follow the public's voice on immigration policy, and watch signatures climb toward a Commons debate."
+        badge={
+          <>
+            <ScrollText className="w-3.5 h-3.5" />
+            Parliament Live
+          </>
+        }
+      />
+      <div className="max-w-[1600px] mx-auto p-4 md:p-8">
 
       <div className="mb-12">
         {/* Engagement Chart */}
@@ -241,6 +244,7 @@ export const PetitionTracker: React.FC = () => {
                 ))}
             </div>
         )}
+      </div>
       </div>
     </div>
   );

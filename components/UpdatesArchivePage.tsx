@@ -5,9 +5,9 @@ import { NewsItem } from '../types';
 import { UpdateCard } from './news/UpdateCard';
 import { UpdateDetailModal } from './news/UpdateDetailModal';
 import { CategoryIcon, CATEGORIES } from './news/newsShared';
-import { ArrowLeft, Search, AlertCircle, Filter, Compass, Archive } from 'lucide-react';
+import { ArrowLeft, Search, AlertCircle, Filter, Archive } from 'lucide-react';
 import { AnimatedBackground } from './AnimatedBackground';
-import { SectionMotif } from './SectionMotif';
+import { PageHero } from './PageHero';
 import { setPageMeta } from '../utils/seo';
 import { Reveal } from './Reveal';
 
@@ -75,19 +75,13 @@ export const UpdatesArchivePage: React.FC = () => {
         </div>
       </header>
 
+      <PageHero
+        icon={Archive}
+        title="Update Archive"
+        description="Every immigration update from the past year, searchable and organised by category."
+      />
+
       <div className="relative z-10 max-w-[1600px] mx-auto p-4 md:p-8">
-        <SectionMotif icon={Archive} className="top-2 right-2 w-40 h-40 text-slate-900/[0.05] dark:text-slate-400/10 -rotate-12" />
-        <Reveal>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/40 ring-1 ring-white/25">
-              <Compass className="text-white w-6 h-6" />
-            </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Update Archive</h1>
-          </div>
-          <p className="text-slate-600 dark:text-slate-400 mb-8 text-lg font-light max-w-2xl">
-            Every immigration update from the past year, searchable and organised by category.
-          </p>
-        </Reveal>
 
         {/* Search */}
         <div className="relative mb-6 max-w-xl">
