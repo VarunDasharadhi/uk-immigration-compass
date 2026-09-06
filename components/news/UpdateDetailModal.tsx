@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { NewsItem, GroundingChunk } from '../../types';
 import { StatusBadge, parseTimeline, getPrimaryLink } from './newsShared';
 import {
-  ExternalLink, Clock, Activity, GitCommitVertical, X, Link as LinkIcon,
+  ExternalLink, Clock, Activity, GitCommitVertical, X,
 } from 'lucide-react';
 
 interface UpdateDetailModalProps {
@@ -92,30 +92,6 @@ export const UpdateDetailModal: React.FC<UpdateDetailModalProps> = ({ item, offi
                   <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 text-center">
                     Direct link to official Gov.uk content.
                   </p>
-                </div>
-
-                {/* Supplementary Sources */}
-                <div className="space-y-3">
-                  {officialSources.slice(0, 4).map((source, idx) => (
-                    <a
-                      key={idx}
-                      href={source.web?.uri}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all group dark:bg-slate-900 dark:border-slate-700 dark:hover:border-blue-600"
-                    >
-                      <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0 dark:bg-blue-950/40 dark:text-blue-400">
-                          <LinkIcon className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-slate-700 truncate group-hover:text-blue-700 dark:text-slate-300 dark:group-hover:text-blue-400">{source.web?.title}</p>
-                          <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">{source.web?.uri}</p>
-                        </div>
-                      </div>
-                      <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-blue-500 dark:text-slate-600 dark:group-hover:text-blue-400" />
-                    </a>
-                  ))}
                 </div>
               </div>
             </div>

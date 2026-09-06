@@ -82,6 +82,20 @@ export const UpdatesArchivePage: React.FC = () => {
       />
 
       <div className="relative z-10 max-w-[1600px] mx-auto p-4 md:p-8">
+        {items.length > 0 && (
+          <Reveal className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            {[
+              { value: items.length.toLocaleString(), label: 'updates tracked this year' },
+              { value: String(new Set(items.map(i => i.category)).size), label: 'categories covered' },
+              { value: items[0]?.date || '', label: 'most recent update' },
+            ].map((stat, i) => (
+              <div key={i} className="bg-white/70 dark:bg-slate-900/60 rounded-2xl border border-slate-200/70 dark:border-slate-800 p-5 text-center">
+                <p className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">{stat.value}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </Reveal>
+        )}
 
         {/* Search */}
         <div className="relative mb-6 max-w-xl">

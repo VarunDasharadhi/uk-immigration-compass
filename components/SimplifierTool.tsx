@@ -5,6 +5,12 @@ import { BookOpen, Wand2, Copy, Check, FileText, Languages } from 'lucide-react'
 import { PageHero } from './PageHero';
 import { Reveal } from './Reveal';
 
+const EXAMPLES = [
+  'The applicant was granted limited leave to remain pursuant to paragraph 276B of the Immigration Rules.',
+  'Your application has been refused under paragraph 322(5) on the ground of false representation.',
+  'The Secretary of State is satisfied that the sponsor is able to maintain the migrant at the appropriate level.',
+];
+
 export const SimplifierTool: React.FC = () => {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -61,6 +67,19 @@ export const SimplifierTool: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <span className="text-xs text-slate-400 dark:text-slate-500">Try one:</span>
+              {EXAMPLES.map((ex, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setInput(ex)}
+                  className="text-xs font-medium text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/40 rounded-full px-3 py-1 hover:border-sky-300 dark:hover:border-sky-700 transition-colors"
+                >
+                  Example {i + 1}
+                </button>
+              ))}
+            </div>
             <button
               onClick={handleSimplify}
               disabled={loading || !input.trim()}
