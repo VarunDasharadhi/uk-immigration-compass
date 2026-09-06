@@ -459,9 +459,44 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
 // MAIN APP COMPONENT
 // ===================================================
 
+// Tab slugs for the URL hash so a refresh (or a shared link) restores the
+// exact tab the user was on: #/sponsors, #/petitions, and so on.
+const TAB_HASHES: Record<Tab, string> = {
+  [Tab.NEWS]: '',
+  [Tab.SPONSORS]: 'sponsors',
+  [Tab.PETITIONS]: 'petitions',
+  [Tab.SIMPLIFIER]: 'jargon-buster',
+  [Tab.PRIVACY]: 'privacy',
+  [Tab.TERMS]: 'terms',
+};
+
+function tabFromHash(): Tab {
+  // "sponsors/browse" -> "sponsors": the first segment picks the tab, any
+  // suffix (like the Browse view) is that tab's own business.
+  const slug = window.location.hash.replace(/^#\/?/, '').split('/')[0].replace(/\/+$/, '');
+  const match = (Object.keys(TAB_HASHES) as Tab[]).find(t => TAB_HASHES[t] === slug);
+  return match ?? Tab.NEWS;
+}
+
 const MainApp: FC = () => {
-  const [activeTab, setActiveTab] = useState<Tab>(Tab.NEWS);
+  const [activeTab, setActiveTab] = useState<Tab>(() =>
+    window.location.pathname === '/' ? tabFromHash() : Tab.NEWS
+  );
   const navigate = useNavigate();
+
+  // Keep the hash in step with the active tab (replaceState: no history spam
+  // from quick tab flips; Back still leaves the site as before).
+  useEffect(() => {
+    const slug = TAB_HASHES[activeTab];
+    // The Sponsors tab carries a /browse suffix managed by SponsorChecker.
+    const suffix = activeTab === Tab.SPONSORS && window.location.hash.includes('/browse')
+      ? '/browse'
+      : '';
+    const target = slug ? `#/${slug}${suffix}` : '';
+    if (window.location.hash !== target) {
+      window.history.replaceState(null, '', `${window.location.pathname}${target}`);
+    }
+  }, [activeTab]);
 
   // Per-tab page titles and descriptions so each section can rank for its
   // own search topic. The index.html defaults cover the News feed.

@@ -11,7 +11,17 @@ import { CompanyLookupResult } from '../types';
 import { SponsorDirectory } from './SponsorDirectory';
 
 export const SponsorChecker: React.FC = () => {
-  const [view, setView] = useState<'check' | 'browse'>('check');
+  // The view lives in the URL hash (#/sponsors/browse) so a refresh keeps it.
+  const [view, setView] = useState<'check' | 'browse'>(() =>
+    window.location.hash.includes('#/sponsors/browse') ? 'browse' : 'check'
+  );
+  const switchView = (next: 'check' | 'browse') => {
+    setView(next);
+    const hash = next === 'browse' ? '#/sponsors/browse' : '#/sponsors';
+    if (window.location.hash !== hash) {
+      window.history.replaceState(null, '', `${window.location.pathname}${hash}`);
+    }
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SponsorCheckResult | null>(null);
@@ -124,7 +134,7 @@ export const SponsorChecker: React.FC = () => {
             type="button"
             role="tab"
             aria-selected={view === 'check'}
-            onClick={() => setView('check')}
+            onClick={() => switchView('check')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               view === 'check'
                 ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-sm'
@@ -138,7 +148,7 @@ export const SponsorChecker: React.FC = () => {
             type="button"
             role="tab"
             aria-selected={view === 'browse'}
-            onClick={() => setView('browse')}
+            onClick={() => switchView('browse')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               view === 'browse'
                 ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-sm'
@@ -152,6 +162,7 @@ export const SponsorChecker: React.FC = () => {
       </div>
       </PageHero>
 
+      <div className="max-w-[1600px] mx-auto p-4 md:p-8">
       {view === 'browse' && <SponsorDirectory onSelectCompany={handleDirectorySelect} />}
 
       {view === 'check' && (
@@ -467,6 +478,7 @@ export const SponsorChecker: React.FC = () => {
         </div>
       </div>
       )}
+      </div>
     </div>
   );
 };
