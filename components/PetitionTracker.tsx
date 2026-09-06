@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '../services/apiClient';
 import { PetitionsResult } from '../types';
-import { ScrollText, TrendingUp, PenTool, AlertCircle } from 'lucide-react';
+import { ScrollText, Milestone, PenTool, AlertCircle } from 'lucide-react';
 import { PageHero } from './PageHero';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
-import { useTheme } from '../contexts/ThemeContext';
 import { Reveal } from './Reveal';
 import { cacheGet, cacheSet, cacheHas } from '../utils/cache';
 
 export const PetitionTracker: React.FC = () => {
-  const { theme } = useTheme();
   const [data, setData] = useState<PetitionsResult | null>(() => cacheGet<PetitionsResult>('petitions') ?? null);
   const [loading, setLoading] = useState<boolean>(() => !cacheHas('petitions'));
   const [error, setError] = useState<string | null>(null);
@@ -47,25 +44,17 @@ export const PetitionTracker: React.FC = () => {
   const formatSignatures = (signatures: string | number) =>
     typeof signatures === 'number' ? signatures.toLocaleString() : signatures;
 
-  // Live snapshot, one bar per petition currently shown — Parliament's API
-  // only gives a point-in-time count, not history, so this compares today's
-  // real petitions rather than faking a week-over-week trend. Horizontal bars
-  // so full petition titles read as row labels instead of colliding under
-  // rotated/truncated x-axis text.
-  const chartData = petitions.map(p => ({
-    name: p.title.length > 34 ? `${p.title.slice(0, 34).trim()}…` : p.title,
-    fullTitle: p.title,
-    signatures: typeof p.signatures === 'number' ? p.signatures : 0,
-  }));
-  const topIndex = chartData.reduce((best, d, i) => (d.signatures > (chartData[best]?.signatures ?? -1) ? i : best), 0);
-  const chartHeight = Math.max(chartData.length * 44, 120);
+  // Pictorial "road to a debate" lanes: the five most-signed petitions,
+  // each drawn as a journey along the real petition milestones (10k forces
+  // a government response, 100k gets it considered for a Commons debate).
+  const numericSigs = (p: { signatures: string | number }) =>
+    typeof p.signatures === 'number' ? p.signatures : parseInt(String(p.signatures).replace(/[^0-9]/g, '')) || 0;
 
-  // Recharts renders via inline SVG props, not CSS classes, so it doesn't
-  // pick up Tailwind's `dark:` variants automatically — pick literal colors
-  // based on the active theme instead.
-  const chartColors = theme === 'dark'
-    ? { axis: '#94a3b8', barActive: '#818cf8', barInactive: '#334155', tooltipCursor: '#1e293b', tooltipBg: '#1e293b', tooltipText: '#e2e8f0' }
-    : { axis: '#475569', barActive: '#4f46e5', barInactive: '#e2e8f0', tooltipCursor: '#f8fafc', tooltipBg: '#ffffff', tooltipText: '#1e293b' };
+  const topPetitions = [...petitions]
+    .sort((a, b) => numericSigs(b) - numericSigs(a))
+    .slice(0, 5);
+
+  const wembleyFill = totalSignatures / 90000;
 
   return (
     <div>
@@ -83,68 +72,127 @@ export const PetitionTracker: React.FC = () => {
       <div className="max-w-[1600px] mx-auto p-4 md:p-8">
 
       <div className="mb-12">
-        {/* Engagement Chart */}
-        <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-black/30 relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-8">
+        <Reveal>
+        <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-black/30 relative overflow-hidden">
+          <div className="flex items-start justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 flex items-center justify-center">
+                    <Milestone className="w-5 h-5 text-sky-600 dark:text-sky-400" />
                 </div>
                 <div>
-                    <h3 className="font-bold text-slate-800 dark:text-slate-100">Top Petitions by Signatures</h3>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">Live from UK Parliament</p>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100">The Road to a Commons Debate</h3>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">Live from UK Parliament: every petition's journey, checkpoint by checkpoint</p>
                 </div>
             </div>
-            <span className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                {totalSignatures >= 1000 ? `${(totalSignatures / 1000).toFixed(1)}k` : totalSignatures}
-            </span>
+            <div className="text-right flex-shrink-0">
+                <span className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight block leading-tight">
+                    {totalSignatures >= 1000 ? `${(totalSignatures / 1000).toFixed(1)}k` : totalSignatures}
+                </span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">signatures</span>
+            </div>
           </div>
 
-          <div className="relative z-10" style={{ height: chartData.length > 0 ? chartHeight : 256 }}>
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={chartData}
-                  layout="vertical"
-                  margin={{ top: 4, right: 56, bottom: 4, left: 4 }}
-                  barCategoryGap={12}
-                >
-                  <XAxis type="number" hide />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    width={220}
-                    tick={{ fill: chartColors.axis, fontSize: 12.5, fontWeight: 500 }}
-                  />
-                  <Tooltip
-                    cursor={{ fill: chartColors.tooltipCursor }}
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', backgroundColor: chartColors.tooltipBg }}
-                    itemStyle={{ color: chartColors.tooltipText, fontWeight: 600 }}
-                    labelFormatter={(_label, payload) => payload?.[0]?.payload?.fullTitle || _label}
-                    formatter={(value: number) => [value.toLocaleString(), 'Signatures']}
-                  />
-                  <Bar dataKey="signatures" radius={[0, 4, 4, 0]} barSize={22}>
-                      {chartData.map((_entry, index) => (
-                          <Cell key={`cell-${index}`} fill={index === topIndex ? chartColors.barActive : chartColors.barInactive} />
-                      ))}
-                      <LabelList
-                        dataKey="signatures"
-                        position="right"
-                        formatter={(value: number) => value.toLocaleString()}
-                        style={{ fill: chartColors.axis, fontSize: 12, fontWeight: 700 }}
-                      />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500">
-                {loading ? 'Loading live petition data…' : 'No petition data available.'}
-              </div>
-            )}
+          {totalSignatures >= 90000 && (
+            <p className="text-sm text-slate-500 dark:text-slate-400 bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/40 rounded-xl px-4 py-2.5 mb-6">
+              That crowd would fill Wembley Stadium {wembleyFill.toFixed(1)} times.
+            </p>
+          )}
+
+          {/* Stage legend */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-8 text-xs">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600 flex-shrink-0" />
+              Opened on the petition site
+            </div>
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 flex-shrink-0" />
+              <span><strong className="text-slate-700 dark:text-slate-300">10,000</strong> · government must respond</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex-shrink-0" />
+              <span><strong className="text-slate-700 dark:text-slate-300">100,000</strong> · considered for a debate</span>
+            </div>
           </div>
+
+          {loading ? (
+            <div className="space-y-6 animate-pulse">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-2/3"></div>
+                  <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full"></div>
+                </div>
+              ))}
+            </div>
+          ) : topPetitions.length > 0 ? (
+            <div className="space-y-7">
+              {topPetitions.map((p) => {
+                const sig = numericSigs(p);
+                const pct = Math.min((sig / 100000) * 100, 100);
+                const hit10k = sig >= 10000;
+                const hit100k = sig >= 100000;
+                return (
+                  <div key={p.id}>
+                    <div className="flex items-baseline justify-between gap-3 mb-2">
+                      <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{p.title}</h4>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex-shrink-0 tabular-nums">
+                        {formatSignatures(sig)}
+                      </span>
+                    </div>
+                    <div className="relative h-2.5 rounded-full bg-slate-100 dark:bg-slate-800">
+                      <div
+                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-700"
+                        style={{ width: `${Math.max(pct, 1.5)}%` }}
+                      />
+                      {/* Government-response checkpoint at 10k */}
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
+                        style={{ left: '10%' }}
+                        title="10,000 signatures: the government must respond"
+                      >
+                        <div className={`w-4 h-4 rounded-full border-2 transition-colors ${hit10k
+                          ? 'bg-emerald-400 border-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,0.25)]'
+                          : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600'}`} />
+                      </div>
+                      {/* Debate checkpoint at 100k */}
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
+                        style={{ left: '100%' }}
+                        title="100,000 signatures: considered for a Commons debate"
+                      >
+                        <div className={`w-5 h-5 rounded-full border-2 transition-colors ${hit100k
+                          ? 'bg-gradient-to-br from-blue-500 to-cyan-400 border-white dark:border-slate-900 shadow-[0_0_0_3px_rgba(56,189,248,0.3)]'
+                          : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600'}`} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1.5 h-4">
+                      {hit100k ? (
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+                          Reached the debate threshold
+                        </span>
+                      ) : hit10k ? (
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                          Government response earned
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                          {(10000 - sig).toLocaleString()} more signatures for a government response
+                        </span>
+                      )}
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-auto tabular-nums">
+                        {Math.floor(pct)}% of the way
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="h-24 flex items-center justify-center text-sm text-slate-400 dark:text-slate-500">
+              {loading ? 'Loading live petition data…' : 'No petition data available.'}
+            </div>
+          )}
         </div>
+        </Reveal>
       </div>
 
       {/* Structured Petitions List */}
