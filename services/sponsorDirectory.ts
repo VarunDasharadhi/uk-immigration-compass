@@ -28,18 +28,33 @@ interface IndustryMapArtifact {
   sections: Record<string, string>;
   companies: Record<string, string[]>;
 }
-const artifact = industryMapArtifact as IndustryMapArtifact;
+const committedArtifact = industryMapArtifact as IndustryMapArtifact;
+// Starts as the committed artifact; a successful industry-map refresh
+// (services/industryMapRefresh.ts, triggered by the monthly cron) swaps in a
+// newer map via applyIndustryMapOverride.
+let activeArtifact: IndustryMapArtifact = committedArtifact;
 
 // Built once, lazily: canonical company name -> SIC section id.
 let industryByCanonicalName: Map<string, SicSectionId> | null = null;
 function industryOf(canonicalCompanyName: string): SicSectionId | undefined {
   if (!industryByCanonicalName) {
     industryByCanonicalName = new Map();
-    for (const [section, names] of Object.entries(artifact.companies)) {
+    for (const [section, names] of Object.entries(activeArtifact.companies)) {
       for (const name of names) industryByCanonicalName.set(name, section as SicSectionId);
     }
   }
   return industryByCanonicalName.get(canonicalCompanyName);
+}
+
+/**
+ * Swaps in a freshly built industry map and invalidates the lazy lookup so
+ * subsequent directory queries reflect it immediately. Called by
+ * services/industryMapRefresh.ts after a rebuild, and at server boot for
+ * instances picking up a map another instance built.
+ */
+export function applyIndustryMapOverride(next: IndustryMapArtifact): void {
+  activeArtifact = next;
+  industryByCanonicalName = null;
 }
 
 export interface DirectoryRow {
@@ -191,7 +206,7 @@ export function queryDirectory(params: DirectoryQueryParams): SponsorDirectoryRe
     items: paginate(filtered, page, pageSize).map(toEntry),
     industries,
     routes,
-    mapGeneratedAt: artifact.generatedAt,
+    mapGeneratedAt: activeArtifact.generatedAt,
   };
 }
 

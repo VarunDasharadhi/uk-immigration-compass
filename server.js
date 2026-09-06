@@ -186,6 +186,13 @@ app.get('*', (_req, res) => {
 // Called at module load time so it runs in both Express server and Vercel serverless.
 aiService.initCache();
 
+// Pick up an industry map rebuilt by another instance (stored in the shared
+// cache) — dynamic import so the cron-only download/streaming machinery stays
+// out of the normal boot path.
+import('./services/industryMapRefresh.js')
+  .then(m => m.applyStoredIndustryMap())
+  .catch(err => console.error('[IndustryMap] Boot pickup failed:', err));
+
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
