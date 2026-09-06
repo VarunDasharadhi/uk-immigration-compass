@@ -157,7 +157,7 @@ export const NewsDashboard: React.FC = () => {
               </div>
 
               <p className="text-xs text-slate-400 mb-6 leading-relaxed border-b border-slate-800 pb-4">
-                We ground our AI in data exclusively from Gov.uk, the House of Commons Library, and official Hansard records.
+                Every update comes from official Gov.uk, House of Commons Library, and Hansard records.
               </p>
 
               <div className="space-y-3">

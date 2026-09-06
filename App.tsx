@@ -444,11 +444,11 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
       {/* Bottom Bar */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
         <p className="text-xs text-slate-400">
-          © {currentYear} UK Immigration Compass. Built on official data, explained by AI.
+          © {currentYear} UK Immigration Compass. Built on official public data.
         </p>
         <div className="bg-amber-950/30 border border-amber-900/40 text-amber-200/70 px-4 py-2 rounded-lg text-xs font-medium max-w-xl text-center md:text-right">
-          This is an AI-assisted information tool, not legal advice. For anything
-          that matters to your case, verify with GOV.UK or a qualified adviser.
+          This is an information tool, not legal advice. For anything that
+          matters to your case, verify with GOV.UK or a qualified adviser.
         </div>
       </div>
     </footer>
