@@ -228,21 +228,21 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {items.map((item, i) => (
-              <Reveal key={`${item.name}-${i}`} delay={(i % 3) * 80}>
+              <Reveal key={`${item.name}-${i}`} delay={(i % 3) * 80} className="h-full">
               <button
                 type="button"
                 onClick={() => onSelectCompany(item.name)}
                 aria-label={`Check ${item.name}`}
-                className="text-left bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group"
+                className="h-full w-full flex flex-col text-left bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group"
               >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h4 className="font-semibold text-slate-900 dark:text-slate-100 leading-snug">{item.name}</h4>
+                <div className="flex items-start justify-between gap-2">
+                  <h4 className="font-semibold text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 min-h-[2.75rem]">{item.name}</h4>
                   <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 flex-shrink-0 mt-0.5" />
                 </div>
-                {item.town && <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">{item.town}</p>}
-                <div className="flex flex-wrap gap-1.5 mb-3">
+                {item.town && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.town}</p>}
+                <div className="flex flex-wrap gap-1.5 mt-3">
                   {item.routes.slice(0, 2).map(r => (
                     <span key={r} className="px-2 py-0.5 rounded-full bg-slate-50 border border-slate-200 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 truncate max-w-[140px]">
                       {r}
@@ -254,8 +254,8 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
                     </span>
                   )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-semibold dark:bg-indigo-950/40 dark:text-indigo-300">
+                <div className="flex items-center justify-between gap-2 mt-auto pt-3">
+                  <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-semibold dark:bg-indigo-950/40 dark:text-indigo-300 truncate max-w-[220px]">
                     {item.industryLabel}
                   </span>
                   {item.rating !== 'Unknown' && (
