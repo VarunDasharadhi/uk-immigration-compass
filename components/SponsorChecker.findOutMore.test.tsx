@@ -44,7 +44,7 @@ const NOT_FOUND_RESULT = {
 async function searchFor(name: string) {
   const user = userEvent.setup();
   await user.type(screen.getByPlaceholderText(/Acme Solutions Ltd/i), name);
-  await user.click(screen.getByRole('button', { name: /Verify License Status/i }));
+  await user.click(screen.getByRole('button', { name: /Verify Licence Status/i }));
 }
 
 describe('SponsorChecker - Find out more links', () => {

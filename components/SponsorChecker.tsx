@@ -192,7 +192,7 @@ export const SponsorChecker: React.FC = () => {
                 disabled={loading || !searchTerm}
                 className="w-full py-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/30 dark:disabled:from-slate-700 dark:disabled:to-slate-700 flex items-center justify-center gap-2"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify License Status'}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify Licence Status'}
               </button>
               {searchError && (
                 <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium mt-2">

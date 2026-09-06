@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '../services/apiClient';
-import { PetitionsResult } from '../types';
+import { PetitionItem, PetitionsResult } from '../types';
 import { ScrollText, Milestone, PenTool, AlertCircle } from 'lucide-react';
 import { PageHero } from './PageHero';
+import { PetitionDetailModal } from './PetitionDetailModal';
 import { Reveal } from './Reveal';
 import { cacheGet, cacheSet, cacheHas } from '../utils/cache';
 
 export const PetitionTracker: React.FC = () => {
   const [data, setData] = useState<PetitionsResult | null>(() => cacheGet<PetitionsResult>('petitions') ?? null);
+  const [selected, setSelected] = useState<PetitionItem | null>(null);
   const [loading, setLoading] = useState<boolean>(() => !cacheHas('petitions'));
   const [error, setError] = useState<string | null>(null);
 
@@ -224,11 +226,11 @@ export const PetitionTracker: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {petitions.map((petition, i) => (
                     <Reveal key={petition.id} delay={(i % 3) * 90}>
-                    <a
-                        href={petition.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group flex flex-col h-full">
+                    <button
+                        type="button"
+                        onClick={() => setSelected(petition)}
+                        aria-label={`Open details for ${petition.title}`}
+                        className="text-left bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group flex flex-col h-full w-full cursor-pointer">
                         <div className="flex justify-between items-start mb-4">
                             <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border
                                 ${petition.status.toLowerCase().includes('open') ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/40' :
@@ -264,7 +266,7 @@ export const PetitionTracker: React.FC = () => {
                                 ></div>
                              </div>
                         </div>
-                    </a>
+                    </button>
                     </Reveal>
                 ))}
             </div>
@@ -294,6 +296,12 @@ export const PetitionTracker: React.FC = () => {
         )}
       </div>
       </div>
+      {selected && (
+        <PetitionDetailModal
+          petition={selected}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </div>
   );
 };

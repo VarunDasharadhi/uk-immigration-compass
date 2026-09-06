@@ -120,7 +120,7 @@ export const NewsDashboard: React.FC = () => {
                     onClick={() => setSelectedCategory('All')}
                     className="mt-4 text-blue-600 text-sm font-semibold hover:underline"
                   >
-                    View All Updates
+                    View all updates
                   </button>
                 )}
               </div>
