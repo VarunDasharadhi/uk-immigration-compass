@@ -508,6 +508,10 @@ const MainApp: FC = () => {
   );
   const navigate = useNavigate();
 
+  // The catch-all route renders MainApp for every unknown path; those are
+  // soft-404s and get their own panel + noindex rather than a fake News feed.
+  const unknownPath = window.location.pathname !== '/';
+
   // Keep the hash in step with the active tab (replaceState: no history spam
   // from quick tab flips; Back still leaves the site as before).
   useEffect(() => {
@@ -558,10 +562,16 @@ const MainApp: FC = () => {
   };
 
   useEffect(() => {
+    // Unknown paths (anything but "/") are soft-404s: noindex them instead of
+    // letting Google index infinite junk URLs under the catch-all route.
+    if (unknownPath) {
+      setPageMeta('Page not found', 'This page does not exist.', null);
+      return;
+    }
     const meta = pageMeta[activeTab] ?? pageMeta[Tab.NEWS];
-    setPageMeta(meta.title, meta.description);
+    setPageMeta(meta.title, meta.description, '/');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  }, [activeTab, unknownPath]);
 
   const ContentComponent = useMemo(() => {
     return CONTENT_MAP[activeTab] || NewsDashboard;
@@ -575,6 +585,25 @@ const MainApp: FC = () => {
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  if (unknownPath) {
+    return (
+      <div className="relative min-h-screen bg-gradient-to-b from-sky-50 via-blue-50 to-cyan-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col items-center justify-center text-center p-8">
+        <p className="text-6xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">404</p>
+        <h1 className="text-xl font-bold text-slate-700 dark:text-slate-300 mt-4">That page doesn't exist</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-md">
+          The address may be mistyped or the page may have moved. Everything lives
+          on the home page.
+        </p>
+        <button
+          onClick={() => { window.location.href = '/'; }}
+          className="mt-6 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5"
+        >
+          Go to the home page
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
