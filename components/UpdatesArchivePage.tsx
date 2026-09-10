@@ -25,7 +25,8 @@ export const UpdatesArchivePage: React.FC = () => {
   useEffect(() => {
     setPageMeta(
       'UK Immigration Updates Archive',
-      'Search every UK immigration update from the past year: Home Office rule changes, visa news and parliamentary activity, organised by category.'
+      'Search every UK immigration update from the past year: Home Office rule changes, visa news and parliamentary activity, organised by category.',
+      '/updates/archive'
     );
   }, []);
 
