@@ -42,6 +42,13 @@ highlights:
 - Perf: session cache (`utils/cache.ts`) + directory prefetch; orbs are radial gradients.
 - SEO layer live: per-tab titles/canonicals, soft-404 noindex, sitemap+robots, self-hosted
   Inter, FAQ+JSON-LD, Search Console verified. Homepage indexed on Google (archive pending).
+- eu.org domain: `uk-immigration-compass.eu.org` added to the Vercel project (awaiting EU.org
+  approval, request 20260911175705-arf-8129 stored — volunteers process periodically); Cloudflare
+  free zone created with the 3 Vercel records. When it resolves, update SITE_URL/canonicals/
+  sitemap/robots in code (all hardcode the vercel.app URL) and set up redirects.
+- Monitoring: weekly indexing check runs Mondays 10am (automation automation-3b7a8467). The
+  Search Console request-indexing quota exhausted again on 2026-09-11; per-account Google-side,
+  retry when it lets you.
 - URL hash restores tab + sponsors view on refresh.
 
 Design gotcha that bit twice this session: when converting `bg-gradient-to-*` to a solid
