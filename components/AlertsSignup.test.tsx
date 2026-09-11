@@ -44,6 +44,11 @@ describe('AlertsSignup', () => {
     );
     // Success replaces the form rather than leaving a second submit path
     expect(screen.queryByRole('button', { name: 'Get email alerts' })).not.toBeInTheDocument();
+
+    // ...but a mistyped address is recoverable without a page reload
+    await user.click(screen.getByRole('button', { name: 'Use a different address' }));
+    expect(screen.getByRole('button', { name: 'Get email alerts' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Email address')).toHaveValue('');
   });
 
   it('shows the server error message when signup fails', async () => {

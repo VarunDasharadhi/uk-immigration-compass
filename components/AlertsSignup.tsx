@@ -41,9 +41,20 @@ export const AlertsSignup: React.FC = () => {
       </div>
 
       {state === 'done' ? (
-        <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 p-4 rounded-xl dark:bg-emerald-950/30 dark:border-emerald-900/40">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-emerald-800 dark:text-emerald-300 leading-relaxed">{message}</p>
+        <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl dark:bg-emerald-950/30 dark:border-emerald-900/40">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-emerald-800 dark:text-emerald-300 leading-relaxed">{message}</p>
+          </div>
+          {/* Typo insurance: the server cannot tell a mistyped address from a
+              real one, so the only recovery is signing up again */}
+          <button
+            type="button"
+            onClick={() => { setEmail(''); setMessage(''); setState('idle'); }}
+            className="mt-3 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:underline"
+          >
+            Use a different address
+          </button>
         </div>
       ) : (
         <>

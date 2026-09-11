@@ -822,8 +822,10 @@ async function recordSignatureSnapshot(petitions: PetitionItem[]): Promise<Petit
 
 export async function refreshPetitions(): Promise<PetitionsResult> {
   const byId = new Map<number, ParliamentPetitionAttributes>();
-  for (const term of PETITION_SEARCH_TERMS) {
-    const results = await fetchPetitionsForTerm(term);
+  // Terms are independent searches; fetching them concurrently keeps the
+  // nightly cron's worst case at one page-timeout deep instead of five.
+  const resultsPerTerm = await Promise.all(PETITION_SEARCH_TERMS.map(fetchPetitionsForTerm));
+  for (const results of resultsPerTerm) {
     for (const { id, attrs } of results) {
       if (!PETITION_TITLE_RELEVANCE.test(attrs.action)) continue;
       if (!byId.has(id)) byId.set(id, attrs);
@@ -915,7 +917,9 @@ export async function getUpdatesArchive(): Promise<NewsItem[]> {
 // feeds — so this has no MOCK/no-key fallback, just cache-then-refresh.
 export async function getPetitions(): Promise<PetitionsResult> {
   const cached = await cache.get('petitions:v3');
-  if (cached) return cached;
+  // Shape guard per the cached-value gotcha: never serve a value the client
+  // can't render, refresh instead.
+  if (cached && Array.isArray(cached.petitions)) return cached;
   return refreshPetitions();
 }
 
