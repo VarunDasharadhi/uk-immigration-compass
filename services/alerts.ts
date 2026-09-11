@@ -46,14 +46,25 @@ interface StoredSubscriber extends SubscriberRecord {
 }
 
 function parseRecord(raw: unknown): SubscriberRecord | null {
-  if (!raw || typeof raw !== 'string') return null;
-  try {
-    const parsed = JSON.parse(raw);
-    if (parsed && (parsed.status === 'pending' || parsed.status === 'confirmed') && typeof parsed.token === 'string') {
-      return parsed;
+  // Upstash's REST client auto-deserializes JSON-looking values, so the same
+  // hash can yield a string locally-written and an object remotely-read
+  // (the exact trap in GOTCHAS.md). Accept both shapes defensively.
+  let value: any = raw;
+  if (typeof value === 'string') {
+    try {
+      value = JSON.parse(value);
+    } catch {
+      return null;
     }
-  } catch {
-    // Corrupt entry behaves like an absent one
+  }
+  if (
+    value &&
+    typeof value === 'object' &&
+    (value.status === 'pending' || value.status === 'confirmed') &&
+    typeof value.token === 'string' &&
+    value.token
+  ) {
+    return value as SubscriberRecord;
   }
   return null;
 }

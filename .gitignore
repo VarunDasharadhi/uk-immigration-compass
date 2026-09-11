@@ -24,3 +24,4 @@ logs/
 /*.jpg
 
 .vercel
+.env*

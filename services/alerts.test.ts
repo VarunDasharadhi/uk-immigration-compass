@@ -178,6 +178,22 @@ describe('alerts: confirm and unsubscribe', () => {
     expect(await confirmSubscriber('')).toBe(false);
   });
 
+  it('matches tokens when Upstash hands back auto-deserialized objects instead of strings', async () => {
+    // The upstash REST client JSON-parses stored values on read; production
+    // hash reads arrive as objects, not the strings our writes sent.
+    redis.hgetall.mockResolvedValue({
+      'reader@example.com': { status: 'pending', token: TOKEN, subscribedAt: 'x' },
+    });
+    expect(await confirmSubscriber(TOKEN)).toBe(true);
+    expect(redis.hset).toHaveBeenCalledWith('alerts:subscribers', {
+      'reader@example.com': expect.stringContaining('"status":"confirmed"'),
+    });
+
+    redis.hset.mockClear();
+    expect(await unsubscribeByToken(TOKEN)).toBe(true);
+    expect(redis.hdel).toHaveBeenCalledWith('alerts:subscribers', 'reader@example.com');
+  });
+
   it('removes the subscriber on unsubscribe and reports unknown tokens', async () => {
     redis.hgetall.mockResolvedValue({ 'reader@example.com': pendingRecord() });
     expect(await unsubscribeByToken(TOKEN)).toBe(true);
@@ -277,7 +293,8 @@ describe('alerts: sendDigestIfDue', () => {
   it('emails each confirmed subscriber and advances the watermark', async () => {
     redis.get.mockResolvedValue(String(SINCE));
     redis.hgetall.mockResolvedValue({
-      'a@example.com': JSON.stringify({ status: 'confirmed', token: 't-a', subscribedAt: 'x' }),
+      // Object shape: what Upstash actually returns for JSON hash values
+      'a@example.com': { status: 'confirmed', token: 't-a', subscribedAt: 'x' },
       'b@example.com': pendingRecord('t-b'), // pending subscribers get nothing
     });
 
