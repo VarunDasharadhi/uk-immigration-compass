@@ -100,21 +100,21 @@ const NavItem: FC<NavItemProps> = ({ config, isActive, onClick }) => {
       className={`relative shrink-0 flex items-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all duration-300 text-xs sm:text-sm font-medium whitespace-nowrap group
         ${
           isActive
-            ? 'text-white bg-gradient-to-r from-blue-600 to-cyan-500 shadow-md shadow-blue-500/30 dark:text-sky-200 dark:bg-sky-400/10 dark:shadow-none dark:ring-1 dark:ring-sky-300/30'
+            ? 'text-white bg-gradient-to-r bg-blue-700 shadow-md shadow-blue-500/30 dark:text-blue-200 dark:bg-blue-400/10 dark:shadow-none dark:ring-1 dark:ring-blue-400/30'
             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
         }`}
     >
       <Icon
         className={`w-4 h-4 transition-colors ${
           isActive
-            ? 'text-white dark:text-sky-300'
+            ? 'text-white dark:text-blue-300'
             : 'text-slate-400 group-hover:text-slate-900 dark:text-slate-500 dark:group-hover:text-slate-300'
         }`}
       />
       {config.label}
       {isActive && (
         <span
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full mb-1.5 dark:bg-sky-300"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full mb-1.5 dark:bg-blue-400"
           aria-hidden="true"
         />
       )}
@@ -160,14 +160,14 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
           className="flex items-center gap-3 cursor-pointer group hover:opacity-80 transition-opacity"
           aria-label="Go to home"
         >
-          <div className="w-10 h-10 bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/40 ring-1 ring-white/25 group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300">
+          <div className="w-10 h-10 bg-gradient-to-br bg-blue-800 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/40 ring-1 ring-white/25 group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300">
             <Compass className="text-white w-6 h-6" />
           </div>
           <div className="flex flex-col justify-center">
             <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
               UK Immigration
             </h1>
-            <span className="block text-xs font-bold bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-sky-300 dark:to-cyan-300 bg-clip-text text-transparent tracking-[0.18em] leading-tight">
+            <span className="block text-xs font-bold bg-blue-700 dark:bg-blue-400 bg-clip-text text-transparent tracking-[0.18em] leading-tight">
               COMPASS
             </span>
           </div>
@@ -244,7 +244,7 @@ const HeroSection: FC<HeroSectionProps> = ({ onExploreClick }) => {
           {/* Heading */}
           <h2 className="text-4xl md:text-7xl font-extrabold tracking-tight mb-8 text-white leading-[1.3] md:leading-[1.2] pb-4">
             Clarity in a changing <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-cyan-300 to-teal-300 inline-block pb-2">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-indigo-200 to-indigo-400 inline-block pb-2">
               Immigration System.
             </span>
           </h2>
@@ -259,7 +259,7 @@ const HeroSection: FC<HeroSectionProps> = ({ onExploreClick }) => {
           {/* CTA Button */}
           <button
             onClick={onExploreClick}
-            className="group bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white pl-8 pr-6 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-blue-500/30 hover:shadow-cyan-500/40 hover:-translate-y-0.5 flex items-center gap-3"
+            className="group bg-blue-700 hover:bg-blue-600 text-white pl-8 pr-6 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-blue-500/30 hover:shadow-blue-600/30 hover:-translate-y-0.5 flex items-center gap-3"
             aria-label="See the latest updates"
           >
             See What's Changed
@@ -366,7 +366,7 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
         {/* Brand Section */}
         <div className="md:col-span-2 pr-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-lg flex items-center justify-center shadow-md shadow-sky-500/30">
+            <div className="w-8 h-8 bg-gradient-to-br bg-blue-800 rounded-lg flex items-center justify-center shadow-md shadow-blue-900/30">
               <Compass className="text-white w-5 h-5" />
             </div>
             <span className="text-lg font-bold text-slate-100">
@@ -588,7 +588,7 @@ const MainApp: FC = () => {
 
   if (unknownPath) {
     return (
-      <div className="relative min-h-screen bg-gradient-to-b from-sky-50 via-blue-50 to-cyan-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col items-center justify-center text-center p-8">
+      <div className="relative min-h-screen bg-gradient-to-b from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col items-center justify-center text-center p-8">
         <p className="text-6xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">404</p>
         <h1 className="text-xl font-bold text-slate-700 dark:text-slate-300 mt-4">That page doesn't exist</h1>
         <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-md">
@@ -597,7 +597,7 @@ const MainApp: FC = () => {
         </p>
         <button
           onClick={() => { window.location.href = '/'; }}
-          className="mt-6 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5"
+          className="mt-6 bg-blue-700 hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5"
         >
           Go to the home page
         </button>
@@ -607,7 +607,7 @@ const MainApp: FC = () => {
 
   return (
     <div
-      className="relative min-h-screen bg-gradient-to-b from-sky-50 via-blue-50 to-cyan-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-900 dark:selection:text-blue-100 overflow-x-hidden"
+      className="relative min-h-screen bg-gradient-to-b from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-900 dark:selection:text-blue-100 overflow-x-hidden"
       role="application"
     >
       {/* Ambient animated backdrop (waves + orbs) */}

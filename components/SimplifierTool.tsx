@@ -62,7 +62,7 @@ export const SimplifierTool: React.FC = () => {
             </div>
             <textarea
               id="jargon-input"
-              className="w-full h-40 md:h-48 p-4 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-400 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:ring-sky-900/40 dark:focus:border-sky-500 transition-all text-base leading-relaxed"
+              className="w-full h-40 md:h-48 p-4 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:ring-blue-900/40 dark:focus:border-blue-500 transition-all text-base leading-relaxed"
               placeholder="Paste text like: 'The leave to remain is granted pursuant to paragraph 276B of the Immigration Rules...'"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -74,7 +74,7 @@ export const SimplifierTool: React.FC = () => {
                   key={i}
                   type="button"
                   onClick={() => setInput(ex)}
-                  className="text-xs font-medium text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/40 rounded-full px-3 py-1 hover:border-sky-300 dark:hover:border-sky-700 transition-colors"
+                  className="text-xs font-medium text-blue-700 dark:text-blue-400 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-full px-3 py-1 hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
                 >
                   Example {i + 1}
                 </button>
@@ -83,7 +83,7 @@ export const SimplifierTool: React.FC = () => {
             <button
               onClick={handleSimplify}
               disabled={loading || !input.trim()}
-              className="mt-4 w-full py-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 disabled:from-slate-300 disabled:to-slate-300 dark:disabled:from-slate-700 dark:disabled:to-slate-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
+              className="mt-4 w-full py-4 bg-blue-700 hover:bg-blue-600 disabled:from-slate-300 disabled:to-slate-300 dark:disabled:from-slate-700 dark:disabled:to-slate-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -98,9 +98,9 @@ export const SimplifierTool: React.FC = () => {
           </div>
 
           {/* Plain English result */}
-          <div className="border-t border-slate-100 dark:border-slate-800 bg-sky-50/60 dark:bg-slate-950/40 p-6 md:p-8">
+          <div className="border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 p-6 md:p-8">
             <div className="flex items-center justify-between mb-4">
-              <label className="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 flex items-center gap-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex items-center gap-2">
                 <Languages className="w-4 h-4" /> Plain English
               </label>
               {output && (

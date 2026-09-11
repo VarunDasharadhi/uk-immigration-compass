@@ -49,14 +49,14 @@ body {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #e0f2fe;
+  background: #e2e8f0;
 }
 ::-webkit-scrollbar-thumb {
-  background: #7dd3fc;
+  background: #94a3b8;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #38bdf8;
+  background: #64748b;
 }
 .dark ::-webkit-scrollbar-track {
   background: #1e293b;
@@ -128,7 +128,7 @@ body {
   height: 36rem;
   top: -8rem;
   left: -10rem;
-  background: radial-gradient(circle closest-side, rgba(125, 211, 252, 0.5), rgba(125, 211, 252, 0) 72%);
+  background: radial-gradient(circle closest-side, rgba(129, 140, 248, 0.32), rgba(129, 140, 248, 0) 72%);
   animation: orb-drift-1 24s ease-in-out infinite alternate;
 }
 .dark .orb-1 {
@@ -139,7 +139,7 @@ body {
   height: 30rem;
   top: 30%;
   right: -8rem;
-  background: radial-gradient(circle closest-side, rgba(165, 243, 252, 0.45), rgba(165, 243, 252, 0) 72%);
+  background: radial-gradient(circle closest-side, rgba(148, 163, 184, 0.38), rgba(148, 163, 184, 0) 72%);
   animation: orb-drift-2 20s ease-in-out infinite alternate;
 }
 .dark .orb-2 {
@@ -150,7 +150,7 @@ body {
   height: 28rem;
   bottom: 18%;
   left: 22%;
-  background: radial-gradient(circle closest-side, rgba(191, 219, 254, 0.45), rgba(191, 219, 254, 0) 72%);
+  background: radial-gradient(circle closest-side, rgba(165, 180, 252, 0.35), rgba(165, 180, 252, 0) 72%);
   animation: orb-drift-3 28s ease-in-out infinite alternate;
 }
 .dark .orb-3 {

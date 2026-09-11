@@ -3,7 +3,7 @@ import React, { FC } from 'react';
 interface SectionMotifProps {
   icon: React.ComponentType<{ className?: string }>;
   /** Position, size, colour and rotation classes, e.g.
-      "-top-10 right-0 w-44 h-44 text-sky-500/10 -rotate-12" */
+      "-top-10 right-0 w-44 h-44 text-slate-500/10 -rotate-12" */
   className?: string;
 }
 

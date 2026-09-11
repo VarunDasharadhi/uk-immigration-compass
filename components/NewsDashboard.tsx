@@ -86,14 +86,14 @@ export const NewsDashboard: React.FC = () => {
       )}
 
       {/* Category Pills */}
-      <div className="flex flex-wrap gap-2 mb-8 border-b border-sky-100/80 dark:border-slate-800 pb-2 sticky top-20 z-30 bg-sky-50/80 dark:bg-slate-950/95 backdrop-blur-sm py-2 -mx-2 px-2 rounded-b-xl">
+      <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-200 dark:border-slate-800 pb-2 sticky top-20 z-30 bg-slate-100/85 dark:bg-slate-950/95 backdrop-blur-sm py-2 -mx-2 px-2 rounded-b-xl">
         {CATEGORIES.map(cat => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200
             ${selectedCategory === cat
-              ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30 translate-y-[-1px]'
+              ? 'bg-gradient-to-r bg-blue-700 text-white shadow-lg shadow-blue-500/30 translate-y-[-1px]'
               : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:text-slate-200'}`}
           >
             {cat !== 'All' && <CategoryIcon category={cat} />}
@@ -152,7 +152,7 @@ export const NewsDashboard: React.FC = () => {
                 {filteredItems.length > FEED_LIMIT && (
                   <Link
                     to="/updates/archive"
-                    className="block text-center bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-semibold px-6 py-3.5 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5"
+                    className="block text-center bg-blue-700 hover:bg-blue-600 text-white font-semibold px-6 py-3.5 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5"
                   >
                     View all {filteredItems.length} updates in the archive
                   </Link>

@@ -78,8 +78,8 @@ export const PetitionTracker: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-black/30 relative overflow-hidden">
           <div className="flex items-start justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 flex items-center justify-center">
-                    <Milestone className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <Milestone className="w-5 h-5 text-blue-700 dark:text-blue-400" />
                 </div>
                 <div>
                     <h3 className="font-bold text-slate-800 dark:text-slate-100">The Road to a Commons Debate</h3>
@@ -95,7 +95,7 @@ export const PetitionTracker: React.FC = () => {
           </div>
 
           {totalSignatures >= 90000 && (
-            <p className="text-sm text-slate-500 dark:text-slate-400 bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/40 rounded-xl px-4 py-2.5 mb-6">
+            <p className="text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 mb-6">
               That crowd would fill Wembley Stadium {wembleyFill.toFixed(1)} times.
             </p>
           )}
@@ -111,7 +111,7 @@ export const PetitionTracker: React.FC = () => {
               <span><strong className="text-slate-700 dark:text-slate-300">10,000</strong> · government must respond</span>
             </div>
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex-shrink-0" />
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-600 flex-shrink-0" />
               <span><strong className="text-slate-700 dark:text-slate-300">100,000</strong> · considered for a debate</span>
             </div>
           </div>
@@ -142,7 +142,7 @@ export const PetitionTracker: React.FC = () => {
                     </div>
                     <div className="relative h-2.5 rounded-full bg-slate-100 dark:bg-slate-800">
                       <div
-                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-700"
+                        className="absolute inset-y-0 left-0 bg-blue-600 rounded-full transition-all duration-700"
                         style={{ width: `${Math.max(pct, 1.5)}%` }}
                       />
                       {/* Government-response checkpoint at 10k */}
@@ -162,13 +162,13 @@ export const PetitionTracker: React.FC = () => {
                         title="100,000 signatures: considered for a Commons debate"
                       >
                         <div className={`w-5 h-5 rounded-full border-2 transition-colors ${hit100k
-                          ? 'bg-gradient-to-br from-blue-500 to-cyan-400 border-white dark:border-slate-900 shadow-[0_0_0_3px_rgba(56,189,248,0.3)]'
+                          ? 'bg-blue-600 border-white dark:border-slate-900 shadow-[0_0_0_3px_rgba(37,99,235,0.25)]'
                           : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600'}`} />
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-1.5 h-4">
                       {hit100k ? (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
                           Reached the debate threshold
                         </span>
                       ) : hit10k ? (
@@ -261,7 +261,7 @@ export const PetitionTracker: React.FC = () => {
                              {/* Progress Bar */}
                              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
                                 <div
-                                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-1000"
+                                    className="h-full bg-blue-600 rounded-full transition-all duration-1000"
                                     style={{ width: `${getProgressWidth(petition.signatures)}%` }}
                                 ></div>
                              </div>

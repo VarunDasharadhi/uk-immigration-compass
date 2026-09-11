@@ -137,7 +137,7 @@ export const SponsorChecker: React.FC = () => {
             onClick={() => switchView('check')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               view === 'check'
-                ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-sm'
+                ? 'bg-gradient-to-r bg-blue-700 text-white shadow-sm'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
@@ -151,7 +151,7 @@ export const SponsorChecker: React.FC = () => {
             onClick={() => switchView('browse')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               view === 'browse'
-                ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-sm'
+                ? 'bg-gradient-to-r bg-blue-700 text-white shadow-sm'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
@@ -190,7 +190,7 @@ export const SponsorChecker: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading || !searchTerm}
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/30 dark:disabled:from-slate-700 dark:disabled:to-slate-700 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-blue-700 hover:bg-blue-600 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/30 dark:disabled:from-slate-700 dark:disabled:to-slate-700 flex items-center justify-center gap-2"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify Licence Status'}
               </button>
@@ -430,7 +430,7 @@ export const SponsorChecker: React.FC = () => {
 
           <div className="relative z-10">
             <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-              <RefreshCcw className="w-5 h-5 text-sky-400" />
+              <RefreshCcw className="w-5 h-5 text-blue-400" />
               Recently Added &amp; Removed
             </h3>
             <p className="text-xs text-slate-400 mb-6 leading-relaxed border-b border-slate-800 pb-4">
@@ -456,7 +456,7 @@ export const SponsorChecker: React.FC = () => {
                     className="w-full text-left flex items-start justify-between gap-3 border-b border-slate-800 pb-3 last:border-0 last:pb-0 group cursor-pointer"
                   >
                     <div className="min-w-0">
-                      <h4 className="text-sm font-semibold text-slate-100 truncate group-hover:text-sky-300 transition-colors">{item.company}</h4>
+                      <h4 className="text-sm font-semibold text-slate-100 truncate group-hover:text-blue-300 transition-colors">{item.company}</h4>
                       <p className="text-xs text-slate-400 mt-0.5 truncate">{item.town || 'UK'}</p>
                     </div>
                     <div className="text-right flex-shrink-0">

@@ -118,7 +118,7 @@ export const PetitionDetailModal: FC<PetitionDetailModalProps> = ({ petition, on
                     href={petition.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-semibold hover:from-blue-500 hover:to-cyan-400 transition-all shadow-lg shadow-blue-500/30 w-full"
+                    className="flex items-center justify-center gap-2 px-6 py-4 bg-blue-700 text-white rounded-xl font-semibold hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/30 w-full"
                   >
                     <ExternalLink className="w-4 h-4" />
                     View or sign this petition
@@ -130,7 +130,7 @@ export const PetitionDetailModal: FC<PetitionDetailModalProps> = ({ petition, on
             {/* Journey Sidebar (1 col) — mirrors the news modal's Policy Timeline */}
             <div className="md:col-span-1 border-l border-slate-100 dark:border-slate-800 md:pl-8">
               <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-6 flex items-center gap-2">
-                <Milestone className="w-4 h-4 text-sky-600 dark:text-sky-400" /> Petition journey
+                <Milestone className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Petition journey
               </h4>
 
               <div className="relative space-y-10">
@@ -171,7 +171,7 @@ export const PetitionDetailModal: FC<PetitionDetailModalProps> = ({ petition, on
                   <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Right now</div>
                   <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-700"
+                      className="h-full bg-blue-600 rounded-full transition-all duration-700"
                       style={{ width: `${Math.max(pct, 1.5)}%` }}
                     />
                   </div>

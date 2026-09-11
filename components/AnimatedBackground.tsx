@@ -23,13 +23,13 @@ export const AnimatedBackground: FC = () => {
 
       {/* Stacked waves anchored to the bottom edge of the viewport */}
       <div className="absolute inset-x-0 bottom-0 h-[42vh]">
-        <div className="wave-track wave-1 text-sky-200/45 dark:text-slate-800/40">
+        <div className="wave-track wave-1 text-slate-300/60 dark:text-slate-800/40">
           <WaveGlyph path={WAVE_PATH_A} />
         </div>
-        <div className="wave-track wave-2 text-cyan-300/40 dark:text-blue-900/35">
+        <div className="wave-track wave-2 text-slate-400/40 dark:text-blue-900/30">
           <WaveGlyph path={WAVE_PATH_B} />
         </div>
-        <div className="wave-track wave-3 text-sky-300/55 dark:text-slate-800/55">
+        <div className="wave-track wave-3 text-slate-300/60 dark:text-slate-800/50">
           <WaveGlyph path={WAVE_PATH_A} />
         </div>
       </div>

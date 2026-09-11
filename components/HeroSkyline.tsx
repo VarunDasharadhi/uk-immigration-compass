@@ -31,7 +31,7 @@ export const HeroSkyline: FC = () => (
       <path d="M424 66 L480 4 L536 66 Z" />
       <rect x="477" y="0" width="6" height="10" />
       {/* The glowing clock face */}
-      <circle cx="480" cy="92" r="19" className="fill-sky-300/25" />
+      <circle cx="480" cy="92" r="19" className="fill-indigo-300/25" />
       {/* Middle blocks and a church tower */}
       <rect x="560" y="190" width="120" height="50" />
       <rect x="700" y="158" width="100" height="82" />

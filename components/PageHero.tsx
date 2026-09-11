@@ -30,12 +30,12 @@ export const PageHero: FC<PageHeroProps> = ({ icon: Icon, title, description, ba
 
     <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6 py-12 md:py-16 text-center">
       {badge && (
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/15 text-sky-300 text-xs font-bold uppercase tracking-wider mb-5">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/15 text-blue-300 text-xs font-bold uppercase tracking-wider mb-5">
           {badge}
         </div>
       )}
       <div className="inline-flex items-center justify-center p-3 bg-white/10 ring-1 ring-white/15 rounded-2xl mb-5">
-        <Icon className="w-8 h-8 text-sky-300" />
+        <Icon className="w-8 h-8 text-blue-300" />
       </div>
       <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">
         {title}

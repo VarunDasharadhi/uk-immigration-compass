@@ -62,7 +62,7 @@ export const UpdatesArchivePage: React.FC = () => {
   }, [selectedCategory, query]);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-sky-50 via-blue-50 to-cyan-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 overflow-x-hidden">
+    <div className="relative min-h-screen bg-gradient-to-b from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 overflow-x-hidden">
       <AnimatedBackground />
       <header className="sticky top-0 z-50 border-b border-slate-800 bg-gradient-to-r from-[#0a1428] via-slate-900 to-[#0a1428]">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center gap-4">
@@ -118,7 +118,7 @@ export const UpdatesArchivePage: React.FC = () => {
               onClick={() => setSelectedCategory(cat)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200
               ${selectedCategory === cat
-                ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30 translate-y-[-1px]'
+                ? 'bg-blue-700 text-white shadow-lg shadow-blue-500/25 translate-y-[-1px]'
                 : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:text-slate-200'}`}
             >
               {cat !== 'All' && <CategoryIcon category={cat} />}
