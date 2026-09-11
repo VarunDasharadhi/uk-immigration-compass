@@ -17,16 +17,26 @@ through OpenRouter (`google/gemini-2.5-flash`). No Firebase or GCP dependency de
 
 ## Where the code stands
 
-`main` was at `08e061b` ("feat: monthly automatic industry-map refresh via cron") before this
-task's `chore/agent-contract` branch was cut off it. Most recent work (per `git log`) added a
-monthly cron to keep the Companies House industry map fresh, refreshed legal page dates, added
-stats strips to News and Browse Sponsors, and trimmed the news modal to its real source.
+`main` is at `49e06fb`; everything through it is committed AND deployed (Vercel auto-deploys
+from main). 90/90 tests, type-check, lint and production build all green. See
+`docs/journal/2026-09-11.md` for the full session narrative; highlights:
 
-Per the last real `HANDOFF.md` entry (2026-07-17, before this task tombstoned that file): the
-industry-filterable Sponsor Directory shipped end to end (offline Companies House bulk-data join,
-86,668 of 125,796 sponsor names matched, 68.9%), 90/90 tests passing at the time, clean
-type-check, clean production build. A Vercel Hobby-plan Serverless Function limit deploy failure
-caused by that feature was found and fixed in the same session (see `GOTCHAS.md`).
+- Mature navy palette everywhere (sky/cyan/teal fully retired); light-mode header is white
+  with navy logo tile + `#16243d` nav tray; every tab opens a dark PageHero band with themed
+  silhouette art (`components/bandArt.tsx`).
+- Petitions: milestone lanes replace Recharts (dropped from bundle); news-style detail modal.
+- Sponsors: sidebar lists real register movements (`/api/sponsor-changes`, ledger-backed).
+- Perf: session cache (`utils/cache.ts`) + directory prefetch; orbs are radial gradients.
+- SEO layer live: per-tab titles/canonicals, soft-404 noindex, sitemap+robots, self-hosted
+  Inter, FAQ+JSON-LD, Search Console verified. Homepage indexed on Google (archive pending).
+- URL hash restores tab + sponsors view on refresh.
+
+Design gotcha that bit twice this session: when converting `bg-gradient-to-*` to a solid
+colour, the dead gradient class must be removed or it inherits the page gradient's white
+stops (caused the "white logo tile / washed pills" bugs).
+
+User rules (strict): deploy only on an explicit "deploy"; commit locally otherwise. UK
+English, no em dashes, professional navy look (bright cyan and flag colours both rejected).
 
 Verification gate: `npm test` (jest), `npm run type-check` (`tsc --noEmit`), `npm run lint`
 (`eslint src --ext .ts,.tsx`). All three are real, codified npm scripts.
