@@ -13,17 +13,18 @@ function q(value: string): string {
   return encodeURIComponent(value);
 }
 
-// Affiliate routing for the Adzuna link. Adzuna runs its affiliate programme
-// through AWIN, whose standard deep-link format is
-// awin1.com/cread.php?awinmid=<merchant>&awinaffid=<publisher>&ued=<target>.
-// Fill in both IDs once the AWIN publisher account is approved (awinmid is
-// Adzuna's merchant ID on AWIN, awinaffid is the publisher ID); with either
-// empty the Adzuna link stays a plain, untracked search URL. These are
-// source constants rather than build-time env vars on purpose: they change
-// about as rarely as this file, and keeping them here avoids dragging
+// Affiliate routing: generic AWIN deep-link wrapper
+// (awin1.com/cread.php?awinmid=<merchant>&awinaffid=<publisher>&ued=<target>).
+// STATUS 2026-09-12: checked AWIN's advertiser directory with an approved
+// publisher account (3087715) and no job board runs a programme there
+// (Adzuna, CV-Library, Reed, Totaljobs, Indeed, ZipRecruiter all absent).
+// Adzuna's own scheme is a direct partnership enquiry gated on traffic. The
+// wrapper stays dormant until a relevant AWIN merchant appears; with either
+// constant empty every link below is a plain, untracked search URL. These
+// are source constants rather than build-time env vars on purpose: they
+// change about as rarely as this file, and keeping them here avoids dragging
 // import.meta into a module that jest tests directly. LinkedIn and Google
-// have no affiliate programmes, and Indeed's is invite-only with a
-// publisher-specific link format, so those three are deliberately plain.
+// have no affiliate programmes at all, so those stay plain regardless.
 const AWIN_MERCHANT_ID = '';
 const AWIN_AFFILIATE_ID = '';
 
