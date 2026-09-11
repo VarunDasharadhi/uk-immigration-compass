@@ -13,6 +13,8 @@ import { fileURLToPath } from 'url';
 import compression from 'compression';
 import * as aiService from './services/aiService.js';
 import * as companiesHouse from './services/companiesHouse.js';
+import * as alerts from './services/alerts.js';
+import { checkRateLimit, clientKey } from './services/rateLimit.js';
 import { queryDirectory, isValidIndustryId } from './services/sponsorDirectory.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -165,6 +167,55 @@ app.get('/api/company-lookup', async (req, res) => {
   } catch (err) {
     console.error('[/api/company-lookup]', err);
     res.json({ companiesHouseUrl: null, natureOfBusiness: null });
+  }
+});
+
+// ─── email alerts ─────────────────────────────────────────────────────────────
+// No dedicated api/alerts.ts: api/ is at Vercel Hobby's 12-function cap, so
+// these ride on the api/index.ts catch-all (this Express app) in production.
+
+app.post('/api/alerts/subscribe', async (req, res) => {
+  try {
+    // Sending a confirmation email has real per-request cost; fail open if the
+    // limiter itself errors, matching the pattern in api/company-lookup.ts.
+    const { allowed } = await checkRateLimit(`alerts:${clientKey(req)}`).catch(() => ({ allowed: true }));
+    if (!allowed) {
+      return res.status(429).json({ error: 'Too many requests. Please try again in a minute.' });
+    }
+    const result = await alerts.subscribe(String(req.body?.email || ''));
+    if (result.ok) return res.status(result.code).json({ ok: true, message: result.message });
+    return res.status(result.code).json({ error: result.message });
+  } catch (err) {
+    console.error('[/api/alerts/subscribe]', err);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+});
+
+app.get('/api/alerts/confirm', async (req, res) => {
+  const token = String(req.query.token || '');
+  try {
+    const ok = await alerts.confirmSubscriber(token);
+    res
+      .status(ok ? 200 : 404)
+      .type('html')
+      .send(ok ? alerts.confirmationPage() : alerts.invalidTokenPage());
+  } catch (err) {
+    console.error('[/api/alerts/confirm]', err);
+    res.status(500).type('html').send(alerts.invalidTokenPage());
+  }
+});
+
+app.get('/api/alerts/unsubscribe', async (req, res) => {
+  const token = String(req.query.token || '');
+  try {
+    const ok = await alerts.unsubscribeByToken(token);
+    res
+      .status(ok ? 200 : 404)
+      .type('html')
+      .send(ok ? alerts.unsubscribePage() : alerts.invalidTokenPage());
+  } catch (err) {
+    console.error('[/api/alerts/unsubscribe]', err);
+    res.status(500).type('html').send(alerts.invalidTokenPage());
   }
 });
 

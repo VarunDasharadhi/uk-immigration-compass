@@ -70,8 +70,17 @@ class ApiClient {
       });
 
       if (!response.ok) {
+        // Prefer the server's own error text (endpoints return {error}) so the
+        // UI can show what actually went wrong instead of a bare status line.
+        let serverMessage: string | undefined;
+        try {
+          const body = await response.json();
+          serverMessage = body?.error || body?.message;
+        } catch {
+          // Non-JSON error body; fall back to the status line below
+        }
         throw {
-          message: `API Error: ${response.status} ${response.statusText}`,
+          message: serverMessage || `API Error: ${response.status} ${response.statusText}`,
           status: response.status,
           endpoint,
         } as ApiError;
@@ -126,6 +135,17 @@ class ApiClient {
     return this.fetch<{ simplified: string }>('/api/simplify', {
       method: 'POST',
       body: JSON.stringify({ complexText }),
+    });
+  }
+
+  /**
+   * Sign an email address up for change alerts. Double opt-in: the server
+   * emails a confirmation link before anything is ever sent.
+   */
+  async subscribeToAlerts(email: string): Promise<{ ok: boolean; message?: string }> {
+    return this.fetch<{ ok: boolean; message?: string }>('/api/alerts/subscribe', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
     });
   }
 

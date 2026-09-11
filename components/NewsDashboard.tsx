@@ -7,6 +7,7 @@ import { UpdateCard } from './news/UpdateCard';
 import { UpdateDetailModal } from './news/UpdateDetailModal';
 import { CategoryIcon, CATEGORIES } from './news/newsShared';
 import { Reveal } from './Reveal';
+import { AlertsSignup } from './AlertsSignup';
 import { cacheGet, cacheSet, cacheHas } from '../utils/cache';
 import {
   ExternalLink, Filter, AlertCircle, CheckCircle2, Newspaper,
@@ -161,8 +162,11 @@ export const NewsDashboard: React.FC = () => {
             )}
           </div>
 
-          {/* Sidebar Sources */}
+          {/* Sidebar */}
           <aside className="lg:col-span-4 xl:col-span-3">
+            <Reveal delay={100} className="mb-6">
+              <AlertsSignup />
+            </Reveal>
             <Reveal delay={150} className="sticky top-28">
               <div className="bg-slate-900 text-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl ring-1 ring-white/10">
               <div className="flex items-center justify-between mb-6">
