@@ -5,6 +5,7 @@ import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Lo
 import { Reveal } from './Reveal';
 import { PageHero } from './PageHero';
 import { prefetchSponsorDirectory } from './SponsorDirectory';
+import { SponsorsArt } from './bandArt';
 import { cacheGet, cacheSet, cacheHas } from '../utils/cache';
 import { buildCompanyDetailsLinks, buildOpenRolesLinks } from '../utils/companyLinks';
 import { CompanyLookupResult } from '../types';
@@ -126,6 +127,7 @@ export const SponsorChecker: React.FC = () => {
         icon={Building2}
         title="Sponsor Checker & Updates"
         description="Check whether an employer holds a valid UK sponsor licence, and keep up with the latest Home Office compliance news."
+        art={<SponsorsArt />}
       >
       {/* Check / Browse toggle */}
       <div className="flex justify-center">
@@ -137,7 +139,7 @@ export const SponsorChecker: React.FC = () => {
             onClick={() => switchView('check')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               view === 'check'
-                ? 'bg-gradient-to-r bg-blue-700 text-white shadow-sm'
+                ? 'bg-blue-700 text-white shadow-sm'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
@@ -151,7 +153,7 @@ export const SponsorChecker: React.FC = () => {
             onClick={() => switchView('browse')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               view === 'browse'
-                ? 'bg-gradient-to-r bg-blue-700 text-white shadow-sm'
+                ? 'bg-blue-700 text-white shadow-sm'
                 : 'text-slate-300 hover:text-white'
             }`}
           >

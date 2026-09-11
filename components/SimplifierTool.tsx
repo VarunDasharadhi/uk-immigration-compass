@@ -3,6 +3,7 @@ import { apiClient } from '../services/apiClient';
 import { stripMarkdown } from '../utils/text';
 import { BookOpen, Wand2, Copy, Check, FileText, Languages } from 'lucide-react';
 import { PageHero } from './PageHero';
+import { JargonArt } from './bandArt';
 import { Reveal } from './Reveal';
 
 const EXAMPLES = [
@@ -42,6 +43,7 @@ export const SimplifierTool: React.FC = () => {
         icon={BookOpen}
         title="Legal Jargon Buster"
         description="Received a confusing Home Office letter, or stuck on a clause you can't unpick? Paste it below and we'll turn the legalese into plain, human English."
+        art={<JargonArt />}
       />
 
       <div className="max-w-3xl mx-auto p-4 md:p-8">

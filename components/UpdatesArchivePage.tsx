@@ -8,6 +8,7 @@ import { CategoryIcon, CATEGORIES } from './news/newsShared';
 import { ArrowLeft, Search, AlertCircle, Filter, Archive } from 'lucide-react';
 import { AnimatedBackground } from './AnimatedBackground';
 import { PageHero } from './PageHero';
+import { ArchiveArt } from './bandArt';
 import { setPageMeta } from '../utils/seo';
 import { Reveal } from './Reveal';
 
@@ -80,6 +81,7 @@ export const UpdatesArchivePage: React.FC = () => {
         icon={Archive}
         title="Update Archive"
         description="Every immigration update from the past year, searchable and organised by category."
+        art={<ArchiveArt />}
       />
 
       <div className="relative z-10 max-w-[1600px] mx-auto p-4 md:p-8">

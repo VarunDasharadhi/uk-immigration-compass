@@ -7,6 +7,8 @@ interface PageHeroProps {
   description: string;
   /** Small chip rendered above the title, e.g. "Parliament Live". */
   badge?: React.ReactNode;
+  /** Themed silhouette artwork anchored to the band's lower half. */
+  art?: React.ReactNode;
   children?: React.ReactNode;
 }
 
@@ -16,7 +18,7 @@ interface PageHeroProps {
  * slate-900 band so light mode keeps its dark-anchor rhythm everywhere
  * (white header, dark band, light content, dark footer).
  */
-export const PageHero: FC<PageHeroProps> = ({ icon: Icon, title, description, badge, children }) => (
+export const PageHero: FC<PageHeroProps> = ({ icon: Icon, title, description, badge, art, children }) => (
   <section
     className="relative isolate overflow-hidden bg-slate-900 dark:bg-slate-950"
     aria-label={`${title} introduction`}
@@ -27,6 +29,14 @@ export const PageHero: FC<PageHeroProps> = ({ icon: Icon, title, description, ba
       aria-hidden="true"
     />
     <SectionMotif icon={Icon} className="-top-6 right-4 w-48 h-48 text-white/[0.05] rotate-6" />
+    {art && (
+      <div
+        className="absolute inset-y-0 right-0 w-[52%] pointer-events-none select-none text-white/[0.06] dark:text-white/[0.04]"
+        aria-hidden="true"
+      >
+        {art}
+      </div>
+    )}
 
     <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6 py-12 md:py-16 text-center">
       {badge && (

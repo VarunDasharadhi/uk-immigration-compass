@@ -3,6 +3,7 @@ import { apiClient } from '../services/apiClient';
 import { PetitionItem, PetitionsResult } from '../types';
 import { ScrollText, Milestone, PenTool, AlertCircle } from 'lucide-react';
 import { PageHero } from './PageHero';
+import { PetitionsArt } from './bandArt';
 import { PetitionDetailModal } from './PetitionDetailModal';
 import { Reveal } from './Reveal';
 import { cacheGet, cacheSet, cacheHas } from '../utils/cache';
@@ -64,6 +65,7 @@ export const PetitionTracker: React.FC = () => {
         icon={ScrollText}
         title="Active Petitions"
         description="Follow the public's voice on immigration policy, and watch signatures climb toward a Commons debate."
+        art={<PetitionsArt />}
         badge={
           <>
             <ScrollText className="w-3.5 h-3.5" />
