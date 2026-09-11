@@ -17,9 +17,9 @@ through OpenRouter (`google/gemini-2.5-flash`). No Firebase or GCP dependency de
 
 ## Where the code stands
 
-`main` is at `d62276d`; everything through it is committed AND deployed, including the email
-alerts. 116/116 tests, type-check, lint (matches nothing by pre-existing script shape) and
-production build all green. See `docs/journal/2026-09-11.md` for the full session narrative;
+`main` is at `59b26d1` plus the docs commit on top; everything through it is committed AND
+deployed, including the email alerts and the petitions breadth fix. 122/122 tests, type-check,
+lint (matches nothing by pre-existing script shape) and production build all green. See `docs/journal/2026-09-11.md` for the full session narrative;
 highlights:
 
 - Email alerts LIVE and verified in production (2026-09-11): double opt-in capture card on the
@@ -38,6 +38,9 @@ highlights:
   with navy logo tile + `#16243d` nav tray; every tab opens a dark PageHero band with themed
   silhouette art (`components/bandArt.tsx`).
 - Petitions: milestone lanes replace Recharts (dropped from bundle); news-style detail modal.
+  The refresh now follows Parliament pagination and stores the top 100 relevant open petitions
+  (74 today) under petitions:v3; the tab reveals twelve at a time behind Show more. Verified
+  live in production 2026-09-11.
 - Sponsors: sidebar lists real register movements (`/api/sponsor-changes`, ledger-backed).
 - Perf: session cache (`utils/cache.ts`) + directory prefetch; orbs are radial gradients.
 - SEO layer live: per-tab titles/canonicals, soft-404 noindex, sitemap+robots, self-hosted
