@@ -93,7 +93,7 @@ export const NewsDashboard: React.FC = () => {
             onClick={() => setSelectedCategory(cat)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200
             ${selectedCategory === cat
-              ? 'bg-gradient-to-r bg-blue-700 text-white shadow-lg shadow-blue-500/30 translate-y-[-1px]'
+              ? 'bg-blue-700 text-white shadow-lg shadow-blue-500/30 translate-y-[-1px]'
               : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:text-slate-200'}`}
           >
             {cat !== 'All' && <CategoryIcon category={cat} />}

@@ -169,7 +169,7 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
             onClick={() => setIndustry(f.id)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
               industry === f.id
-                ? 'bg-gradient-to-r bg-blue-700 text-white shadow-lg shadow-blue-500/30'
+                ? 'bg-blue-700 text-white shadow-lg shadow-blue-500/30'
                 : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:text-slate-200'
             }`}
           >
