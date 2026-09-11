@@ -117,10 +117,10 @@ function emailShell(title: string, bodyHtml: string, footerHtml: string): string
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f1f5f9;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 12px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 12px;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;">
             <tr>
               <td style="background:#16243d;padding:20px 28px;">
                 <span style="color:#ffffff;font-size:16px;font-weight:bold;">${SITE_NAME}</span>
