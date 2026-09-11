@@ -230,7 +230,7 @@ export const PetitionTracker: React.FC = () => {
                         type="button"
                         onClick={() => setSelected(petition)}
                         aria-label={`Open details for ${petition.title}`}
-                        className="text-left bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group flex flex-col h-full w-full cursor-pointer">
+                        className="text-left bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:border-blue-200 dark:hover:border-blue-700 transition-all group flex flex-col h-full w-full cursor-pointer">
                         <div className="flex justify-between items-start mb-4">
                             <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border
                                 ${petition.status.toLowerCase().includes('open') ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/40' :
@@ -238,10 +238,10 @@ export const PetitionTracker: React.FC = () => {
                                   'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'}`}>
                                 {petition.status}
                             </span>
-                            <PenTool className="w-4 h-4 text-slate-300 group-hover:text-indigo-500 transition-colors dark:text-slate-600 dark:group-hover:text-indigo-400" />
+                            <PenTool className="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition-colors dark:text-slate-600 dark:group-hover:text-blue-400" />
                         </div>
 
-                        <h4 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2 leading-tight group-hover:text-indigo-700 transition-colors dark:text-slate-100 dark:group-hover:text-indigo-400">
+                        <h4 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2 leading-tight group-hover:text-blue-700 transition-colors dark:text-slate-100 dark:group-hover:text-blue-400">
                             {petition.title}
                         </h4>
                         <p className="text-slate-500 text-sm leading-relaxed mb-6 flex-grow dark:text-slate-400">

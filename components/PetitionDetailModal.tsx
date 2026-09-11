@@ -80,7 +80,7 @@ export const PetitionDetailModal: FC<PetitionDetailModalProps> = ({ petition, on
             <div className="md:col-span-2 space-y-8">
               <div>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <PenTool className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> The petition
+                  <PenTool className="w-4 h-4 text-blue-500 dark:text-blue-400" /> The petition
                 </h4>
                 <div className="prose prose-slate dark:prose-invert max-w-none text-slate-600 dark:text-slate-400 leading-relaxed text-lg">
                   <p>{petition.summary}</p>
@@ -112,7 +112,7 @@ export const PetitionDetailModal: FC<PetitionDetailModalProps> = ({ petition, on
               {petition.url && (
                 <div className="border-t border-slate-100 dark:border-slate-800 pt-8">
                   <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <ExternalLink className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> On Parliament's site
+                    <ExternalLink className="w-4 h-4 text-blue-500 dark:text-blue-400" /> On Parliament's site
                   </h4>
                   <a
                     href={petition.url}

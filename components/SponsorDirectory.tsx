@@ -155,7 +155,7 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="e.g. Tesco, or Manchester"
-            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 text-sm font-medium text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:focus:ring-indigo-900/40 dark:focus:border-indigo-500"
+            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-sm font-medium text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:focus:ring-blue-900/40 dark:focus:border-blue-500"
           />
         </div>
       </div>
@@ -187,7 +187,7 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
           id="sponsor-directory-route"
           value={route}
           onChange={(e) => setRoute(e.target.value)}
-          className="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 text-sm font-medium text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:focus:ring-indigo-900/40 dark:focus:border-indigo-500"
+          className="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-sm font-medium text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:focus:ring-blue-900/40 dark:focus:border-blue-500"
         >
           {routes.map(r => (
             <option key={r.id} value={r.id}>
@@ -244,11 +244,11 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
                 type="button"
                 onClick={() => onSelectCompany(item.name)}
                 aria-label={`Check ${item.name}`}
-                className="h-full w-full flex flex-col text-left bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group"
+                className="h-full w-full flex flex-col text-left bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 transition-all group"
               >
                 <div className="flex items-start justify-between gap-2">
                   <h4 className="font-semibold text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 min-h-[2.75rem]">{item.name}</h4>
-                  <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 flex-shrink-0 mt-0.5" />
+                  <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-blue-500 dark:group-hover:text-blue-400 flex-shrink-0 mt-0.5" />
                 </div>
                 {item.town && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.town}</p>}
                 <div className="flex flex-wrap gap-1.5 mt-3">
@@ -264,7 +264,7 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
                   )}
                 </div>
                 <div className="flex items-center justify-between gap-2 mt-auto pt-3">
-                  <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-semibold dark:bg-indigo-950/40 dark:text-indigo-300 truncate max-w-[220px]">
+                  <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold dark:bg-blue-950/40 dark:text-blue-300 truncate max-w-[220px]">
                     {item.industryLabel}
                   </span>
                   {item.rating !== 'Unknown' && (
@@ -290,7 +290,7 @@ export const SponsorDirectory: React.FC<SponsorDirectoryProps> = ({ onSelectComp
                 type="button"
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="px-6 py-3 rounded-xl bg-white border border-slate-200 font-semibold text-slate-700 hover:border-indigo-300 hover:text-indigo-700 disabled:opacity-50 transition-colors shadow-sm dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-indigo-600 dark:hover:text-indigo-400"
+                className="px-6 py-3 rounded-xl bg-white border border-slate-200 font-semibold text-slate-700 hover:border-blue-300 hover:text-blue-700 disabled:opacity-50 transition-colors shadow-sm dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-700 dark:hover:text-blue-400"
               >
                 {loadingMore ? 'Loading...' : `Load more (${(total - items.length).toLocaleString()} remaining)`}
               </button>

@@ -173,7 +173,7 @@ export const SponsorChecker: React.FC = () => {
           <Reveal>
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-black/30">
             <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6 flex items-center gap-2">
-              <Search className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+              <Search className="w-5 h-5 text-blue-500 dark:text-blue-400" />
               Check an Employer
             </h3>
             <form onSubmit={handleSearch} className="space-y-4">
@@ -181,7 +181,7 @@ export const SponsorChecker: React.FC = () => {
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Company Name</label>
                 <input
                   type="text"
-                  className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all font-medium text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:focus:ring-indigo-900/40 dark:focus:border-indigo-500"
+                  className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all font-medium text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:focus:ring-blue-900/40 dark:focus:border-blue-500"
                   placeholder="e.g. Acme Solutions Ltd"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -301,7 +301,7 @@ export const SponsorChecker: React.FC = () => {
                 {isConfirmedResult && (
                   <div className="mb-8">
                     <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                      <ExternalLink className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                      <ExternalLink className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                       Find out more
                     </h4>
                     <div className="space-y-4">
@@ -314,7 +314,7 @@ export const SponsorChecker: React.FC = () => {
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-700 dark:hover:text-indigo-300"
+                              className="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-blue-950/30 dark:hover:border-blue-700 dark:hover:text-blue-300"
                             >
                               {link.label}
                             </a>
@@ -330,7 +330,7 @@ export const SponsorChecker: React.FC = () => {
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-700 dark:hover:text-indigo-300"
+                              className="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-blue-950/30 dark:hover:border-blue-700 dark:hover:text-blue-300"
                             >
                               {link.label}
                             </a>
@@ -345,7 +345,7 @@ export const SponsorChecker: React.FC = () => {
                 {result.history && result.history.length > 0 && (
                   <div className="mb-8">
                     <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                      <Clock className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                       Licence History
                     </h4>
                     <div className="relative pl-4 border-l-2 border-slate-200 dark:border-slate-700 space-y-4">
@@ -400,7 +400,7 @@ export const SponsorChecker: React.FC = () => {
                           key={i}
                           type="button"
                           onClick={() => handleCandidateSelect(candidate.name)}
-                          className="w-full text-left p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 transition-colors flex items-center justify-between gap-4 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-700"
+                          className="w-full text-left p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-200 transition-colors flex items-center justify-between gap-4 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-blue-950/30 dark:hover:border-blue-700"
                         >
                           <div>
                             <span className="font-semibold text-slate-900 dark:text-slate-100 block">{candidate.name}</span>
@@ -426,7 +426,7 @@ export const SponsorChecker: React.FC = () => {
 
         {/* Right Column: Recently Added & Revoked Sponsors */}
         <div className="bg-slate-900 rounded-3xl p-6 md:p-8 text-white h-full relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
           <div className="relative z-10">
             <h3 className="text-xl font-bold mb-2 flex items-center gap-2">

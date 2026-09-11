@@ -108,7 +108,7 @@ const NavItem: FC<NavItemProps> = ({ config, isActive, onClick }) => {
         className={`w-4 h-4 transition-colors ${
           isActive
             ? 'text-blue-300'
-            : 'text-slate-500 group-hover:text-slate-300'
+            : 'text-slate-400 group-hover:text-slate-200'
         }`}
       />
       {config.label}
@@ -175,7 +175,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
         {/* Desktop Nav */}
         <nav
-          className="hidden md:flex items-center gap-2 bg-[#0c1428] p-1.5 rounded-full border border-white/10 shadow-sm"
+          className="hidden md:flex items-center gap-2 bg-[#16243d] p-1.5 rounded-full border border-white/10 shadow-sm"
           role="navigation"
           aria-label="Main navigation"
         >
@@ -196,7 +196,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
       {/* Mobile Nav — always visible, no menu button needed */}
       <nav
-        className="md:hidden border-t border-white/10 bg-[#0c1428]/95 px-3 py-2 flex flex-wrap items-center gap-1.5"
+        className="md:hidden border-t border-white/10 bg-[#16243d]/95 px-3 py-2 flex flex-wrap items-center gap-1.5"
         role="navigation"
         aria-label="Main navigation"
       >
