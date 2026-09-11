@@ -14,7 +14,9 @@ rediscovered the hard way; you only pay for the detail when it is actually relev
 - A cached endpoint's key must be bumped (or given a defensive shape check) any time the cached
   value's shape changes, or it silently serves stale, wrongly-shaped data with no error; this
   exact class of bug has hit the sponsor register, petitions, updates feed, and sponsor history
-  more than once each.
+  more than once each, and hit alerts on day one: the upstash REST client auto-deserializes
+  JSON-looking hash values, so reads return objects even when writes stored strings
+  (`services/alerts.ts` parseRecord accepts both).
 - Vercel "Sensitive" environment variables cannot be read back through any channel (dashboard,
   `vercel env pull`, likely the API too) once set; if one is needed locally, rotate it to a fresh
   value with the sensitive flag off, don't try to recover the original.

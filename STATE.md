@@ -17,16 +17,20 @@ through OpenRouter (`google/gemini-2.5-flash`). No Firebase or GCP dependency de
 
 ## Where the code stands
 
-`main` is at `2e926ec`; everything through `4181ab5` is committed AND deployed (Vercel auto-deploys
-from main); the email alerts / Ko-fi / affiliate commits are local, awaiting an explicit "deploy".
-115/115 tests, type-check, lint (matches nothing by pre-existing script shape) and production build
-all green. See `docs/journal/2026-09-11.md` for the full session narrative; highlights:
+`main` is at `d62276d`; everything through it is committed AND deployed, including the email
+alerts. 116/116 tests, type-check, lint (matches nothing by pre-existing script shape) and
+production build all green. See `docs/journal/2026-09-11.md` for the full session narrative;
+highlights:
 
-- Email alerts shipped: double opt-in capture card on the News tab, `/api/alerts/*` routes riding
-  the api/index catch-all (api/ sits at Vercel Hobby's 12-function cap, no new function files),
-  subscribers in the shared Upstash Redis, daily digest sent from the refresh cron via Resend.
-  Needs RESEND_API_KEY + optional ALERTS_FROM_EMAIL in Vercel env, plus a verified sending
-  domain, before the first real email can go out; unverified in production until then.
+- Email alerts LIVE and verified in production (2026-09-11): double opt-in capture card on the
+  News tab, `/api/alerts/*` routes riding the api/index catch-all (api/ sits at Vercel Hobby's
+  12-function cap, no new function files), subscribers in the shared Upstash Redis, daily digest
+  sent from the nightly refresh cron via Resend. RESEND_API_KEY is in Vercel production (added
+  via CLI, Sensitive). Subscribe, Gmail delivery of the confirmation, and confirm-link round
+  trip all verified live; first digest fires on the nightly cron (00:00 UTC) with a Gmail check
+  scheduled the next morning. Resend is still on the sandbox sender (onboarding@resend.dev), so
+  only the Resend account owner's address receives mail until a domain is verified at
+  resend.com/domains and ALERTS_FROM_EMAIL is set; other signups get an honest send-failure error.
 - Ko-fi footer button wired behind an empty `KOFI_URL` constant in App.tsx (hidden until Varun
   sets the URL). Adzuna added to the sponsor card's open-roles links, routed through AWIN once
   both ID constants in `utils/companyLinks.ts` are filled (source constants, not env vars).
