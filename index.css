@@ -128,7 +128,7 @@ body {
   height: 36rem;
   top: -8rem;
   left: -10rem;
-  background: radial-gradient(circle closest-side, rgba(129, 140, 248, 0.32), rgba(129, 140, 248, 0) 72%);
+  background: radial-gradient(circle closest-side, rgba(30, 64, 175, 0.20), rgba(30, 64, 175, 0) 72%);
   animation: orb-drift-1 24s ease-in-out infinite alternate;
 }
 .dark .orb-1 {
@@ -139,7 +139,7 @@ body {
   height: 30rem;
   top: 30%;
   right: -8rem;
-  background: radial-gradient(circle closest-side, rgba(148, 163, 184, 0.38), rgba(148, 163, 184, 0) 72%);
+  background: radial-gradient(circle closest-side, rgba(99, 102, 241, 0.16), rgba(99, 102, 241, 0) 72%);
   animation: orb-drift-2 20s ease-in-out infinite alternate;
 }
 .dark .orb-2 {
@@ -150,7 +150,7 @@ body {
   height: 28rem;
   bottom: 18%;
   left: 22%;
-  background: radial-gradient(circle closest-side, rgba(165, 180, 252, 0.35), rgba(165, 180, 252, 0) 72%);
+  background: radial-gradient(circle closest-side, rgba(30, 41, 59, 0.14), rgba(30, 41, 59, 0) 72%);
   animation: orb-drift-3 28s ease-in-out infinite alternate;
 }
 .dark .orb-3 {
