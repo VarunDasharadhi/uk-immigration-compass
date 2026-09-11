@@ -584,7 +584,6 @@ const MainApp: FC = () => {
     }
     const meta = pageMeta[activeTab] ?? pageMeta[Tab.NEWS];
     setPageMeta(meta.title, meta.description, '/');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, unknownPath]);
 
   const ContentComponent = useMemo(() => {
