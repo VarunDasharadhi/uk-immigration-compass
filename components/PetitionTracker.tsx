@@ -8,11 +8,16 @@ import { PetitionDetailModal } from './PetitionDetailModal';
 import { Reveal } from './Reveal';
 import { cacheGet, cacheSet, cacheHas } from '../utils/cache';
 
+// Cards revealed per "Show more" click; the full stored set (up to 100)
+// stays reachable without loading anything upfront.
+const PETITIONS_PAGE_SIZE = 12;
+
 export const PetitionTracker: React.FC = () => {
   const [data, setData] = useState<PetitionsResult | null>(() => cacheGet<PetitionsResult>('petitions') ?? null);
   const [selected, setSelected] = useState<PetitionItem | null>(null);
   const [loading, setLoading] = useState<boolean>(() => !cacheHas('petitions'));
   const [error, setError] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PETITIONS_PAGE_SIZE);
 
   useEffect(() => {
     const load = async () => {
@@ -34,6 +39,7 @@ export const PetitionTracker: React.FC = () => {
   }, []);
 
   const petitions = data?.petitions || [];
+  const visiblePetitions = petitions.slice(0, visibleCount);
   const totalSignatures = petitions.reduce((sum, p) => sum + (typeof p.signatures === 'number' ? p.signatures : 0), 0);
 
   const getProgressWidth = (signatures: string | number) => {
@@ -225,8 +231,9 @@ export const PetitionTracker: React.FC = () => {
                 ))}
             </div>
         ) : petitions.length > 0 ? (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {petitions.map((petition, i) => (
+                {visiblePetitions.map((petition, i) => (
                     <Reveal key={petition.id} delay={(i % 3) * 90}>
                     <button
                         type="button"
@@ -272,6 +279,21 @@ export const PetitionTracker: React.FC = () => {
                     </Reveal>
                 ))}
             </div>
+            {petitions.length > visiblePetitions.length && (
+                <div className="mt-8 text-center">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                        Showing {visiblePetitions.length} of {petitions.length} tracked petitions
+                    </p>
+                    <button
+                        type="button"
+                        onClick={() => setVisibleCount(c => c + PETITIONS_PAGE_SIZE)}
+                        className="bg-blue-700 hover:bg-blue-600 text-white font-semibold px-6 py-3.5 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 inline-block"
+                    >
+                        Show more petitions
+                    </button>
+                </div>
+            )}
+            </>
         ) : (
             <div className="prose prose-slate dark:prose-invert max-w-none text-slate-600 bg-white p-8 rounded-2xl shadow-sm border border-slate-200 leading-relaxed dark:text-slate-400 dark:bg-slate-900 dark:border-slate-700">
                  <AlertCircle className="w-8 h-8 text-slate-300 mb-4 dark:text-slate-600" />

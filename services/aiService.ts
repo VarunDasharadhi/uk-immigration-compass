@@ -761,19 +761,41 @@ interface ParliamentPetitionAttributes {
   response_threshold_reached_at: string | null;
 }
 
-async function fetchPetitionsForTerm(term: string): Promise<{ id: number; attrs: ParliamentPetitionAttributes }[]> {
+// Parliament pages its JSON API at 25 results. Two pages per term keeps the
+// stored set effectively complete (top 100 across all search terms) without
+// letting a runaway link list stretch the nightly cron.
+const PETITION_MAX_PAGES = 2;
+// Hard ceiling on what gets cached; the petitions page reveals these
+// progressively, so breadth costs the UI nothing.
+const MAX_STORED_PETITIONS = 100;
+
+async function fetchPetitionsPage(url: string): Promise<{ items: { id: number; attrs: ParliamentPetitionAttributes }[]; next: string | null }> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 15_000);
   try {
-    const resp = await fetch(`https://petition.parliament.uk/petitions.json?state=open&q=${encodeURIComponent(term)}`, { signal: ctrl.signal });
-    if (!resp.ok) return [];
-    const json = await resp.json() as { data?: { id: number; attributes: ParliamentPetitionAttributes }[] };
-    return (json.data || []).map(p => ({ id: p.id, attrs: p.attributes }));
+    const resp = await fetch(url, { signal: ctrl.signal });
+    if (!resp.ok) return { items: [], next: null };
+    const json = await resp.json() as { data?: { id: number; attributes: ParliamentPetitionAttributes }[]; links?: { next?: string | null } };
+    return {
+      items: (json.data || []).map(p => ({ id: p.id, attrs: p.attributes })),
+      next: json.links?.next || null,
+    };
   } catch {
-    return [];
+    return { items: [], next: null };
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function fetchPetitionsForTerm(term: string): Promise<{ id: number; attrs: ParliamentPetitionAttributes }[]> {
+  const all: { id: number; attrs: ParliamentPetitionAttributes }[] = [];
+  let url: string | null = `https://petition.parliament.uk/petitions.json?state=open&q=${encodeURIComponent(term)}`;
+  for (let page = 0; url && page < PETITION_MAX_PAGES; page++) {
+    const { items, next } = await fetchPetitionsPage(url);
+    all.push(...items);
+    url = next;
+  }
+  return all;
 }
 
 function petitionStatus(attrs: ParliamentPetitionAttributes): string {
@@ -810,7 +832,7 @@ export async function refreshPetitions(): Promise<PetitionsResult> {
 
   const top = [...byId.entries()]
     .sort((a, b) => b[1].signature_count - a[1].signature_count)
-    .slice(0, 6);
+    .slice(0, MAX_STORED_PETITIONS);
 
   const petitions: PetitionItem[] = top.map(([id, attrs]) => ({
     id: `pet-${id}`,
@@ -828,7 +850,10 @@ export async function refreshPetitions(): Promise<PetitionsResult> {
     sources: petitions.map(p => ({ web: { uri: p.url, title: p.title } })),
     signatureHistory,
   };
-  await cache.set('petitions:v2', result);
+  // v3: the payload shape is unchanged but the set grew from 6 petitions to
+  // the top 100; a version bump stops the stale 6-item v2 value hiding the
+  // fuller list until tomorrow's cron (see GOTCHAS.md).
+  await cache.set('petitions:v3', result);
   console.log(`[Cache] Refreshed: petitions (${petitions.length} found)`);
   return result;
 }
@@ -889,7 +914,7 @@ export async function getUpdatesArchive(): Promise<NewsItem[]> {
 // Parliament's petitions API is public and needs no API key, unlike the other
 // feeds — so this has no MOCK/no-key fallback, just cache-then-refresh.
 export async function getPetitions(): Promise<PetitionsResult> {
-  const cached = await cache.get('petitions:v2');
+  const cached = await cache.get('petitions:v3');
   if (cached) return cached;
   return refreshPetitions();
 }
