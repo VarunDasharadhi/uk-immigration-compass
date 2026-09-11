@@ -354,9 +354,8 @@ interface FooterProps {
   onNavigate: (tab: Tab) => void;
 }
 
-// Ko-fi page for the footer support button. Empty hides the button; set it
-// to e.g. 'https://ko-fi.com/yourname' once the page exists.
-const KOFI_URL = '';
+// Ko-fi page for the footer support button (account created 2026-09-12).
+const KOFI_URL = 'https://ko-fi.com/ukimmigrationcompass';
 
 const Footer: FC<FooterProps> = ({ onNavigate }) => {
   const currentYear = new Date().getFullYear();
