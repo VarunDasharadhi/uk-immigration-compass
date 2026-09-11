@@ -160,7 +160,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
           className="flex items-center gap-3 cursor-pointer group hover:opacity-80 transition-opacity"
           aria-label="Go to home"
         >
-          <div className="w-10 h-10 bg-gradient-to-br bg-blue-800 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/40 ring-1 ring-white/25 group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300">
+          <div className="w-10 h-10 bg-blue-800 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/40 ring-1 ring-white/25 group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300">
             <Compass className="text-white w-6 h-6" />
           </div>
           <div className="flex flex-col justify-center">
@@ -366,7 +366,7 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
         {/* Brand Section */}
         <div className="md:col-span-2 pr-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-gradient-to-br bg-blue-800 rounded-lg flex items-center justify-center shadow-md shadow-blue-900/30">
+            <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center shadow-md shadow-blue-900/30">
               <Compass className="text-white w-5 h-5" />
             </div>
             <span className="text-lg font-bold text-slate-100">
