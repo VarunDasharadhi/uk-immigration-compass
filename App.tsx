@@ -8,6 +8,7 @@ import {
   BookOpen,
   X,
   Compass,
+  Heart,
   ArrowRight,
   ChevronRight,
   Building2,
@@ -151,10 +152,11 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-gradient-to-r dark:from-[#0a1428] dark:via-slate-900 dark:to-[#0a1428]"
+      className="sticky top-3 z-50 px-3 sm:px-5"
       role="banner"
     >
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+      <div className="max-w-[1600px] mx-auto rounded-2xl border border-slate-200 bg-white/90 shadow-lg shadow-slate-900/5 backdrop-blur-md dark:border-slate-800 dark:bg-[#0a1428]/90">
+      <div className="flex items-center justify-between px-4 sm:px-5 h-16">
         {/* Logo */}
         <button
           onClick={() => handleNavClick(Tab.NEWS)}
@@ -190,14 +192,26 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
           ))}
         </nav>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
+          {KOFI_URL && (
+            <a
+              href={KOFI_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Support us on Ko-fi"
+              className="flex items-center gap-1.5 rounded-full bg-blue-600 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition-all hover:bg-blue-500 hover:-translate-y-0.5"
+            >
+              <Heart className="w-4 h-4" />
+              <span className="hidden sm:inline">Donate</span>
+            </a>
+          )}
           <ThemeToggle />
         </div>
       </div>
 
       {/* Mobile Nav — always visible, no menu button needed */}
       <nav
-        className="md:hidden border-t border-white/10 bg-[#16243d]/95 px-3 pt-2 pb-2.5 flex flex-wrap items-center gap-1.5"
+        className="md:hidden border-t border-white/10 px-3 pt-2 pb-2.5 flex flex-wrap items-center gap-1.5"
         role="navigation"
         aria-label="Main navigation"
       >
@@ -210,6 +224,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
           />
         ))}
       </nav>
+      </div>
     </header>
   );
 };
