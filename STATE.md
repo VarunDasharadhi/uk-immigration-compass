@@ -17,10 +17,19 @@ through OpenRouter (`google/gemini-2.5-flash`). No Firebase or GCP dependency de
 
 ## Where the code stands
 
-`main` is at `49e06fb`; everything through it is committed AND deployed (Vercel auto-deploys
-from main). 90/90 tests, type-check, lint and production build all green. See
-`docs/journal/2026-09-11.md` for the full session narrative; highlights:
+`main` is at `6bf4b99`; everything through `4181ab5` is committed AND deployed (Vercel auto-deploys
+from main); the email alerts / Ko-fi / affiliate commits are local, awaiting an explicit "deploy".
+115/115 tests, type-check, lint (matches nothing by pre-existing script shape) and production build
+all green. See `docs/journal/2026-09-11.md` for the full session narrative; highlights:
 
+- Email alerts shipped: double opt-in capture card on the News tab, `/api/alerts/*` routes riding
+  the api/index catch-all (api/ sits at Vercel Hobby's 12-function cap, no new function files),
+  subscribers in the shared Upstash Redis, daily digest sent from the refresh cron via Resend.
+  Needs RESEND_API_KEY + optional ALERTS_FROM_EMAIL in Vercel env, plus a verified sending
+  domain, before the first real email can go out; unverified in production until then.
+- Ko-fi footer button wired behind an empty `KOFI_URL` constant in App.tsx (hidden until Varun
+  sets the URL). Adzuna added to the sponsor card's open-roles links, routed through AWIN once
+  both ID constants in `utils/companyLinks.ts` are filled (source constants, not env vars).
 - Mature navy palette everywhere (sky/cyan/teal fully retired); light-mode header is white
   with navy logo tile + `#16243d` nav tray; every tab opens a dark PageHero band with themed
   silhouette art (`components/bandArt.tsx`).
@@ -41,4 +50,4 @@ English, no em dashes, professional navy look (bright cyan and flag colours both
 Verification gate: `npm test` (jest), `npm run type-check` (`tsc --noEmit`), `npm run lint`
 (`eslint src --ext .ts,.tsx`). All three are real, codified npm scripts.
 
-Last verified: 2026-09-09
+Last verified: 2026-09-11

@@ -28,3 +28,7 @@ rediscovered the hard way; you only pay for the detail when it is actually relev
 - Multiple Claude Code sessions can end up editing this repo concurrently; check `git status` and
   the diff before every commit, and adopt another session's in-place fix rather than layering a
   conflicting one on top of it.
+- `import.meta` (so `import.meta.env.VITE_*`) does not survive ts-jest in any module a test
+  imports unmocked; `services/apiClient.ts` only gets away with it because every test mocks the
+  whole module. Keep build-time config out of jest-tested modules (see the AWIN constants in
+  `utils/companyLinks.ts` for the pattern).
