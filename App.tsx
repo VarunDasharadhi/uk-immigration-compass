@@ -150,7 +150,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-slate-800 bg-gradient-to-r from-[#0a1428] via-slate-900 to-[#0a1428]"
+      className="sticky top-0 z-50 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-gradient-to-r dark:from-[#0a1428] dark:via-slate-900 dark:to-[#0a1428]"
       role="banner"
     >
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center justify-between">
@@ -164,10 +164,10 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
             <Compass className="text-white w-6 h-6" />
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="text-lg font-bold text-slate-100 tracking-tight leading-tight">
+            <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
               UK Immigration
             </h1>
-            <span className="block text-xs font-bold bg-blue-400 bg-clip-text text-transparent tracking-[0.18em] leading-tight">
+            <span className="block text-xs font-bold bg-blue-700 dark:bg-blue-400 bg-clip-text text-transparent tracking-[0.18em] leading-tight">
               COMPASS
             </span>
           </div>
@@ -175,7 +175,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
         {/* Desktop Nav */}
         <nav
-          className="hidden md:flex items-center gap-2 bg-white/[0.06] p-1.5 rounded-full border border-white/10 shadow-sm"
+          className="hidden md:flex items-center gap-2 bg-[#0c1428] p-1.5 rounded-full border border-white/10 shadow-sm"
           role="navigation"
           aria-label="Main navigation"
         >
