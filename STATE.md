@@ -17,7 +17,7 @@ through OpenRouter (`google/gemini-2.5-flash`). No Firebase or GCP dependency de
 
 ## Where the code stands
 
-`main` is at `6bf4b99`; everything through `4181ab5` is committed AND deployed (Vercel auto-deploys
+`main` is at `2e926ec`; everything through `4181ab5` is committed AND deployed (Vercel auto-deploys
 from main); the email alerts / Ko-fi / affiliate commits are local, awaiting an explicit "deploy".
 115/115 tests, type-check, lint (matches nothing by pre-existing script shape) and production build
 all green. See `docs/journal/2026-09-11.md` for the full session narrative; highlights:
