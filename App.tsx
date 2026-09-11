@@ -16,6 +16,7 @@ import {
   Check,
   Sun,
   Moon,
+  Coffee,
 } from 'lucide-react';
 import { Tab } from './types';
 import { useTheme } from './contexts/ThemeContext';
@@ -353,6 +354,10 @@ interface FooterProps {
   onNavigate: (tab: Tab) => void;
 }
 
+// Ko-fi page for the footer support button. Empty hides the button; set it
+// to e.g. 'https://ko-fi.com/yourname' once the page exists.
+const KOFI_URL = '';
+
 const Footer: FC<FooterProps> = ({ onNavigate }) => {
   const currentYear = new Date().getFullYear();
   const [contactOpen, setContactOpen] = useState(false);
@@ -378,6 +383,16 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
             official government data and turns it into clear, simple guidance for
             applicants, students, and families, free of charge.
           </p>
+          {KOFI_URL && (
+            <a
+              href={KOFI_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-md shadow-blue-900/30 transition-colors"
+            >
+              <Coffee className="w-4 h-4" /> Support the site on Ko-fi
+            </a>
+          )}
         </div>
 
         {/* Explore Section */}
