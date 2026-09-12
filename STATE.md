@@ -17,9 +17,10 @@ through OpenRouter (`google/gemini-2.5-flash`). No Firebase or GCP dependency de
 
 ## Where the code stands
 
-`main` is at `59b26d1` plus the docs commit on top; everything through it is committed AND
-deployed, including the email alerts and the petitions breadth fix. 122/122 tests, type-check,
-lint (matches nothing by pre-existing script shape) and production build all green. See `docs/journal/2026-09-11.md` for the full session narrative;
+`main` is at `b1a1ce9` (2026-09-12): the floating header work through `a9d3e9a` is committed AND
+deployed; on top, per-page view analytics plus the sponsor list back button are committed locally,
+NOT deployed. 124/124 tests, type-check and lint all green. See `docs/journal/2026-09-12.md` for
+the latest session narrative and `docs/journal/2026-09-11.md` for the alerts/petitions one;
 highlights:
 
 - Email alerts LIVE and verified in production (2026-09-11): double opt-in capture card on the
@@ -53,6 +54,12 @@ highlights:
   Search Console request-indexing quota exhausted again on 2026-09-11; per-account Google-side,
   retry when it lets you.
 - URL hash restores tab + sponsors view on refresh.
+- Per-page analytics (2026-09-12, local): `<Analytics route path>` per view makes Vercel's
+  Pages panel split the hash-routed app into /, /sponsors, /sponsors/browse, /sponsors/check,
+  /petitions, /jargon-buster, /updates/archive, /404; the route prop disables auto-track.
+- Sponsor browse back button (2026-09-12, local): opening a sponsor from the directory keeps
+  the list mounted (hidden) and a "Back to sponsor list" button restores filters, loaded pages
+  and scroll position.
 
 Design gotcha that bit twice this session: when converting `bg-gradient-to-*` to a solid
 colour, the dead gradient class must be removed or it inherits the page gradient's white
@@ -64,4 +71,4 @@ English, no em dashes, professional navy look (bright cyan and flag colours both
 Verification gate: `npm test` (jest), `npm run type-check` (`tsc --noEmit`), `npm run lint`
 (`eslint src --ext .ts,.tsx`). All three are real, codified npm scripts.
 
-Last verified: 2026-09-11
+Last verified: 2026-09-12
