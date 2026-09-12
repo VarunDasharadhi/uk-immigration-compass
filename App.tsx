@@ -103,14 +103,14 @@ const NavItem: FC<NavItemProps> = ({ config, isActive, onClick }) => {
         ${
           isActive
             ? 'text-white bg-blue-600 shadow-md shadow-blue-600/25'
-            : 'text-slate-400 hover:bg-white/10 hover:text-slate-100'
+            : 'text-slate-100 hover:bg-white/15'
         }`}
     >
       <Icon
         className={`w-4 h-4 transition-colors ${
           isActive
             ? 'text-white'
-            : 'text-slate-400 group-hover:text-slate-200'
+            : 'text-slate-300 group-hover:text-white'
         }`}
       />
       {config.label}
