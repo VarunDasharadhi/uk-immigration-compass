@@ -102,21 +102,21 @@ const NavItem: FC<NavItemProps> = ({ config, isActive, onClick }) => {
       className={`relative shrink-0 flex items-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all duration-300 text-xs sm:text-sm font-medium whitespace-nowrap group
         ${
           isActive
-            ? 'text-white bg-blue-600 shadow-md shadow-blue-600/25'
-            : 'text-slate-100 hover:bg-white/15'
+            ? 'text-blue-200 bg-blue-400/10 ring-1 ring-blue-400/30'
+            : 'text-slate-400 hover:bg-white/10 hover:text-slate-100'
         }`}
     >
       <Icon
         className={`w-4 h-4 transition-colors ${
           isActive
-            ? 'text-white'
-            : 'text-slate-300 group-hover:text-white'
+            ? 'text-blue-300'
+            : 'text-slate-400 group-hover:text-slate-200'
         }`}
       />
       {config.label}
       {isActive && (
         <span
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full mb-1.5"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full mb-1.5 dark:bg-blue-400"
           aria-hidden="true"
         />
       )}
@@ -211,7 +211,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
 
       {/* Mobile Nav — always visible, no menu button needed */}
       <nav
-        className="md:hidden border-t border-white/10 px-3 pt-2 pb-2.5 flex flex-wrap items-center gap-1.5"
+        className="md:hidden border-t border-white/10 bg-[#16243d]/95 px-3 py-2 flex flex-wrap items-center gap-1.5"
         role="navigation"
         aria-label="Main navigation"
       >
@@ -599,6 +599,7 @@ const MainApp: FC = () => {
     }
     const meta = pageMeta[activeTab] ?? pageMeta[Tab.NEWS];
     setPageMeta(meta.title, meta.description, '/');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, unknownPath]);
 
   const ContentComponent = useMemo(() => {
