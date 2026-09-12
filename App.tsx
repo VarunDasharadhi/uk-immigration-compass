@@ -541,6 +541,15 @@ const MainApp: FC = () => {
   // soft-404s and get their own panel + noindex rather than a fake News feed.
   const unknownPath = window.location.pathname !== '/';
 
+  // Vercel Analytics sees one pathname ("/") for this whole hash-routed app,
+  // so its automatic pageviews lump every tab together. Passing the route per
+  // view (this also switches the component to manual-only tracking) makes the
+  // dashboard's Pages panel show /sponsors, /sponsors/browse and so on. The
+  // /browse suffix mirrors SponsorChecker's own view state.
+  const sponsorsSuffix =
+    activeTab === Tab.SPONSORS && window.location.hash.includes('/browse') ? '/browse' : '';
+  const analyticsRoute = unknownPath ? '/404' : `/${TAB_HASHES[activeTab]}${sponsorsSuffix}`;
+
   // Keep the hash in step with the active tab (replaceState: no history spam
   // from quick tab flips; Back still leaves the site as before).
   useEffect(() => {
@@ -599,7 +608,6 @@ const MainApp: FC = () => {
     }
     const meta = pageMeta[activeTab] ?? pageMeta[Tab.NEWS];
     setPageMeta(meta.title, meta.description, '/');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, unknownPath]);
 
   const ContentComponent = useMemo(() => {
@@ -618,6 +626,7 @@ const MainApp: FC = () => {
   if (unknownPath) {
     return (
       <div className="relative min-h-screen bg-gradient-to-b from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col items-center justify-center text-center p-8">
+        <Analytics route={analyticsRoute} path={analyticsRoute} />
         <p className="text-6xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">404</p>
         <h1 className="text-xl font-bold text-slate-700 dark:text-slate-300 mt-4">That page doesn't exist</h1>
         <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-md">
@@ -639,6 +648,9 @@ const MainApp: FC = () => {
       className="relative min-h-screen bg-gradient-to-b from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-900 dark:selection:text-blue-100 overflow-x-hidden"
       role="application"
     >
+      {/* Pageview tracking: one event per tab / sponsors sub-view */}
+      <Analytics route={analyticsRoute} path={analyticsRoute} />
+
       {/* Ambient animated backdrop (waves + orbs) */}
       <AnimatedBackground />
 
@@ -666,7 +678,6 @@ const MainApp: FC = () => {
 const App: FC = () => {
   return (
     <>
-      <Analytics />
       <Routes>
         <Route path="/updates/archive" element={<UpdatesArchivePage />} />
         <Route path="*" element={<MainApp />} />

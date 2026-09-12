@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { pageview } from '@vercel/analytics';
 import { apiClient } from '../services/apiClient';
 import { NewsItem } from '../types';
 import { UpdateCard } from './news/UpdateCard';
@@ -29,6 +30,11 @@ export const UpdatesArchivePage: React.FC = () => {
       'Search every UK immigration update from the past year: Home Office rule changes, visa news and parliamentary activity, organised by category.',
       '/updates/archive'
     );
+  }, []);
+
+  // This route renders outside MainApp, so nobody else sends its pageview.
+  useEffect(() => {
+    pageview({ route: '/updates/archive', path: '/updates/archive' });
   }, []);
 
   useEffect(() => {

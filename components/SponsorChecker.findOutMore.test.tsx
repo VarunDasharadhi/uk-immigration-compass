@@ -4,6 +4,11 @@ import userEvent from '@testing-library/user-event';
 import { SponsorChecker } from './SponsorChecker';
 import { apiClient } from '../services/apiClient';
 
+// The package ships as ESM, which ts-jest cannot require unmocked.
+jest.mock('@vercel/analytics', () => ({
+  pageview: jest.fn(),
+}));
+
 jest.mock('../services/apiClient', () => ({
   apiClient: {
     checkSponsor: jest.fn(),

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { pageview } from '@vercel/analytics';
 import { apiClient } from '../services/apiClient';
 import { SponsorCheckResult, SponsorChangeItem } from '../types';
-import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight, ExternalLink, ListFilter } from 'lucide-react';
+import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight, ExternalLink, ListFilter, ArrowLeft } from 'lucide-react';
 import { Reveal } from './Reveal';
 import { PageHero } from './PageHero';
 import { prefetchSponsorDirectory } from './SponsorDirectory';
@@ -23,6 +24,23 @@ export const SponsorChecker: React.FC = () => {
       window.history.replaceState(null, '', `${window.location.pathname}${hash}`);
     }
   };
+
+  // Tab entry pageviews come from App; report only the internal check/browse
+  // switches here so each page look is counted exactly once.
+  const reportedView = useRef(true);
+  useEffect(() => {
+    if (reportedView.current) {
+      reportedView.current = false;
+      return;
+    }
+    const route = view === 'browse' ? '/sponsors/browse' : '/sponsors/check';
+    pageview({ route, path: route });
+  }, [view]);
+
+  // True while the current check result was opened from the directory list:
+  // the list stays mounted (hidden) so going back restores it exactly.
+  const [fromDirectory, setFromDirectory] = useState(false);
+  const directoryScrollY = useRef(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SponsorCheckResult | null>(null);
@@ -116,9 +134,20 @@ export const SponsorChecker: React.FC = () => {
   };
 
   const handleDirectorySelect = (companyName: string) => {
+    directoryScrollY.current = window.scrollY;
+    setFromDirectory(true);
     setView('check');
     setSearchTerm(companyName);
     runSearch(companyName);
+    window.scrollTo(0, 0);
+  };
+
+  const handleBackToDirectory = () => {
+    setFromDirectory(false);
+    switchView('browse');
+    // The list re-renders with its filters and loaded pages intact; put the
+    // user back on the card they left, after React commits the layout.
+    requestAnimationFrame(() => window.scrollTo(0, directoryScrollY.current));
   };
 
   return (
@@ -165,9 +194,27 @@ export const SponsorChecker: React.FC = () => {
       </PageHero>
 
       <div className="max-w-[1600px] mx-auto p-4 md:p-8">
-      {view === 'browse' && <SponsorDirectory onSelectCompany={handleDirectorySelect} />}
+      {/* The directory stays mounted while a sponsor from the list is being
+          checked (hidden), so Back restores the filters, loaded pages and
+          scroll position instead of starting over. */}
+      {(view === 'browse' || fromDirectory) && (
+        <div className={view === 'browse' ? '' : 'hidden'}>
+          <SponsorDirectory onSelectCompany={handleDirectorySelect} />
+        </div>
+      )}
 
       {view === 'check' && (
+      <>
+      {fromDirectory && (
+        <button
+          type="button"
+          onClick={handleBackToDirectory}
+          className="mb-6 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 font-semibold text-sm text-slate-700 hover:border-blue-300 hover:text-blue-700 transition-colors shadow-sm dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-700 dark:hover:text-blue-400"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to sponsor list
+        </button>
+      )}
       <div className="grid lg:grid-cols-3 gap-8 items-start">
         {/* Left Column: Search & Result */}
         <div className="lg:col-span-2 space-y-8">
@@ -479,6 +526,7 @@ export const SponsorChecker: React.FC = () => {
           </div>
         </div>
       </div>
+      </>
       )}
       </div>
     </div>
