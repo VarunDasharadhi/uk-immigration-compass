@@ -3,10 +3,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SponsorChecker } from './SponsorChecker';
 import { apiClient } from '../services/apiClient';
-import { pageview } from '@vercel/analytics';
+import { pageview, track } from '@vercel/analytics';
 
 jest.mock('@vercel/analytics', () => ({
   pageview: jest.fn(),
+  track: jest.fn(),
 }));
 
 jest.mock('../services/apiClient', () => ({
@@ -98,5 +99,7 @@ describe('SponsorChecker - back to the sponsor list', () => {
 
     expect(screen.queryByRole('button', { name: /Back to sponsor list/i })).not.toBeInTheDocument();
     expect(pageview).not.toHaveBeenCalled();
+    // A completed check is the demand signal we track.
+    expect(track).toHaveBeenCalledWith('sponsor_check', { found: 'Licensed' });
   });
 });

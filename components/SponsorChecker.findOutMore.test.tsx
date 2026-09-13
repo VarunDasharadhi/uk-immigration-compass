@@ -7,6 +7,7 @@ import { apiClient } from '../services/apiClient';
 // The package ships as ESM, which ts-jest cannot require unmocked.
 jest.mock('@vercel/analytics', () => ({
   pageview: jest.fn(),
+  track: jest.fn(),
 }));
 
 jest.mock('../services/apiClient', () => ({

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { pageview } from '@vercel/analytics';
+import { pageview, track } from '@vercel/analytics';
 import { apiClient } from '../services/apiClient';
 import { SponsorCheckResult, SponsorChangeItem } from '../types';
 import { Search, Building2, AlertTriangle, CheckCircle, XCircle, ShieldAlert, Loader2, RefreshCcw, AlertCircle, Clock, ChevronRight, ExternalLink, ListFilter, ArrowLeft } from 'lucide-react';
@@ -115,6 +115,8 @@ export const SponsorChecker: React.FC = () => {
     try {
       const data = await apiClient.checkSponsor(name) as SponsorCheckResult;
       setResult(data);
+      // Demand signal: a completed licence check, with what it found.
+      track('sponsor_check', { found: String(data.status) });
     } catch (err) {
       console.error(err);
       setSearchError("Couldn't check that company. Please try again.");

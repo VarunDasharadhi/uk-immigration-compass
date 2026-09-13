@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, FC } from 'react';
 import { createPortal } from 'react-dom';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { Analytics } from '@vercel/analytics/react';
+import { Analytics, track } from '@vercel/analytics/react';
 import {
   Newspaper,
   ScrollText,
@@ -199,6 +199,7 @@ const Header: FC<HeaderProps> = ({ activeTab, onTabChange }) => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Support us on Ko-fi"
+              onClick={trackDonateClick}
               className="flex items-center gap-1.5 rounded-full bg-blue-600 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition-all hover:bg-blue-500 hover:-translate-y-0.5"
             >
               <Heart className="w-4 h-4" />
@@ -374,6 +375,16 @@ interface FooterProps {
 // both buttons hide themselves when this is empty.
 const KOFI_URL = 'https://ko-fi.com/ukimmigrationcompass';
 
+// Donations leave the site, so a Donate click never produces a pageview of
+// ours. Log it as a custom event carrying the page the button was on; the
+// Events panel count against total visitors then reads as the donor
+// conversion rate, and the hash suffix says which page converts.
+const trackDonateClick = () => {
+  track('donate_click', {
+    from: (window.location.hash || '#/').replace(/^#/, '') || '/',
+  });
+};
+
 const Footer: FC<FooterProps> = ({ onNavigate }) => {
   const currentYear = new Date().getFullYear();
   const [contactOpen, setContactOpen] = useState(false);
@@ -404,6 +415,7 @@ const Footer: FC<FooterProps> = ({ onNavigate }) => {
               href={KOFI_URL}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={trackDonateClick}
               className="mt-6 inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-md shadow-blue-900/30 transition-colors"
             >
               <Coffee className="w-4 h-4" /> Support the site on Ko-fi
