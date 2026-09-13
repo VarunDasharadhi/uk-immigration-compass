@@ -201,14 +201,22 @@ export interface DigestSelection {
 
 /** Newest-first picks of everything that happened after `sinceMs`, capped. */
 export function selectDigestItems(updates: NewsItem[], changes: SponsorChangeItem[], sinceMs: number): DigestSelection {
+  // "New" means dated after the watermark AND not in the future. Rule
+  // changes often carry future effective dates ("effective 26 March 2027");
+  // without the future clamp those items sit permanently above the
+  // watermark and requalify for the digest every single night.
+  const now = Date.now();
   const freshUpdates = updates
-    .filter(u => Number(u.parsedDate) > sinceMs)
+    .filter(u => {
+      const ts = Number(u.parsedDate);
+      return Number.isFinite(ts) && ts > sinceMs && ts <= now;
+    })
     .sort((a, b) => b.parsedDate - a.parsedDate)
     .slice(0, MAX_UPDATES_PER_DIGEST);
   const freshChanges = changes
     .filter(c => {
       const ts = Date.parse(c.date);
-      return Number.isFinite(ts) && ts > sinceMs;
+      return Number.isFinite(ts) && ts > sinceMs && ts <= now;
     })
     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
     .slice(0, MAX_CHANGES_PER_DIGEST);

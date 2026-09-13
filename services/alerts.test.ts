@@ -218,6 +218,20 @@ describe('alerts: digest selection and email', () => {
     expect(sel.changes[0].company).toBe('Acme Ltd');
   });
 
+  it('never selects future-dated items, so they cannot resend every night', () => {
+    // Production bug 2026-09-13: updates effective months ahead ("effective
+    // 26 March 2027") sat permanently above the watermark and the same six
+    // items resent daily.
+    const now = Date.now();
+    const future = { ...makeUpdate(0, 'Effective next March'), parsedDate: now + 200 * 86_400_000 };
+    const recentPast = { ...makeUpdate(0, 'Dated yesterday-ish'), parsedDate: now - 86_400_000 };
+    const sel = selectDigestItems([future, recentPast], [], now - 3 * 86_400_000);
+    expect(sel.updates.map(u => u.title)).toEqual(['Dated yesterday-ish']);
+
+    // Sanity: future-only feed selects nothing at all
+    expect(selectDigestItems([{ ...makeUpdate(0, 'Far future'), parsedDate: now + 30 * 86_400_000 }], [], now - 86_400_000).updates).toHaveLength(0);
+  });
+
   it('builds an email with both sections, an unsubscribe link, escaped titles, and no em dashes', () => {
     const tricky = makeUpdate(1, 'Salary <rules> & "thresholds" updated');
     const sel = selectDigestItems([tricky], [CHANGE], SINCE);
