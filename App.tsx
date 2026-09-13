@@ -370,10 +370,9 @@ interface FooterProps {
 }
 
 // Ko-fi page for the header and footer Donate buttons. Emptied on 2026-09-12
-// while the Ko-fi account is unavailable; both buttons hide themselves when
-// this is empty. Restore 'https://ko-fi.com/ukimmigrationcompass' to bring
-// them back.
-const KOFI_URL = '';
+// while the Ko-fi account was flagged (appeal since upheld, page live again);
+// both buttons hide themselves when this is empty.
+const KOFI_URL = 'https://ko-fi.com/ukimmigrationcompass';
 
 const Footer: FC<FooterProps> = ({ onNavigate }) => {
   const currentYear = new Date().getFullYear();
