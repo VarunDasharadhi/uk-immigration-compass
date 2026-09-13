@@ -194,40 +194,105 @@ export function buildConfirmationEmail(confirmUrl: string): EmailContent {
 
 // ─── digest content ──────────────────────────────────────────────────────────
 
+export interface DigestItem extends NewsItem {
+  /** True when the item was sent before and its content has since changed. */
+  updated?: boolean;
+}
+
 export interface DigestSelection {
-  updates: NewsItem[];
-  changes: SponsorChangeItem[];
+  updates: DigestItem[];
+  changes: (SponsorChangeItem & { updated?: boolean })[];
+}
+
+// Content fingerprints of everything the digest has already delivered, so an
+// already-sent item whose details changed (deadline moved, summary amended,
+// status corrected) is re-sent exactly once, flagged as an update.
+const SENT_HASHES_KEY = 'alerts:sent-hashes';
+const HASH_PREFIX = 'v1:';
+// Bounded memory: fingerprints older than two months stop being tracked; the
+// watermark makes anything that old ineligible anyway.
+const SENT_HASHES_TTL_SECONDS = 60 * 24 * 60 * 60;
+
+function updateFingerprint(u: NewsItem): string {
+  return HASH_PREFIX + crypto.createHash('sha256').update([u.title, u.summary, u.details, u.impact, u.status].join('\u241f')).digest('hex').slice(0, 24);
+}
+
+function changeFingerprint(c: SponsorChangeItem): string {
+  return HASH_PREFIX + crypto.createHash('sha256').update([c.type, c.company, c.town, c.date].join('\u241f')).digest('hex').slice(0, 24);
+}
+
+function changeKey(c: SponsorChangeItem): string {
+  return `chg:${c.type}:${c.company.toLowerCase()}`;
 }
 
 /** Newest-first picks of everything that happened after `sinceMs`, capped. */
-export function selectDigestItems(updates: NewsItem[], changes: SponsorChangeItem[], sinceMs: number): DigestSelection {
+export function selectDigestItems(
+  updates: NewsItem[],
+  changes: SponsorChangeItem[],
+  sinceMs: number,
+  sentHashes: Record<string, string> = {},
+): DigestSelection {
   // "New" means dated after the watermark AND not in the future. Rule
   // changes often carry future effective dates ("effective 26 March 2027");
   // without the future clamp those items sit permanently above the
   // watermark and requalify for the digest every single night.
   const now = Date.now();
-  const freshUpdates = updates
+  const freshUpdates: DigestItem[] = updates
     .filter(u => {
       const ts = Number(u.parsedDate);
       return Number.isFinite(ts) && ts > sinceMs && ts <= now;
     })
     .sort((a, b) => b.parsedDate - a.parsedDate)
     .slice(0, MAX_UPDATES_PER_DIGEST);
-  const freshChanges = changes
+  // Already-delivered items whose content changed since they were sent go
+  // out again once, flagged, so postponements and amendments reach readers
+  // without anything ever repeating daily.
+  const seen = new Map(Object.entries(sentHashes));
+  const changedUpdates: DigestItem[] = updates
+    .filter(u => {
+      if (freshUpdates.some(f => f.id === u.id)) return false;
+      const prev = seen.get(u.id);
+      if (!prev) return false;
+      return prev !== updateFingerprint(u);
+    })
+    .map(u => ({ ...u, updated: true }))
+    .slice(0, MAX_UPDATES_PER_DIGEST);
+
+  const freshChanges: (SponsorChangeItem & { updated?: boolean })[] = changes
     .filter(c => {
       const ts = Date.parse(c.date);
       return Number.isFinite(ts) && ts > sinceMs && ts <= now;
     })
     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
     .slice(0, MAX_CHANGES_PER_DIGEST);
-  return { updates: freshUpdates, changes: freshChanges };
+  const changedChanges = changes
+    .filter(c => {
+      if (freshChanges.some(f => changeKey(f) === changeKey(c))) return false;
+      const prev = seen.get(changeKey(c));
+      if (!prev) return false;
+      return prev !== changeFingerprint(c);
+    })
+    .map(c => ({ ...c, updated: true }))
+    .slice(0, MAX_CHANGES_PER_DIGEST);
+
+  return { updates: [...freshUpdates, ...changedUpdates], changes: [...freshChanges, ...changedChanges] };
+}
+
+/** Fingerprints to remember after a digest goes out (sent items only). */
+export function collectSentHashes(sel: DigestSelection): Record<string, string> {
+  const hashes: Record<string, string> = {};
+  for (const u of sel.updates) hashes[u.id] = updateFingerprint(u);
+  for (const c of sel.changes) hashes[changeKey(c)] = changeFingerprint(c);
+  return hashes;
 }
 
 function digestSubject(sel: DigestSelection): string {
+  const updatedCount = sel.updates.filter(u => u.updated).length + sel.changes.filter(c => c.updated).length;
   const parts: string[] = [];
   if (sel.updates.length > 0) parts.push(`${sel.updates.length} rule update${sel.updates.length === 1 ? '' : 's'}`);
   if (sel.changes.length > 0) parts.push(`${sel.changes.length} sponsor register change${sel.changes.length === 1 ? '' : 's'}`);
-  return `${SITE_NAME}: ${parts.join(', ')}`;
+  const head = `${SITE_NAME}: ${parts.join(', ')}`;
+  return updatedCount > 0 ? `${head} (${updatedCount} updated)` : head;
 }
 
 function digestItemHtml(label: string, title: string, date: string): string {
@@ -239,13 +304,22 @@ function digestItemHtml(label: string, title: string, date: string): string {
       </li>`;
 }
 
+function updateLabel(u: DigestItem): string {
+  return u.updated ? `Updated \u00b7 ${u.category}` : u.category;
+}
+
+function changeLabel(c: SponsorChangeItem & { updated?: boolean }): string {
+  const base = c.type === 'added' ? 'Added' : 'Removed';
+  return c.updated ? `Updated \u00b7 ${base}` : base;
+}
+
 export function buildDigestEmail(sel: DigestSelection, unsubscribeUrl: string): EmailContent {
   const sections: string[] = [];
   if (sel.updates.length > 0) {
     sections.push(`
       <h2 style="margin:0 0 12px;font-size:15px;color:#0f172a;">Rule and policy updates</h2>
       <ul style="margin:0;padding:0 0 0 4px;list-style:none;">${sel.updates
-        .map(u => digestItemHtml(u.category, escapeHtml(u.title), escapeHtml(u.date)))
+        .map(u => digestItemHtml(updateLabel(u), escapeHtml(u.title), escapeHtml(u.date)))
         .join('')}
       </ul>`);
   }
@@ -253,7 +327,7 @@ export function buildDigestEmail(sel: DigestSelection, unsubscribeUrl: string): 
     sections.push(`
       <h2 style="margin:20px 0 12px;font-size:15px;color:#0f172a;">Sponsor register movements</h2>
       <ul style="margin:0;padding:0 0 0 4px;list-style:none;">${sel.changes
-        .map(c => digestItemHtml(c.type === 'added' ? 'Added' : 'Removed', `${escapeHtml(c.company)} (${escapeHtml(c.town)})`, escapeHtml(c.date)))
+        .map(c => digestItemHtml(changeLabel(c), `${escapeHtml(c.company)} (${escapeHtml(c.town)})`, escapeHtml(c.date)))
         .join('')}
       </ul>`);
   }
@@ -273,12 +347,12 @@ export function buildDigestEmail(sel: DigestSelection, unsubscribeUrl: string): 
   ];
   if (sel.updates.length > 0) {
     textLines.push('RULE AND POLICY UPDATES');
-    for (const u of sel.updates) textLines.push(`- [${u.category}] ${u.title} (${u.date})`);
+    for (const u of sel.updates) textLines.push(`- [${updateLabel(u)}] ${u.title} (${u.date})`);
     textLines.push('');
   }
   if (sel.changes.length > 0) {
     textLines.push('SPONSOR REGISTER MOVEMENTS');
-    for (const c of sel.changes) textLines.push(`- [${c.type}] ${c.company} (${c.town}) (${c.date})`);
+    for (const c of sel.changes) textLines.push(`- [${changeLabel(c)}] ${c.company} (${c.town}) (${c.date})`);
     textLines.push('');
   }
   textLines.push(`Unsubscribe: ${unsubscribeUrl}`);
@@ -404,7 +478,7 @@ export async function sendDigestIfDue(): Promise<{ sent: number; skipped?: strin
   const sinceRaw = await redis.get<string>(LAST_DIGEST_KEY);
   const since = sinceRaw ? Number(sinceRaw) : 0;
 
-  const [updatesRes, changes] = await Promise.all([
+  const [updatesRes, changes, sentHashesRaw] = await Promise.all([
     aiService.getUpdates().catch(err => {
       console.error('[Alerts] Digest could not load updates:', err);
       return null;
@@ -413,8 +487,18 @@ export async function sendDigestIfDue(): Promise<{ sent: number; skipped?: strin
       console.error('[Alerts] Digest could not load sponsor changes:', err);
       return [] as SponsorChangeItem[];
     }),
+    // Values were stored as plain strings, but upstash may auto-parse any
+    // that look like JSON; normalise both shapes (the GOTCHAS trap).
+    redis.hgetall<Record<string, string>>(SENT_HASHES_KEY).catch(err => {
+      console.error('[Alerts] Digest could not load sent fingerprints:', err);
+      return {} as Record<string, string>;
+    }),
   ]);
-  const sel = selectDigestItems(updatesRes?.items ?? [], changes, Number.isFinite(since) ? since : 0);
+  const sentHashes: Record<string, string> = {};
+  for (const [key, value] of Object.entries(sentHashesRaw || {})) {
+    sentHashes[key] = typeof value === 'string' ? value : String((value as any)?.v ?? value);
+  }
+  const sel = selectDigestItems(updatesRes?.items ?? [], changes, Number.isFinite(since) ? since : 0, sentHashes);
 
   if (sel.updates.length === 0 && sel.changes.length === 0) {
     await redis.set(LAST_DIGEST_KEY, String(Date.now()));
@@ -438,7 +522,16 @@ export async function sendDigestIfDue(): Promise<{ sent: number; skipped?: strin
   // Advance the watermark only once something actually went out, so a total
   // send failure (unverified domain, API outage) retries tomorrow with the
   // same items rather than silently skipping them.
-  if (sent > 0) await redis.set(LAST_DIGEST_KEY, String(Date.now()));
+  if (sent > 0) {
+    await redis.set(LAST_DIGEST_KEY, String(Date.now()));
+    // Remember what was delivered so amendments resend once, and nothing
+    // repeats. One hash key, TTL-bounded.
+    const hashes = collectSentHashes(sel);
+    if (Object.keys(hashes).length > 0) {
+      await redis.hset(SENT_HASHES_KEY, hashes);
+      await redis.expire(SENT_HASHES_KEY, SENT_HASHES_TTL_SECONDS);
+    }
+  }
   return { sent };
 }
 

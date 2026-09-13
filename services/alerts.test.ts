@@ -2,6 +2,7 @@ import {
   alertsConfigured,
   buildConfirmationEmail,
   buildDigestEmail,
+  collectSentHashes,
   confirmSubscriber,
   isValidEmail,
   selectDigestItems,
@@ -36,6 +37,7 @@ function makeRedis() {
     hgetall: jest.fn().mockResolvedValue({}),
     get: jest.fn().mockResolvedValue(null),
     set: jest.fn().mockResolvedValue('OK'),
+    expire: jest.fn().mockResolvedValue(1),
   };
 }
 
@@ -230,6 +232,48 @@ describe('alerts: digest selection and email', () => {
 
     // Sanity: future-only feed selects nothing at all
     expect(selectDigestItems([{ ...makeUpdate(0, 'Far future'), parsedDate: now + 30 * 86_400_000 }], [], now - 86_400_000).updates).toHaveLength(0);
+  });
+
+  it('resends an already-sent item once when its content changes, flagged as updated', () => {
+    const item = makeUpdate(-2, 'Salary thresholds'); // old item, never re-selected by date
+    const fp = collectSentHashes({ updates: [item], changes: [] })[item.id];
+
+    // Same content as when delivered: stays quiet
+    expect(selectDigestItems([item], [], SINCE, { [item.id]: fp }).updates).toHaveLength(0);
+
+    // Details amended (e.g. deadline postponed): selected once, flagged
+    const amended = { ...item, summary: 'Deadline postponed to April 2027' };
+    const sel = selectDigestItems([amended], [], SINCE, { [item.id]: fp });
+    expect(sel.updates).toHaveLength(1);
+    expect(sel.updates[0].updated).toBe(true);
+    expect(sel.updates[0].summary).toContain('postponed');
+
+    // After the amended version is delivered, it stays quiet again
+    const newFp = collectSentHashes({ updates: [amended], changes: [] })[item.id];
+    expect(selectDigestItems([amended], [], SINCE, { [item.id]: newFp }).updates).toHaveLength(0);
+  });
+
+  it('resends a register movement when its details change, flagged as updated', () => {
+    const old = { ...CHANGE, date: '2001-05-05' }; // delivered long ago; date path can never re-select it
+    const key = `chg:${old.type}:${old.company.toLowerCase()}`;
+    const fp = collectSentHashes({ updates: [], changes: [old] })[key];
+
+    // Town corrected after delivery: one update
+    const corrected = { ...old, town: 'Greater Leeds' };
+    const sel = selectDigestItems([], [corrected], SINCE, { [key]: fp });
+    expect(sel.changes).toHaveLength(1);
+    expect(sel.changes[0].updated).toBe(true);
+
+    // Unchanged afterwards: quiet
+    expect(selectDigestItems([], [corrected], SINCE, { [key]: collectSentHashes({ updates: [], changes: [corrected] })[key] }).changes).toHaveLength(0);
+  });
+
+  it('collectSentHashes fingerprints everything in the selection', () => {
+    const sel = selectDigestItems([makeUpdate(1)], [CHANGE], SINCE);
+    const hashes = collectSentHashes(sel);
+    expect(Object.keys(hashes)).toHaveLength(2);
+    expect(hashes[sel.updates[0].id]).toMatch(/^v1:/);
+    expect(hashes[`chg:${CHANGE.type}:${CHANGE.company.toLowerCase()}`]).toMatch(/^v1:/);
   });
 
   it('builds an email with both sections, an unsubscribe link, escaped titles, and no em dashes', () => {
