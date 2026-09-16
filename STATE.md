@@ -17,11 +17,11 @@ through OpenRouter (`google/gemini-2.5-flash`). No Firebase or GCP dependency de
 
 ## Where the code stands
 
-`main` is at `b1a1ce9` (2026-09-12): the floating header work through `a9d3e9a` is committed AND
-deployed; on top, per-page view analytics plus the sponsor list back button are committed locally,
-NOT deployed. 124/124 tests, type-check and lint all green. See `docs/journal/2026-09-12.md` for
-the latest session narrative and `docs/journal/2026-09-11.md` for the alerts/petitions one;
-highlights:
+`main` is at `ac9248f` (2026-09-13) and matches origin/main: per-page view analytics, the sponsor
+list back button, digest dedupe, the Donate restore and the donate_click/sponsor_check events are
+ALL deployed and live-bundle-verified (2026-09-13). 128/128 tests, type-check and lint green at
+that point. See `docs/journal/2026-09-13.md` for the latest session narrative and
+`docs/journal/2026-09-11.md` for the alerts/petitions one; highlights:
 
 - Email alerts LIVE and verified in production (2026-09-11): double opt-in capture card on the
   News tab, `/api/alerts/*` routes riding the api/index catch-all (api/ sits at Vercel Hobby's
@@ -32,8 +32,9 @@ highlights:
   scheduled the next morning. Resend is still on the sandbox sender (onboarding@resend.dev), so
   only the Resend account owner's address receives mail until a domain is verified at
   resend.com/domains and ALERTS_FROM_EMAIL is set; other signups get an honest send-failure error.
-- Ko-fi footer button wired behind an empty `KOFI_URL` constant in App.tsx (hidden until Varun
-  sets the URL). Adzuna added to the sponsor card's open-roles links, routed through AWIN once
+- Ko-fi account restored (appeal upheld 2026-09-13); Donate buttons live again via KOFI_URL,
+  with donate_click (from = route) and sponsor_check (found = status) events feeding the
+  Events panel. Adzuna added to the sponsor card's open-roles links, routed through AWIN once
   both ID constants in `utils/companyLinks.ts` are filled (source constants, not env vars).
 - Mature navy palette everywhere (sky/cyan/teal fully retired); light-mode header is white
   with navy logo tile + `#16243d` nav tray; every tab opens a dark PageHero band with themed
@@ -54,10 +55,10 @@ highlights:
   Search Console request-indexing quota exhausted again on 2026-09-11; per-account Google-side,
   retry when it lets you.
 - URL hash restores tab + sponsors view on refresh.
-- Per-page analytics (2026-09-12, local): `<Analytics route path>` per view makes Vercel's
+- Per-page analytics (2026-09-12, deployed): `<Analytics route path>` per view makes Vercel's
   Pages panel split the hash-routed app into /, /sponsors, /sponsors/browse, /sponsors/check,
   /petitions, /jargon-buster, /updates/archive, /404; the route prop disables auto-track.
-- Sponsor browse back button (2026-09-12, local): opening a sponsor from the directory keeps
+- Sponsor browse back button (2026-09-12, deployed): opening a sponsor from the directory keeps
   the list mounted (hidden) and a "Back to sponsor list" button restores filters, loaded pages
   and scroll position.
 
@@ -71,4 +72,4 @@ English, no em dashes, professional navy look (bright cyan and flag colours both
 Verification gate: `npm test` (jest), `npm run type-check` (`tsc --noEmit`), `npm run lint`
 (`eslint src --ext .ts,.tsx`). All three are real, codified npm scripts.
 
-Last verified: 2026-09-12
+Last verified: 2026-09-16
