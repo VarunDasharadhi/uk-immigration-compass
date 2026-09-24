@@ -1,6 +1,7 @@
 /**
  * aiService.ts
- * Server-side AI service using OpenRouter (never imported by browser code).
+ * Server-side AI service using direct Gemini Search for live news and the
+ * free Kilo lane for bounded formatting/classification work.
  * Responses are disk-cached and refreshed once per day at local midnight.
  */
 
@@ -12,13 +13,16 @@ import { canonicalName } from '../utils/canonicalName.js';
 
 export { canonicalName };
 
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+const ORCA_API_URL = 'https://api.orcarouter.ai/v1/chat/completions';
+const HETZNER_API_URL = 'https://inference.hetzner.com/api/v1/chat/completions';
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const CALL_TIMEOUT_MS = 45_000;
 
-// Lazy getters: resolved at call time, after loadEnvFile() has run
-const getApiKey = () => process.env.OPENROUTER_API_KEY || '';
-const getBaseModel = () => process.env.OPENROUTER_MODEL || 'google/gemini-2.5-flash';
-const getOnlineModel = () => `${getBaseModel()}:online`;
+// Lazy getters: resolved at call time, after loadEnvFile() has run.
+const getApiKey = () => process.env.GEMINI_API_KEY_PAID || process.env.GEMINI_API_KEY || '';
+const getBaseModel = () => process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const getOnlineModel = () => getBaseModel();
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -28,72 +32,148 @@ function parseDelimitedBlocks(text: string, startDelim: string, endDelim: string
 
 function extractKeyValues(blockText: string): Record<string, string> {
   const result: Record<string, string> = {};
-  blockText.split('\n').forEach(line => {
+  for (const line of blockText.split('\n')) {
     const match = line.match(/^([A-Z_]+):\s*(.*)/);
     if (match) result[match[1].toLowerCase()] = match[2].trim();
-  });
+  }
   return result;
 }
 
-// ─── OpenRouter call ─────────────────────────────────────────────────────────
+// ─── AI calls ────────────────────────────────────────────────────────────────
 
-interface OrMessage {
+interface AiMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
 }
 
-async function callOpenRouter(
-  messages: OrMessage[],
-  model?: string,
+interface AiResult {
+  text: string;
+  annotations: any[];
+}
+
+async function callGeminiSearch(
+  messages: AiMessage[],
   maxTokens: number = 8192,
   temperature?: number
-): Promise<{ text: string; annotations: any[] }> {
+): Promise<AiResult> {
   const apiKey = getApiKey();
-  const resolvedModel = model ?? getOnlineModel();
-  if (!apiKey) {
-    throw new Error('OPENROUTER_API_KEY not set. Add it to .env.local.');
-  }
+  if (!apiKey) throw new Error('GEMINI_API_KEY_PAID or GEMINI_API_KEY is not set.');
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CALL_TIMEOUT_MS);
+  const system = messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n');
+  const contents = messages.filter(m => m.role !== 'system').map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }));
 
   try {
-    const resp = await fetch(OPENROUTER_API_URL, {
+    const resp = await fetch(`${GEMINI_API_URL}/${getOnlineModel()}:generateContent`, {
       method: 'POST',
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-        'HTTP-Referer': 'http://localhost:10000',
-        'X-Title': 'UK Immigration Compass',
+        'x-goog-api-key': apiKey,
       },
       body: JSON.stringify({
-        model: resolvedModel,
-        messages,
-        max_tokens: maxTokens,
-        ...(temperature !== undefined ? { temperature } : {}),
+        ...(system ? { system_instruction: { parts: [{ text: system }] } } : {}),
+        contents,
+        tools: [{ google_search: {} }],
+        generationConfig: {
+          maxOutputTokens: maxTokens,
+          ...(temperature !== undefined ? { temperature } : {}),
+        },
       }),
     });
-
-    if (!resp.ok) {
-      const errText = await resp.text().catch(() => '');
-      throw new Error(`OpenRouter ${resp.status}: ${errText}`);
-    }
-
+    if (!resp.ok) throw new Error(`Gemini ${resp.status}: ${await resp.text().catch(() => '')}`);
     const json = await resp.json() as any;
-    const choice = json.choices?.[0];
-    const text: string = choice?.message?.content ?? '';
-    const annotations: any[] = choice?.message?.annotations ?? [];
+    const candidate = json.candidates?.[0];
+    const text = (candidate?.content?.parts || []).map((p: any) => p.text || '').join('');
+    const grounding = candidate?.groundingMetadata || {};
+    const annotations = (grounding.groundingChunks || [])
+      .filter((c: any) => c?.web?.uri)
+      .map((c: any) => ({ type: 'url_citation', url_citation: { url: c.web.uri, title: c.web.title || '' } }));
     return { text, annotations };
   } finally {
     clearTimeout(timer);
   }
 }
 
+async function callFreeLane(
+  messages: AiMessage[],
+  maxTokens: number = 8192,
+  temperature?: number
+): Promise<AiResult> {
+  const rungs = [
+    {
+      name: 'Hetzner Qwen 3.6 35B',
+      url: HETZNER_API_URL,
+      key: process.env.HETZNER_INFERENCE_API_KEY,
+      model: 'Qwen/Qwen3.6-35B-A3B-FP8',
+      headers: {},
+      extra: { chat_template_kwargs: { enable_thinking: false } },
+    },
+    {
+      name: 'Groq GPT-OSS 120B',
+      url: GROQ_API_URL,
+      key: process.env.GROQ_API_KEY,
+      model: 'openai/gpt-oss-120b',
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      extra: {},
+    },
+    {
+      name: 'OrcaRouter DeepSeek V4 Flash',
+      url: ORCA_API_URL,
+      key: process.env.ORCAROUTER_API_KEY,
+      model: 'deepseek/deepseek-v4-flash-free',
+      headers: {},
+      extra: {},
+    },
+  ];
+  const errors: string[] = [];
+  for (const rung of rungs) {
+    if (!rung.key) {
+      errors.push(`${rung.name}: missing key`);
+      continue;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30_000);
+    try {
+      const resp = await fetch(rung.url, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${rung.key}`,
+          ...(rung.headers as Record<string, string>),
+        },
+        body: JSON.stringify({
+          model: rung.model,
+          messages,
+          max_tokens: maxTokens,
+          ...(temperature !== undefined ? { temperature } : {}),
+          ...rung.extra,
+        }),
+      });
+      if (!resp.ok) {
+        errors.push(`${rung.name}: HTTP ${resp.status}`);
+        continue;
+      }
+      const json = await resp.json() as any;
+      const text = json.choices?.[0]?.message?.content || '';
+      if (text.trim()) return { text, annotations: [] };
+      errors.push(`${rung.name}: empty response`);
+    } catch (err) {
+      errors.push(`${rung.name}: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw new Error(`All free lanes failed: ${errors.join('; ')}`);
+}
+
 function annotationsToSources(annotations: any[]): { web?: { uri?: string; title?: string } }[] {
-  return annotations
-    .filter(a => a?.type === 'url_citation' && a?.url_citation?.url)
-    .map(a => ({ web: { uri: a.url_citation.url, title: a.url_citation.title ?? '' } }));
+  return annotations.map(a => ({ web: { uri: a.url_citation.url, title: a.url_citation.title || '' } }));
 }
 
 // ─── GOV.UK sponsor register (CSV-based, authoritative) ──────────────────────
@@ -629,9 +709,8 @@ async function isDuplicateEvent(candidateTitle: string, existingTitles: string[]
     // generation. Left at the default (sampling) temperature, the same
     // candidate/existing pair was observed to flip between DUPLICATE and NEW
     // across runs.
-    const { text } = await callOpenRouter(
+    const { text } = await callFreeLane(
       [{ role: 'user', content: PROMPTS.duplicateCheck(candidateTitle, existingTitles) }],
-      getBaseModel(),
       10,
       0
     );
@@ -662,7 +741,9 @@ async function mergeIntoArchiveAndRebuildDisplay(freshItems: NewsItem[], sources
     const key = newsDedupeKey(item.title);
     if (existingKeys.has(key)) continue;
     const sameCategoryTitles = archive.filter(a => a.category === item.category).map(a => a.title);
-    if (await isDuplicateEvent(item.title, sameCategoryTitles)) continue;
+    // Keep the free classifier input bounded. Hetzner is a small-context,
+    // rate-limited lane and the archive can grow well beyond one prompt.
+    if (await isDuplicateEvent(item.title, sameCategoryTitles.slice(-40))) continue;
     archive.push(item);
     existingKeys.add(key);
   }
@@ -689,9 +770,8 @@ async function mergeIntoArchiveAndRebuildDisplay(freshItems: NewsItem[], sources
 }
 
 export async function refreshUpdates(): Promise<UpdatesResponse> {
-  const { text, annotations } = await callOpenRouter(
+  const { text, annotations } = await callGeminiSearch(
     [{ role: 'user', content: PROMPTS.latestUpdates }],
-    getOnlineModel(),
     12000
   );
   return mergeIntoArchiveAndRebuildDisplay(parseUpdatesText(text || ''), annotationsToSources(annotations));
@@ -713,9 +793,8 @@ export async function backfillThinCategories(): Promise<void> {
   const freshItems: NewsItem[] = [];
   for (const category of thinCategories) {
     try {
-      const { text } = await callOpenRouter(
+      const { text } = await callGeminiSearch(
         [{ role: 'user', content: PROMPTS.categoryBackfill(category) }],
-        getOnlineModel(),
         6000
       );
       for (const item of parseUpdatesText(text || '')) {
@@ -861,9 +940,8 @@ export async function refreshPetitions(): Promise<PetitionsResult> {
 }
 
 export async function refreshSponsorNews(): Promise<SponsorNewsItem[]> {
-  const { text } = await callOpenRouter(
+  const { text } = await callGeminiSearch(
     [{ role: 'user', content: PROMPTS.sponsorNews }],
-    getOnlineModel(),
     2048
   );
   const items: SponsorNewsItem[] = [];
@@ -994,10 +1072,9 @@ export async function getRecentSponsorChanges(): Promise<SponsorChangeItem[]> {
 
 export async function simplify(complexText: string): Promise<{ simplified: string }> {
   if (!getApiKey()) return { simplified: `Simplified: ${complexText.substring(0, 200)}...` };
-  const { text } = await callOpenRouter(
+  const { text } = await callFreeLane(
     [{ role: 'user', content: PROMPTS.simplify(complexText) }],
-    getBaseModel(),
-    4096
+    2048
   );
   return { simplified: text || 'Could not simplify text.' };
 }
