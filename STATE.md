@@ -17,8 +17,9 @@ through OpenRouter (`google/gemini-2.5-flash`). No Firebase or GCP dependency de
 
 ## Where the code stands
 
-`origin/main` is at `cbd22d4` (2026-09-24). The 2026-09-13 baseline recorded per-page view
-analytics, the sponsor list back button, digest dedupe, the Donate restore and the
+`origin/main` includes the reviewed archive indexing fix `cbd22d4` and its deployment
+checkpoint (2026-09-24). The 2026-09-13 baseline recorded per-page view analytics, the
+sponsor list back button, digest dedupe, the Donate restore and the
 donate_click/sponsor_check events as deployed and live-bundle-verified, with 128/128 tests,
 type-check and lint green at that point. `docs/journal/2026-09-24.md` is the latest session
 narrative. `docs/journal/2026-09-13.md` preserves the earlier checkpoint, and
