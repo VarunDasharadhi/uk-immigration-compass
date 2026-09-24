@@ -17,11 +17,12 @@ through OpenRouter (`google/gemini-2.5-flash`). No Firebase or GCP dependency de
 
 ## Where the code stands
 
-`main` is at `ac9248f` (2026-09-13) and matches origin/main: per-page view analytics, the sponsor
-list back button, digest dedupe, the Donate restore and the donate_click/sponsor_check events are
-ALL deployed and live-bundle-verified (2026-09-13). 128/128 tests, type-check and lint green at
-that point. See `docs/journal/2026-09-13.md` for the latest session narrative and
-`docs/journal/2026-09-11.md` for the alerts/petitions one; highlights:
+`origin/main` is at `cbd22d4` (2026-09-24). The 2026-09-13 baseline recorded per-page view
+analytics, the sponsor list back button, digest dedupe, the Donate restore and the
+donate_click/sponsor_check events as deployed and live-bundle-verified, with 128/128 tests,
+type-check and lint green at that point. `docs/journal/2026-09-24.md` is the latest session
+narrative. `docs/journal/2026-09-13.md` preserves the earlier checkpoint, and
+`docs/journal/2026-09-11.md` covers alerts and petitions. Highlights:
 
 - Email alerts LIVE and verified in production (2026-09-11): double opt-in capture card on the
   News tab, `/api/alerts/*` routes riding the api/index catch-all (api/ sits at Vercel Hobby's
@@ -46,16 +47,21 @@ that point. See `docs/journal/2026-09-13.md` for the latest session narrative an
 - Sponsors: sidebar lists real register movements (`/api/sponsor-changes`, ledger-backed).
 - Perf: session cache (`utils/cache.ts`) + directory prefetch; orbs are radial gradients.
 - SEO layer live: per-tab titles/canonicals, soft-404 noindex, sitemap+robots, self-hosted
-  Inter, FAQ+JSON-LD, Search Console verified. Homepage indexed on Google (archive pending).
-  The reviewed local branch `fix/archive-indexing` generates `dist/updates/archive/index.html`
-  during `npm run build`, with archive-specific initial metadata, one H1, up to 20 escaped
-  static items, CollectionPage and ItemList JSON-LD when data exists, and a no-items fallback
-  that does not fail the build. Client metadata now updates Open Graph and Twitter fields, and
-  FAQ schema is scoped to the homepage News view. This is local only, not deployed, not pushed,
-  and not yet reflected in production Search Console. The live production issue remains
-  `Discovered - currently not indexed` for `/updates/archive` until deployment and Google's
-  recrawl. Local gate: 19 suites, 127 tests, type-check, lint, build, node syntax check,
-  generator black-box tests, and diff check all passing.
+  Inter, FAQ+JSON-LD, Search Console verified. Homepage indexed on Google. The archive prerender
+  is deployed from production commit `cbd22d4` (`fix: prerender archive for search indexing`) in
+  Vercel deployment `dpl_3faUA28ALsbpLGu6ZuLiYNKW54z5`, Ready and aliased to
+  `https://uk-immigration-compass.vercel.app`. The generator wrote 20 static items. Raw HTML for
+  `/updates/archive` and `/updates/archive/` returned HTTP 200 with archive metadata, one H1,
+  crawlable homepage link, exact self-canonical, 20 ItemList entries plus static markup and no
+  FAQ schema; the Googlebot no-JavaScript structural check and JSON-LD parsing also passed. The
+  hydrated page loaded 72 live API items, displayed 12 initially, expanded to 24, and passed
+  search, category, modal, metadata, asset and browser-error checks. Sitemap and robots returned
+  HTTP 200; archive lastmod is `2026-09-24T01:46:06.237Z`, and robots allows all. Search Console
+  still showed `Discovered - currently not indexed` immediately after deployment. One Request
+  Indexing attempt ran the live test but failed with `Quota exceeded`; the interface asked to try
+  tomorrow. `Validate Fix` was started successfully on 24/09/2026, after which Search Console
+  displayed `Validation started`. At immediate verification, the URL still had Last crawled N/A and
+  was not indexed. No indexing or ranking outcome is claimed; Google can take days or weeks.
 - eu.org domain: `uk-immigration-compass.eu.org` added to the Vercel project (awaiting EU.org
   approval, request 20260911175705-arf-8129 stored — volunteers process periodically); Cloudflare
   free zone created with the 3 Vercel records. When it resolves, update SITE_URL/canonicals/
