@@ -155,7 +155,7 @@ export const NewsDashboard: React.FC = () => {
                     to="/updates/archive"
                     className="block text-center bg-blue-700 hover:bg-blue-600 text-white font-semibold px-6 py-3.5 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5"
                   >
-                    View all {filteredItems.length} updates in the archive
+                    View the full update archive
                   </Link>
                 )}
               </>

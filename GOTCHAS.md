@@ -34,3 +34,5 @@ rediscovered the hard way; you only pay for the detail when it is actually relev
   imports unmocked; `services/apiClient.ts` only gets away with it because every test mocks the
   whole module. Keep build-time config out of jest-tested modules (see the AWIN constants in
   `utils/companyLinks.ts` for the pattern).
+- Free-text event, effective, expiry or policy dates must never drive sitemap `lastmod`; use a
+  build-bounded `createdAt` or a genuinely later `updatedAt`, with build time as the fallback.

@@ -7,6 +7,7 @@ export default {
     './*.ts',
     './components/**/*.{ts,tsx}',
     './services/**/*.{ts,tsx}',
+    './scripts/generate-archive-prerender.mjs',
   ],
   theme: {
     extend: {},

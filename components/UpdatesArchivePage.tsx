@@ -15,6 +15,41 @@ import { Reveal } from './Reveal';
 
 const PAGE_SIZE = 12;
 
+// Keep the hydrated route on the same event-date ordering as the build-time
+// archive. parsedDate is authoritative; ISO date text and createdAt are only
+// deterministic fallbacks for malformed upstream records.
+function archiveOrderingDate(item: NewsItem): number | null {
+  const rawParsedDate: unknown = item.parsedDate;
+  const hasParsedDate = typeof rawParsedDate === 'number' ||
+    (typeof rawParsedDate === 'string' && rawParsedDate.trim() !== '');
+  const parsedDate = hasParsedDate ? Number(rawParsedDate) : NaN;
+  if (Number.isFinite(parsedDate)) return parsedDate;
+
+  const dateOnly = String(item.date ?? '').trim().match(/^(\d{4}-\d{2}-\d{2})(?:$|T|\s)/);
+  if (dateOnly) {
+    const date = Date.parse(`${dateOnly[1]}T00:00:00.000Z`);
+    if (Number.isFinite(date)) return date;
+  }
+
+  if (typeof item.createdAt === 'string' && item.createdAt.trim()) {
+    const date = Date.parse(item.createdAt);
+    if (Number.isFinite(date)) return date;
+  }
+  return null;
+}
+
+function compareArchiveItems(
+  left: { item: NewsItem; sourceOrder: number },
+  right: { item: NewsItem; sourceOrder: number }
+): number {
+  const leftDate = archiveOrderingDate(left.item);
+  const rightDate = archiveOrderingDate(right.item);
+  if (leftDate === null && rightDate === null) return left.sourceOrder - right.sourceOrder;
+  if (leftDate === null) return 1;
+  if (rightDate === null) return -1;
+  return rightDate - leftDate || left.sourceOrder - right.sourceOrder;
+}
+
 export const UpdatesArchivePage: React.FC = () => {
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -57,7 +92,9 @@ export const UpdatesArchivePage: React.FC = () => {
     return items
       .filter(item => selectedCategory === 'All' || item.category === selectedCategory)
       .filter(item => !q || item.title.toLowerCase().includes(q) || item.summary.toLowerCase().includes(q))
-      .sort((a, b) => b.parsedDate - a.parsedDate);
+      .map((item, sourceOrder) => ({ item, sourceOrder }))
+      .sort(compareArchiveItems)
+      .map(({ item }) => item);
   }, [items, selectedCategory, query]);
 
   const visibleItems = filteredItems.slice(0, visibleCount);
@@ -87,6 +124,7 @@ export const UpdatesArchivePage: React.FC = () => {
         icon={Archive}
         title="Update Archive"
         description="Every immigration update from the past year, searchable and organised by category."
+        headingLevel="h1"
         art={<ArchiveArt />}
       />
 

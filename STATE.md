@@ -47,6 +47,15 @@ that point. See `docs/journal/2026-09-13.md` for the latest session narrative an
 - Perf: session cache (`utils/cache.ts`) + directory prefetch; orbs are radial gradients.
 - SEO layer live: per-tab titles/canonicals, soft-404 noindex, sitemap+robots, self-hosted
   Inter, FAQ+JSON-LD, Search Console verified. Homepage indexed on Google (archive pending).
+  The reviewed local branch `fix/archive-indexing` generates `dist/updates/archive/index.html`
+  during `npm run build`, with archive-specific initial metadata, one H1, up to 20 escaped
+  static items, CollectionPage and ItemList JSON-LD when data exists, and a no-items fallback
+  that does not fail the build. Client metadata now updates Open Graph and Twitter fields, and
+  FAQ schema is scoped to the homepage News view. This is local only, not deployed, not pushed,
+  and not yet reflected in production Search Console. The live production issue remains
+  `Discovered - currently not indexed` for `/updates/archive` until deployment and Google's
+  recrawl. Local gate: 19 suites, 127 tests, type-check, lint, build, node syntax check,
+  generator black-box tests, and diff check all passing.
 - eu.org domain: `uk-immigration-compass.eu.org` added to the Vercel project (awaiting EU.org
   approval, request 20260911175705-arf-8129 stored — volunteers process periodically); Cloudflare
   free zone created with the 3 Vercel records. When it resolves, update SITE_URL/canonicals/
@@ -72,4 +81,4 @@ English, no em dashes, professional navy look (bright cyan and flag colours both
 Verification gate: `npm test` (jest), `npm run type-check` (`tsc --noEmit`), `npm run lint`
 (`eslint src --ext .ts,.tsx`). All three are real, codified npm scripts.
 
-Last verified: 2026-09-16
+Last verified: 2026-09-24

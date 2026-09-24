@@ -621,7 +621,7 @@ const MainApp: FC = () => {
       return;
     }
     const meta = pageMeta[activeTab] ?? pageMeta[Tab.NEWS];
-    setPageMeta(meta.title, meta.description, '/');
+    setPageMeta(meta.title, meta.description, '/', { includeFaq: activeTab === Tab.NEWS });
   }, [activeTab, unknownPath]);
 
   const ContentComponent = useMemo(() => {
