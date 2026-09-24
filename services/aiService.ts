@@ -1,7 +1,7 @@
 /**
  * aiService.ts
  * Server-side AI service using direct Gemini Search for live news and the
- * free Kilo lane for bounded formatting/classification work.
+ * free fallback lanes for bounded formatting/classification work.
  * Responses are disk-cached and refreshed once per day at local midnight.
  */
 
@@ -17,7 +17,8 @@ const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 const ORCA_API_URL = 'https://api.orcarouter.ai/v1/chat/completions';
 const HETZNER_API_URL = 'https://inference.hetzner.com/api/v1/chat/completions';
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const CALL_TIMEOUT_MS = 45_000;
+const GEMINI_TIMEOUT_MS = 120_000;
+const FREE_LANE_TIMEOUT_MS = 30_000;
 
 // Lazy getters: resolved at call time, after loadEnvFile() has run.
 const getApiKey = () => process.env.GEMINI_API_KEY_PAID || process.env.GEMINI_API_KEY || '';
@@ -60,7 +61,7 @@ async function callGeminiSearch(
   if (!apiKey) throw new Error('GEMINI_API_KEY_PAID or GEMINI_API_KEY is not set.');
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), CALL_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
   const system = messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n');
   const contents = messages.filter(m => m.role !== 'system').map(m => ({
     role: m.role === 'assistant' ? 'model' : 'user',
@@ -137,7 +138,7 @@ async function callFreeLane(
       continue;
     }
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 30_000);
+    const timer = setTimeout(() => controller.abort(), FREE_LANE_TIMEOUT_MS);
     try {
       const resp = await fetch(rung.url, {
         method: 'POST',
