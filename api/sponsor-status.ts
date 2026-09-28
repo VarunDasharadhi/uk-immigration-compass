@@ -19,8 +19,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // into this instance first if they aren't here yet.
     await aiService.ensureSponsorDataLoaded();
     const data = await aiService.checkSponsor(companyName);
-    // Cache per-company results for 1h
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
+    // Cache per-company results. Was s-maxage=3600, the only endpoint left on
+    // an hourly edge TTL: the revalidation blocked instead of serving stale, so
+    // the first visitor after every hour paid the full register download (8.5s
+    // measured in production). The register only refreshes nightly, so an
+    // answer cannot be fresher than a day regardless; this now matches every
+    // other read endpoint.
+    res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=604800');
     res.status(200).json(data);
   } catch (err) {
     console.error('[/api/sponsor-status]', err);
