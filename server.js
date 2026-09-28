@@ -123,6 +123,11 @@ app.get('/api/sponsor-news', async (_req, res) => {
 app.get('/api/sponsor-changes', async (_req, res) => {
   try {
     const data = await aiService.getRecentSponsorChanges();
+    // This route is served by the catch-all (no dedicated function), so
+    // without an explicit header Vercel's default (max-age=0) meant the edge
+    // never cached it and every request paid the full ledger scan on a cold
+    // instance. The ledger only changes when the register refreshes daily.
+    res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=604800');
     res.json(data);
   } catch (err) {
     console.error('[/api/sponsor-changes]', err);

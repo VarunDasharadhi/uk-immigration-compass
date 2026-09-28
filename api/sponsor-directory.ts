@@ -44,7 +44,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     await aiService.ensureSponsorDataLoaded();
     const data = queryDirectory({ industry, route, q, page, pageSize });
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
+    // Was s-maxage=3600, so the edge entry expired every hour and the first
+    // visitor after each expiry paid the full register load (~10s). The
+    // register only changes when the nightly refresh runs, so a day-long
+    // edge cache loses nothing.
+    res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=604800');
     res.status(200).json(data);
   } catch (err) {
     console.error('[/api/sponsor-directory]', err);

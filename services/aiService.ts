@@ -295,6 +295,10 @@ export async function refreshSponsorRegister(): Promise<void> {
     }
     registerVersion++;
     console.log(`[Register] Loaded ${workerRegister.length} licensed sponsors`);
+    // The sidebar's added/removed list is derived from this register, so drop
+    // the shared copy and let the next request recompute it from fresh data.
+    recentChangesCache = null;
+    await invalidateRecentSponsorChanges();
   } catch (err) {
     console.error('[Register] Failed to load:', err);
   }
@@ -1018,18 +1022,41 @@ export async function getSponsorNews(): Promise<SponsorNewsItem[]> {
 
 let recentChangesCache: { at: number; items: SponsorChangeItem[] } | null = null;
 const RECENT_CHANGES_TTL_MS = 10 * 60 * 1000;
+// The in-process memo above dies with the instance, so a cold function pays
+// the full 676-bucket scan again. The result is only a dozen small items, so
+// it also lives in the shared Redis cache where every instance can read it in
+// one call. TTL is a safety net; the register refresh invalidates it outright.
+const RECENT_CHANGES_REDIS_KEY = 'sponsor-recent-changes:v1';
+const RECENT_CHANGES_REDIS_TTL_S = 12 * 60 * 60;
 
 /**
  * The most recently added and removed sponsors, computed from the same
  * historical ledger the licence-history view reads. Every company's records
  * are grouped and reduced to its latest genuine event, then the newest adds
  * and removals are returned. Computed at most once every 10 minutes per
- * instance; the scan runs in memory over buckets already primed by the
- * nightly job.
+ * instance, and shared across instances through Redis; the scan runs in memory
+ * over buckets already primed by the nightly job.
  */
 export async function getRecentSponsorChanges(): Promise<SponsorChangeItem[]> {
   if (recentChangesCache && Date.now() - recentChangesCache.at < RECENT_CHANGES_TTL_MS) {
     return recentChangesCache.items;
+  }
+  const redis = cache.getRedisClient();
+  if (redis) {
+    try {
+      // Upstash auto-deserializes JSON-looking values, so a value can come
+      // back as an object or a string depending on how it was written.
+      const raw = await redis.get<string>(RECENT_CHANGES_REDIS_KEY);
+      const parsed = typeof raw === 'string' ? (raw ? JSON.parse(raw) : null) : raw;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        recentChangesCache = { at: Date.now(), items: parsed as SponsorChangeItem[] };
+        return recentChangesCache.items;
+      }
+    } catch (err) {
+      // A shared-cache miss must never fail the request; fall through to the
+      // scan, same fail-open pattern as the rate limiter.
+      console.error('[SponsorChanges] Shared cache read failed:', err);
+    }
   }
   await ensureSponsorDataLoaded();
 
@@ -1068,7 +1095,25 @@ export async function getRecentSponsorChanges(): Promise<SponsorChangeItem[]> {
 
   const items = [...added.slice(0, 6), ...removed.slice(0, 6)];
   recentChangesCache = { at: Date.now(), items };
+  if (redis) {
+    try {
+      await redis.set(RECENT_CHANGES_REDIS_KEY, JSON.stringify(items), { ex: RECENT_CHANGES_REDIS_TTL_S });
+    } catch (err) {
+      console.error('[SponsorChanges] Shared cache write failed:', err);
+    }
+  }
   return items;
+}
+
+/** Called after the register refresh so the sidebar never shows yesterday's ledger. */
+export async function invalidateRecentSponsorChanges(): Promise<void> {
+  const redis = cache.getRedisClient();
+  if (!redis) return;
+  try {
+    await redis.del(RECENT_CHANGES_REDIS_KEY);
+  } catch (err) {
+    console.error('[SponsorChanges] Shared cache invalidate failed:', err);
+  }
 }
 
 export async function simplify(complexText: string): Promise<{ simplified: string }> {
