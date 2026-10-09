@@ -63,10 +63,14 @@ narrative. `docs/journal/2026-09-13.md` preserves the earlier checkpoint, and
   tomorrow. `Validate Fix` was started successfully on 24/09/2026, after which Search Console
   displayed `Validation started`. At immediate verification, the URL still had Last crawled N/A and
   was not indexed. No indexing or ranking outcome is claimed; Google can take days or weeks.
-- eu.org domain: `uk-immigration-compass.eu.org` added to the Vercel project (awaiting EU.org
-  approval, request 20260911175705-arf-8129 stored — volunteers process periodically); Cloudflare
-  free zone created with the 3 Vercel records. When it resolves, update SITE_URL/canonicals/
-  sitemap/robots in code (all hardcode the vercel.app URL) and set up redirects.
+- eu.org domain: request 20260911175705-arf-8129 (handle VD565-FREE) still pending at EU.org as of
+  9 Oct 2026; no confirmation email found and the domain is not yet delegated (NXDOMAIN, checked
+  against 1.1.1.1 and EU.org's own nameservers). Cloudflare removed the unused zone on 9 Oct
+  because nameservers were never set. Vercel lists the two eu.org entries as misconfigured; the
+  live site at uk-immigration-compass.vercel.app is unaffected. Staying free: no paid domain. Do
+  not file a duplicate EU.org request. When EU.org approves, re-add the site in Cloudflare (or
+  point the delegation at Vercel's nameservers), then update SITE_URL/canonicals/sitemap/robots
+  in code (all hardcode the vercel.app URL) and set up redirects.
 - Monitoring: weekly indexing check runs Mondays 10am (automation automation-3b7a8467). The
   Search Console request-indexing quota exhausted again on 2026-09-11; per-account Google-side,
   retry when it lets you.
