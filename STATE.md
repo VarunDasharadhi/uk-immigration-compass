@@ -63,10 +63,19 @@ narrative. `docs/journal/2026-09-13.md` preserves the earlier checkpoint, and
   tomorrow. `Validate Fix` was started successfully on 24/09/2026, after which Search Console
   displayed `Validation started`. At immediate verification, the URL still had Last crawled N/A and
   was not indexed. No indexing or ranking outcome is claimed; Google can take days or weeks.
-- eu.org domain: `uk-immigration-compass.eu.org` added to the Vercel project (awaiting EU.org
-  approval, request 20260911175705-arf-8129 stored — volunteers process periodically); Cloudflare
-  free zone created with the 3 Vercel records. When it resolves, update SITE_URL/canonicals/
-  sitemap/robots in code (all hardcode the vercel.app URL) and set up redirects.
+- eu.org domain: request 20260911175705-arf-8129 (handle VD565-FREE) still pending at EU.org as of
+  24 Nov 2026, confirmed by resubmitting the New Domain form: the nameserver check passed and
+  EU.org answered "IGNORED: you already have a pending request 20260911175705-arf-8129", so no
+  duplicate was filed. The form checks nameservers before duplicates, so it cannot confirm a
+  pending request unless the zone resolves. Cloudflare free zone re-created 24 Nov 2026 (the
+  first was auto-deleted 9 Oct): nameservers suzanne.ns.cloudflare.com and yew.ns.cloudflare.com
+  (same pair as September), records DNS only: A @ 76.76.21.21 and CNAME www cname.vercel-dns.com.
+  Cloudflare deletes zones not activated within about four weeks, so expect a deletion notice
+  around 22 Dec 2026; re-adding is free and gives the same nameservers. Vercel lists the two
+  eu.org entries as misconfigured until delegation; the live site at
+  uk-immigration-compass.vercel.app is unaffected. Staying free: no paid domain. Do not file a
+  duplicate EU.org request. When EU.org approves, update SITE_URL/canonicals/sitemap/robots in
+  code (all hardcode the vercel.app URL) and set up redirects.
 - Monitoring: weekly indexing check runs Mondays 10am (automation automation-3b7a8467). The
   Search Console request-indexing quota exhausted again on 2026-09-11; per-account Google-side,
   retry when it lets you.

@@ -19,3 +19,7 @@ saying so rather than editing the old one.
 ## 2026-09-24
 
 - 2026-09-24: The archive gets static prerendering during the Vite build, with no new Vercel function because the Hobby plan is already at its function cap. Why: the snapshot can refresh only at deployment, so its freshness ceiling is recorded, while display event dates stay separate from sitemap freshness.
+
+## 2026-10-09
+
+- 2026-10-09: No paid domain; wait for the free eu.org delegation and keep vercel.app as the canonical URL. Why: the site earns no income yet, so recurring domain spend is not justified; the Cloudflare zone is re-added only after eu.org approves, because Cloudflare deletes zones whose nameservers are not set within four weeks.
